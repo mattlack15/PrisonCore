@@ -1,0 +1,4 @@
+description: "Your pickaxe fires a laser that destroys blocks"
+percent-increase-per-level: 0.1
+display-name: "&cLaser"
+max-level: 100

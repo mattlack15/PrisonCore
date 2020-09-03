@@ -1,0 +1,3 @@
+prefix: "&6&lMines > &7"
+reset-threshold-percentage-mined: 0.6
+enable-flight-near-mines: true

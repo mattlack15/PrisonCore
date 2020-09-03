@@ -1,0 +1,37 @@
+main: com.soraxus.prisons.SpigotPrisonCore
+name: SoraxusPrisonCore
+version: ${project.version}
+authors: [Gravitinos, UltraDev]
+description: Prison Core for Soraxus
+commands:
+  prisoncore:
+    aliases: [spc]
+    description: Too lazy to make
+    usage: /<command>
+  money:
+    description: Too lazy to make
+    usage: /<command>
+  bal:
+    description: Too lazy to make
+    usage: /<command>
+  balance:
+    description: Too lazy to make
+    usage: /<command>
+  tokens:
+    description: Too lazy to make
+    usage: /<command>
+  stars:
+    description: Too lazy to make
+    usage: /<command>
+  eco:
+    description: Too lazy to make
+    usage: /<command>
+  autosell:
+    description: Too lazy to make
+    usage: /<command>
+  gang:
+    description: Gang Command
+  multiplier:
+    aliases: [multi]
+  crystals:
+    aliases: [crystal]
