@@ -1,15 +1,13 @@
 package com.soraxus.prisons.bunkers;
 
 import lombok.Getter;
-import lombok.Setter;
 import net.ultragrav.serializer.GravSerializable;
 import net.ultragrav.serializer.GravSerializer;
 
 @Getter
-@Setter
 public class AvgMeasure implements GravSerializable {
-    private double weightTotal;
-    private double avg;
+    private volatile double weightTotal;
+    private volatile double avg;
 
     public AvgMeasure() {
         this(0D, 0D);
@@ -26,6 +24,10 @@ public class AvgMeasure implements GravSerializable {
 
     public synchronized void addEntry(double measure, double weight) {
         this.avg += (measure - avg) * weight / (weightTotal += weight);
+    }
+
+    public synchronized void setAvg(double avg) {
+        this.avg = avg;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class AvgMeasure implements GravSerializable {
         measure.addEntry(1, 0.1);
 
         double val = 7;
-        System.out.println((val += 0.3));
+        System.out.println(val + 0.3);
 
         System.out.println(measure.getAvg());
     }

@@ -51,6 +51,6 @@ public class MenuTileEmpty extends Menu {
             bunker.getElementShop(tile).getMenu(getBackButton(this)).open(e.getWhoClicked());
         });
 
-        this.setElement(11, build);
+        this.setElement(13, build);
     }
 }

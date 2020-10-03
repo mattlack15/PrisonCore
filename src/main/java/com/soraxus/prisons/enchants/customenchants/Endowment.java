@@ -54,9 +54,9 @@ public class Endowment extends AbstractCE {
         ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
         if (hasEnchant(item)) {
             int level = getLevel(item);
-            double chance = 0.01 + percentIncrease * level; // TODO: Balance this
+            double chance = 0.01 + percentIncrease * level;
             if (MathUtils.isRandom(chance, 100.0)) {
-                long amount = MathUtils.random(level * 5, level * 10); // TODO: Balance this
+                long amount = MathUtils.random(level * 5, level * 10);
                 String amFormat = NumberUtils.formatFull(amount);
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     if (!player.getUniqueId().equals(event.getPlayer().getUniqueId())) { //You don't get money from your own charity

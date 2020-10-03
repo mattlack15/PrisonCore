@@ -1,7 +1,5 @@
 package com.soraxus.prisons.bunkers;
 
-import lombok.Getter;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,8 +10,8 @@ public class BunkerDebugStats {
         BUNKER_LOAD_TOTAL;
     }
 
-    //TODO
-
-    @Getter
-    Map<DebugStat, AvgMeasure> measureMap = new HashMap<>();
+    public static Map<DebugStat, AvgMeasure> measureMap = new HashMap<>();
+    static {
+        measureMap.put(DebugStat.BUNKER_LOAD_TOTAL, new AvgMeasure());
+    }
 }

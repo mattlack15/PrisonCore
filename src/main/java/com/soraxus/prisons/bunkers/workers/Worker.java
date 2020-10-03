@@ -11,8 +11,8 @@ public class Worker implements GravSerializable {
     private Task task;
 
     public Worker(GravSerializer serializer, ElementWorkerHut hut) {
-        this.task = (Task) serializer.readObject(hut.getBunker(), this);
         this.hut = hut;
+        this.task = serializer.readObject(hut.getBunker(), this);
     }
 
     public Worker(ElementWorkerHut hut) {
@@ -29,12 +29,16 @@ public class Worker implements GravSerializable {
     /**
      * Sets this worker's task and starts the task
      */
-    public synchronized void setTask(Task task) {
+    public synchronized boolean setTask(Task task) {
         if (task.isFinished())
-            return;
+            return false;
+        if(this.isWorking()) {
+            return false;
+        }
         this.task = task;
         if (!task.isStarted())
             task.start();
+        return true;
     }
 
     public int getSpeed() {

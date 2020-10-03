@@ -95,4 +95,25 @@ public class MathUtils {
         double d = rand.nextDouble();
         return Math.pow(d, weight + 1);
     }
+
+    /**
+     * Series approximation of the Lambert W function (product log function)
+     *
+     * @param z Number
+     * @return W(z)
+     */
+    public static double lw(double z) {
+        double S = 0.0;
+        for (int n = 1; n <= 100; n++) {
+            double Se = S * StrictMath.pow(StrictMath.E, S);
+            double S1e = (S + 1) *
+                    StrictMath.pow(StrictMath.E, S);
+            double PRECISION = 1E-12;
+            if (PRECISION > StrictMath.abs((z - Se) / S1e)) {
+                return S;
+            }
+            S -= (Se - z) / (S1e - (S + 2) * (Se - z) / (2 * S + 2));
+        }
+        return S;
+    }
 }

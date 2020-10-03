@@ -52,7 +52,7 @@ public class CrateFinder extends AbstractCE {
         ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
         if (hasEnchant(item)) {
             int level = getLevel(item);
-            double chance = 0.01 + percentIncrease * level; // TODO: Balance this
+            double chance = 0.01 + percentIncrease * level;
             if (MathUtils.isRandom(chance, 100.0)) {
                 String crateType = "null";
                 Crate crate = CrateManager.instance.get(crateType);

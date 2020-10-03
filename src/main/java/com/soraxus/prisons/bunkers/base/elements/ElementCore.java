@@ -49,7 +49,10 @@ public class ElementCore extends StorageElement {
     }
 
     public ElementCore(Bunker bunker) {
-        super(bunker, new Storage(BunkerResource.TIMBER, 0, 50), new Storage(BunkerResource.STONE, 0, 50));
+        super(bunker,
+                new Storage(BunkerResource.TIMBER, 0, 50),
+                new Storage(BunkerResource.STONE, 0, 50)
+        );
     }
 
     @Override
@@ -72,10 +75,6 @@ public class ElementCore extends StorageElement {
     public BunkerElementType getType() {
         return BunkerElementType.ESSENTIAL_CORE;
     }
-//    @Override
-//    public BunkerElementType<? extends BunkerElement> getType() {
-//        return BunkerElementType.ESSENTIAL.CORE;
-//    }
 
     @Override
     public double getMaxHealth() {
@@ -107,10 +106,11 @@ public class ElementCore extends StorageElement {
 
     @Override
     public void onClick(PlayerInteractEvent e) {
-        if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+        if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK) && e.getPlayer().isSneaking()) {
             e.setCancelled(true);
             new MenuCoreElement(this).open(e.getPlayer());
         }
+        e.setCancelled(false);
     }
 
     @Override
@@ -141,5 +141,13 @@ public class ElementCore extends StorageElement {
             .build()).setClickHandler((e, i) -> new MenuSkills(getBunker(), getBackButton(this)).open(e.getWhoClicked())));
             MenuManager.instance.invalidateInvsForMenu(this);
         }
+    }
+
+    @Override
+    public boolean onDestroy() {
+        if (getBunker().getDefendingMatch() != null) {
+            getBunker().getDefendingMatch().end();
+        }
+        return false;
     }
 }

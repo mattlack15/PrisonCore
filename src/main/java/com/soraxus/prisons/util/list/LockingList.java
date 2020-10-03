@@ -58,6 +58,10 @@ public class LockingList<E> extends ArrayList<E> {
         return lock.perform(() -> super.add(e));
     }
 
+    public boolean addInternal(E e) {
+        return super.add(e);
+    }
+
     @Override
     public boolean remove(Object o) {
         return lock.perform(() -> super.remove(o));

@@ -108,6 +108,13 @@ public class MenuEnchant extends Menu {
                 builder.addLore("&cMax Level Reached");
             }
 
+            if(!ce.isEnabled()) {
+                builder.addLore("",
+                        "&c&lWARNING: &7This enchant is currently",
+                        "&7disabled, you can still purchase it, however",
+                        "&7it may not work for a while");
+            }
+
             return new MenuElement(builder.build()).setClickHandler((e, i) -> {
 
                 int enchLevel = info.getEnchants().getOrDefault(ce, 0);

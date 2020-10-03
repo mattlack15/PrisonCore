@@ -9,8 +9,7 @@ import lombok.Getter;
 public enum Skill {
     WOODWORKING("Woodworking", BunkerResource.TIMBER,5, 50),
     STONECUTTING("Stonecutting", BunkerResource.STONE,10, 50),
-    METALWORKING("Metalworking", BunkerResource.GOLD, 15, 50),
-    JEWELING("Jeweling", BunkerResource.SAPPHIRE, 25, 50);
+    METALWORKING("Metalworking", BunkerResource.GOLD, 15, 50);
 
     private String name;
     private BunkerResource resourceType;
@@ -18,7 +17,7 @@ public enum Skill {
     private double requirementBase;
 
     public int getResearchCost(int level) {
-        return researchCostBase * (level + 1); // TODO: Balance
+        return researchCostBase * (level + 1);
     }
 
     public int getRequiredLevel(double resourceAmount) {

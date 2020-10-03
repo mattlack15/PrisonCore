@@ -2,12 +2,14 @@ package com.soraxus.prisons.bunkers.base;
 
 import com.soraxus.prisons.bunkers.BunkerManager;
 import com.soraxus.prisons.bunkers.ModuleBunkers;
+import com.soraxus.prisons.bunkers.base.elements.BunkerElementFlag;
 import com.soraxus.prisons.bunkers.base.elements.animation.DamageAnimationHandler;
 import com.soraxus.prisons.bunkers.base.elements.type.BunkerElementType;
 import com.soraxus.prisons.bunkers.gui.tile.MenuTileOccupied;
 import com.soraxus.prisons.bunkers.npc.ElementDrop;
 import com.soraxus.prisons.bunkers.util.BunkerSchematics;
 import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.math.MathUtils;
 import com.soraxus.prisons.util.menus.MenuElement;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,9 +28,12 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Getter
 public abstract class BunkerElement implements GravSerializable {
@@ -36,6 +41,12 @@ public abstract class BunkerElement implements GravSerializable {
 
     public static final Random random = ThreadLocalRandom.current();
     private final Bunker bunker;
+    //Flags
+    private final ReentrantLock flagListLock = new ReentrantLock(true);
+    /**
+     * Meta for this bunker element
+     * internal.* is reserved for internal usage
+     */
     private Meta meta = new Meta();
     private UUID id = UUID.randomUUID();
     @Setter(AccessLevel.PROTECTED)
@@ -45,19 +56,14 @@ public abstract class BunkerElement implements GravSerializable {
     private int rotation = 0;
     @Getter
     private double health = getMaxHealth();
-
     @Getter
     private boolean enabled = false;
-
     @Getter
     private boolean destroyed = false;
-
     @Getter
     @Setter(value = AccessLevel.PACKAGE)
     private boolean built = false;
-
     private DamageAnimationHandler damageAnimationHandler = new DamageAnimationHandler(this, 5, 120);
-
     @Setter
     private ElementGenerationSettings generationSettings = new ElementGenerationSettings(true, true);
     private volatile boolean _beingRemoved = false;
@@ -91,6 +97,8 @@ public abstract class BunkerElement implements GravSerializable {
         }
     }
 
+    ;
+
     /**
      * Load an element from a serializer
      *
@@ -111,8 +119,6 @@ public abstract class BunkerElement implements GravSerializable {
             return null;
         }
     }
-
-    ;
 
     /**
      * Called when this element is deserialized
@@ -136,6 +142,7 @@ public abstract class BunkerElement implements GravSerializable {
             e.printStackTrace();
             ModuleBunkers.messageDevs("Exception thrown during saving of element of type " + getType().getName());
         }
+
         serializer.writeString(getClass().getName());
         serializer.writeUUID(id);
         serializer.writeObject(position);
@@ -146,6 +153,8 @@ public abstract class BunkerElement implements GravSerializable {
         serializer.writeBoolean(this.getGenerationSettings().isNeedsBuilding());
         serializer.writeObject(meta);
         serializer.writeSerializer(serializer1);
+
+        //NOTE: Any new fields that need to be serialized should be serialized using the meta object and the path "internal."
     }
 
     /**
@@ -172,7 +181,7 @@ public abstract class BunkerElement implements GravSerializable {
      *
      * @return the schematic to be built
      */
-    public Schematic getSchematic() {
+    public final Schematic getSchematic() {
         return getSchematic(this.level, this.destroyed);
     }
 
@@ -181,12 +190,6 @@ public abstract class BunkerElement implements GravSerializable {
      */
     public boolean isVisibleToAttackers() {
         return true;
-    }
-
-    /**
-     * Called when it is time to create entities
-     */
-    public void createEntities() {
     }
 
     /**
@@ -205,6 +208,13 @@ public abstract class BunkerElement implements GravSerializable {
      * Called when any functions this element performs should start being executed - Can be called async
      */
     protected void onEnable() {
+
+    }
+
+    /**
+     * Called when the element is added to the bunker
+     */
+    protected void onPlacement() {
 
     }
 
@@ -278,9 +288,15 @@ public abstract class BunkerElement implements GravSerializable {
     }
 
     /**
-     * called when this element is ticked
+     * Called when this element is ticked and is enabled
      */
     public void onTick() {
+    }
+
+    /**
+     * Called when this element is ticked, will be called regardless of whether this element is enabled or not
+     */
+    public void onTickEnabledOrDisabled() {
     }
 
     /**
@@ -316,7 +332,7 @@ public abstract class BunkerElement implements GravSerializable {
      * @return Bounding box of this element
      */
     public CuboidRegion getBoundingRegion(double height) {
-        return new CuboidRegion(this.getLocation(), this.getLocation().add(this.getShape().toLocation(this.getBunker().getWorld().getBukkitWorld(), 0).multiply(BunkerManager.TILE_SIZE_BLOCKS).subtract(1, 0, 1).add(0, height, 0)));
+        return new CuboidRegion(this.getLocation(), this.getLocation().add(this.getShape().toLocation(this.getBunker().getWorld().getBukkitWorld(), 0).multiply(BunkerManager.TILE_SIZE_BLOCKS).subtract(0.00000001, 0, 0.00000001).add(0, height, 0)));
     }
 
     /**
@@ -332,12 +348,20 @@ public abstract class BunkerElement implements GravSerializable {
 
     /**
      * Stops execution of any functions this element should perform
+     *
+     * @param persistent Whether or not this element will still be disabled after a reload of the bunker
      */
-    public final synchronized void disable() {
+    public final synchronized void disable(boolean persistent) {
         if (!enabled)
             return;
         this.enabled = false;
+        if (persistent)
+            this.setGenerationSettings(new ElementGenerationSettings(false, getGenerationSettings().isNeedsBuilding()));
         this.onDisable();
+    }
+
+    public final synchronized void disable() {
+        this.disable(false);
     }
 
     /**
@@ -348,7 +372,7 @@ public abstract class BunkerElement implements GravSerializable {
     public MenuElement getInfoElement() {
         String name = getName();
         String description = getDescription();
-        String health = "&7" + getHealth() + "&f/&7" + getMaxHealth();
+        String health = "&7" + MathUtils.round(getHealth(), 1) + "&f/&7" + getMaxHealth();
         String level = "&7" + getLevel() + "&f/&7" + getMaxLevel();
         String dimensions = getShape().getX() + "x" + getShape().getY();
         return new MenuElement(new ItemBuilder(Material.PAPER, 1).setName("&f&l" + name)
@@ -382,7 +406,8 @@ public abstract class BunkerElement implements GravSerializable {
 
     /**
      * Called when this element is reaches 0 health (DIFFERENT FROM onRemove)
-     * Return whether or not to destroy the element
+     *
+     * @return Whether or not to destroy the element
      */
     public boolean onDestroy() {
         return true;
@@ -430,21 +455,24 @@ public abstract class BunkerElement implements GravSerializable {
         }
         Schematic schematic = null;
         try {
+            //Try to get schematic
             schematic = getSchematic().rotate(this.getRotation());
             world.pasteSchematic(schematic, this.bunker.getTileMap().getTileLocation(this.getPosition()));
         } catch (RuntimeException e) {
+            //Use default schematic instead
+            e.printStackTrace();
             try {
-                schematic = BunkerManager.instance.getDefaultSchematic();
-                for (int i = 0; i < getShape().getX(); i ++) {
-                    for (int j = 0; j < getShape().getY(); j ++) {
+                schematic = BunkerSchematics.getDefaultSchematic(this.getShape());
+                for (int i = 0; i < getShape().getX(); i++) {
+                    for (int j = 0; j < getShape().getY(); j++) {
                         IntVector2D pos = this.getPosition().add(new IntVector2D(i, j));
                         world.pasteSchematic(schematic, this.bunker.getTileMap().getTileLocation(pos));
                     }
                 }
-            } catch(Exception e1) {
+            } catch (Exception e1) {
                 e1.printStackTrace();
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         this.setGenerationSettings(new ElementGenerationSettings(getGenerationSettings().isNeedsEnabling(), true));
@@ -522,7 +550,28 @@ public abstract class BunkerElement implements GravSerializable {
         }
         this.destroyed = true;
         this.build();
+        this.disable(true);
         return true;
+    }
+
+    /**
+     * This basically just sets destroyed to false, resets health, and rebuilds
+     */
+    public synchronized void unDestroy() {
+        if (!this.isDestroyed()) {
+            return;
+        }
+        this.destroyed = false;
+        this.setHealth(this.getMaxHealth());
+        this.build();
+        this.enable();
+    }
+
+    /**
+     * Set whether this element is destroyed or not
+     */
+    public synchronized void setDestroyed(boolean value) {
+        this.destroyed = value;
     }
 
     /**
@@ -580,7 +629,13 @@ public abstract class BunkerElement implements GravSerializable {
     public final void tick() {
         this.getDamageAnimationHandler().tick();
         try {
-            this.onTick();
+            this.onTickEnabledOrDisabled();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            if (this.isEnabled())
+                this.onTick();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -650,5 +705,68 @@ public abstract class BunkerElement implements GravSerializable {
      */
     public final BunkerElement[] getNeighbours() {
         return new BunkerElement[]{getRelative(1, 0), getRelative(0, 1), getRelative(-1, 0), getRelative(0, -1)};
+    }
+
+    /**
+     * Get all flags held by this element
+     */
+    public List<BunkerElementFlag> getFlags() {
+        flagListLock.lock();
+        try {
+            validateFlags();
+            return meta.get("internal.flags");
+        } finally {
+            flagListLock.unlock();
+        }
+    }
+
+    private void validateFlags() {
+        flagListLock.lock();
+        try {
+            List<BunkerElementFlag> flags = meta.get("internal.flags");
+            if (flags == null) {
+                List<BunkerElementFlag> defaultFlags = new ArrayList<>();
+                defaultFlags.add(BunkerElementFlag.PROTECTED);
+                meta.set("internal.flags", defaultFlags);
+            }
+        } finally {
+            flagListLock.unlock();
+        }
+    }
+
+    /**
+     * Check if this element holds a flag
+     */
+    public boolean hasFlag(BunkerElementFlag flag) {
+        return getFlags().contains(flag);
+    }
+
+    /**
+     * Add a flag to this element
+     */
+    public void addFlag(BunkerElementFlag flag) {
+        flagListLock.lock();
+        try {
+            validateFlags();
+            List<BunkerElementFlag> flags = meta.get("internal.flags");
+            if (!flags.contains(flag)) {
+                flags.add(flag);
+            }
+        } finally {
+            flagListLock.unlock();
+        }
+    }
+
+    /**
+     * Remove a flag from this element
+     */
+    public void removeFlag(BunkerElementFlag flag) {
+        flagListLock.lock();
+        try {
+            validateFlags();
+            meta.<List<BunkerElementFlag>>get("internal.flags").remove(flag);
+        } finally {
+            flagListLock.unlock();
+        }
     }
 }

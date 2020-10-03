@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class BunkerMatchMaker {
     public static final double RATING_GRACE_PERIOD = 2D;
-    public static final double MATCHING_TOLERANCE = 10D; //TODO: change to 2.4
+    public static final double MATCHING_TOLERANCE = 2.4D;
     public static BunkerMatchMaker instance;
 
     private final BunkerManager manager;

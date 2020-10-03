@@ -1,5 +1,7 @@
 package com.soraxus.prisons.bunkers.npc;
 
+import org.bukkit.entity.Entity;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -50,8 +52,22 @@ public class NPCManager {
 
     public void tick() {
         getNpcList().forEach(n -> {
-            if (n.getController() != null && n.getController().isSpawned())
+            if (n.getController() != null && n.getController().isSpawned()) {
+                n.tick();
                 n.getController().tick();
+            }
         });
+    }
+
+    public BunkerNPC getNpc(Entity entity) {
+        for (BunkerNPC bunkerNPC : getNpcList()) {
+            if (!bunkerNPC.getController().isSpawned()) {
+                continue;
+            }
+            if (bunkerNPC.getController().getNpc().getEntity().getUniqueId().equals(entity.getUniqueId())) {
+                return bunkerNPC;
+            }
+        }
+        return null;
     }
 }

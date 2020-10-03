@@ -6,6 +6,7 @@ import com.soraxus.prisons.bunkers.base.BunkerElement;
 import com.soraxus.prisons.bunkers.base.Meta;
 import com.soraxus.prisons.bunkers.base.Tile;
 import com.soraxus.prisons.bunkers.util.BHoloTextBox;
+import com.soraxus.prisons.util.Synchronizer;
 import com.soraxus.prisons.util.particles.ParticleShape;
 import com.soraxus.prisons.util.particles.ParticleUtils;
 import com.soraxus.prisons.util.time.DateUtils;
@@ -46,14 +47,15 @@ public abstract class Task implements GravSerializable {
         this.started = serializer.readBoolean();
         this.meta = serializer.readObject();
         this.worker = worker;
-        if (worker.getHut().getBunker().getWorkers().stream()
-                .anyMatch(w -> w.getTask().getTarget().getPosition().equals(target.getPosition()))) {
-            throw new IllegalStateException("bunker.worker.TileInUse");
-        }
-        this.setup();
+        Synchronizer.synchronize(() -> {
+            if(this.worker.getHut().isEnabled())
+                this.setup();
+        });
     }
 
     public Task(String name, Tile target, Worker worker) {
+        if(target == null)
+            throw new IllegalStateException("Target cannot be null");
         this.taskName = name;
         this.target = target;
         this.meta = new Meta();
@@ -138,21 +140,22 @@ public abstract class Task implements GravSerializable {
     /**
      * @throws IllegalStateException If the worker is not available for work
      */
-    public synchronized void start() throws IllegalStateException {
+    public synchronized boolean start() throws IllegalStateException {
         if(this.isStarted())
-            return;
+            return false;
         if(worker.getTask() != null && worker.getTask() != this) {
             throw new IllegalStateException("Worker not available!");
-        } else if(!worker.isWorking()){
+        } else if(worker.setTask(this)){
             this.startTime = System.currentTimeMillis();
-            worker.setTask(this);
-        } else {
-            this.startTime = System.currentTimeMillis();
+            return true;
         }
+        return false;
     }
 
     public void end() {
-        this.finished = true;
+        synchronized (this) {
+            this.finished = true;
+        }
         this.textBoxs.forEach(BHoloTextBox::clear);
         try {
             this.getCallback().run();

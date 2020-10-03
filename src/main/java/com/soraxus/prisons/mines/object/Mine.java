@@ -25,6 +25,7 @@ public class Mine {
     private static final String BLOCKS = "blocks";
 
     @Getter
+    @Setter
     private CuboidRegion region;
     @Getter
     private String name;
@@ -52,6 +53,10 @@ public class Mine {
             }
         }
         return this.resetting;
+    }
+
+    public boolean shouldSave() {
+        return true;
     }
 
     /**
@@ -203,6 +208,8 @@ public class Mine {
     }
 
     public void saveToConfigSection(ConfigurationSection section) {
+        if(!shouldSave())
+            return;
         ioLock.lock();
         //Region
         section.set(concatForConfig(REGION, "point1"), region.getMinimumPoint().toBukkitVector());

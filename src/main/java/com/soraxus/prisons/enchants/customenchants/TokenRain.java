@@ -58,9 +58,9 @@ public class TokenRain extends AbstractCE {
         ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
         if (hasEnchant(item)) {
             int level = getLevel(item);
-            double chance = 0.001 + percentIncrease * level; // TODO: Balance this
+            double chance = 0.001 + percentIncrease * level;
             if (MathUtils.isRandom(chance, 100.0)) {
-                long amount = level * 10; // TODO: Balance this
+                long amount = level * 10;
                 Economy.tokens.addBalance(event.getPlayer().getUniqueId(), amount);
                 for (int i = 0; i < 10; i ++) {
                     ItemStack it = new ItemBuilder(Material.DOUBLE_PLANT, 1)

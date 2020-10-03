@@ -2,6 +2,7 @@ package com.soraxus.prisons.gangs.cmd;
 
 import com.soraxus.prisons.gangs.Gang;
 import com.soraxus.prisons.gangs.GangManager;
+import com.soraxus.prisons.util.string.Similarity;
 import lombok.Getter;
 import lombok.NonNull;
 import net.ultragrav.command.exception.CommandException;
@@ -21,9 +22,11 @@ public class GangProvider extends UltraProvider<Gang> {
     public Gang convert(@NonNull String s) throws CommandException {
         UUID gangId = GangManager.instance.getId(s);
         if (gangId == null) {
-            throw new CommandException("No gang found with name: " + s); // TODO: Similar names with Similarity.getMostSimilar?
+            List<String> gangs = GangManager.instance.listGangs();
+            gangs = Similarity.getMostSimilar(gangs, s, 1);
+            throw new CommandException("No gang found with name: " + s + ", did you mean " + String.join(", ", gangs));
         }
-        return GangManager.instance.getLoadedGang(gangId);
+        return GangManager.instance.getOrLoadGang(gangId);
     }
 
     @Override

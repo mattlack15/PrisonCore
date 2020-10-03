@@ -60,6 +60,7 @@ public class MenuCrystals extends Menu {
 
     private void reloadInfo() {
         this.info = CrystalManager.getInfo(parent.getToEnchant());
+        System.out.println("Loaded crystals: " + info.toString());
     }
 
     public void setup() {

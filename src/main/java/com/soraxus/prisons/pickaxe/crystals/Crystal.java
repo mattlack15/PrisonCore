@@ -53,7 +53,7 @@ public class Crystal implements GravSerializable {
     }
 
     public double getPercent() {
-        return -1.0; // TODO: Function
+        return tier * 4.8;
     }
 
     @Override

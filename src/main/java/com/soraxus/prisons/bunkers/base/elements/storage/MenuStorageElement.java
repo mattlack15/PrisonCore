@@ -59,7 +59,7 @@ public class MenuStorageElement extends Menu {
         }
         if (element.getLevel() >= element.getMaxLevel()) {
             builder.addLore("");
-            builder.addLore("&cThis generator has reached the max level!");
+            builder.addLore("&cThis building has reached the max level!");
         }
         if (!element.getBunker().hasResources(element.getType().getBuildCost(element.getLevel() + 1))) {
             builder.addLore("");

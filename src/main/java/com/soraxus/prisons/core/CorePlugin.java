@@ -1,7 +1,6 @@
 package com.soraxus.prisons.core;
 
 import com.soraxus.prisons.core.command.CmdCorePlugin;
-import com.soraxus.prisons.core.command.GravSubCommand;
 import com.soraxus.prisons.util.PluginFile;
 import com.soraxus.prisons.util.PluginFolder;
 import com.soraxus.prisons.util.data.PlayerData;
@@ -42,6 +41,7 @@ public abstract class CorePlugin extends JavaPlugin {
     protected void init() {
         PlayerData.init();
         command = new CmdCorePlugin(commandName, ChatColor.translateAlternateColorCodes('&', commandPrefix));
+        command.register();
     }
 
     public void addSubCommand(UltraCommand command) {

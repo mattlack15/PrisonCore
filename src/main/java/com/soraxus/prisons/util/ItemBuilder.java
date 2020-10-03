@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -143,6 +144,19 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder setupAsSkull(OfflinePlayer owner) {
+        this.setType(Material.SKULL_ITEM);
+        this.setDurability((short) 3);
+        this.setSkullOwner(owner);
+        /*ArrayList<String> lore = this.getLore();
+        String name = this.getName();
+        this.item = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+        this.setSkullOwner(owner);
+        this.setName(name);
+        lore.forEach(this::addLore);*/
+        return this;
+    }
+
 	private ItemBuilder setType(Material material) {
     	this.item.setType(material);
     	return this;
@@ -176,6 +190,15 @@ public class ItemBuilder {
         ItemMeta meta = this.item.getItemMeta();
         if (meta instanceof SkullMeta) {
             ((SkullMeta) meta).setOwner(owner);
+            this.item.setItemMeta(meta);
+        }
+        return this;
+    }
+
+    public ItemBuilder setSkullOwner(OfflinePlayer owner) {
+        ItemMeta meta = this.item.getItemMeta();
+        if (meta instanceof SkullMeta) {
+            ((SkullMeta) meta).setOwningPlayer(owner);
             this.item.setItemMeta(meta);
         }
         return this;
@@ -278,7 +301,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder setLeatherColour(int color) {
-        if (!this.item.hasItemMeta() || !(this.item.getItemMeta() instanceof LeatherArmorMeta)) {
+        if (!(this.item.getItemMeta() instanceof LeatherArmorMeta)) {
             return this;
         }
 

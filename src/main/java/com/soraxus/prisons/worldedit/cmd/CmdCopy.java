@@ -3,7 +3,6 @@ package com.soraxus.prisons.worldedit.cmd;
 import com.soraxus.prisons.SpigotPrisonCore;
 import com.soraxus.prisons.worldedit.WorldEditPlayerManager;
 import com.soraxus.prisons.worldedit.WorldEditPlayerState;
-import net.ultragrav.asyncworld.AsyncWorld;
 import net.ultragrav.asyncworld.SpigotAsyncWorld;
 import net.ultragrav.asyncworld.schematics.Schematic;
 import net.ultragrav.command.UltraCommand;
@@ -11,12 +10,17 @@ import net.ultragrav.utils.CuboidRegion;
 import net.ultragrav.utils.IntVector3D;
 import org.bukkit.entity.Player;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class CmdCopy extends UltraCommand {
     public CmdCopy() {
         addAlias("copy");
         setAllowConsole(false);
     }
-    
+
+    private ExecutorService service = Executors.newSingleThreadExecutor();
+
     public void perform() {
         if (!sender.hasPermission("asyncworld.copy")) {
             returnTell(SpigotPrisonCore.PREFIX + "&cYou don't have permission to do this!");
@@ -34,13 +38,12 @@ public class CmdCopy extends UltraCommand {
         CuboidRegion region = new CuboidRegion(state.getPos1(), state.getPos2());
         IntVector3D origin = new IntVector3D(0, 0, 0);
 
-        long ms = System.currentTimeMillis();
-
-        AsyncWorld world = new SpigotAsyncWorld(region.getWorld());
-        Schematic schem = new Schematic(origin, world, region);
-
-        double time = (System.currentTimeMillis() - ms) / 1000D;
-        state.setClipboard(schem);
-        tell(SpigotPrisonCore.PREFIX + "&aCopied in " + time + "s!");
+        service.submit(() -> {
+            long ms = System.currentTimeMillis();
+            Schematic schem = new SpigotAsyncWorld(region.getWorld()).optimizedCreateSchematic(region, origin, -1);
+            double time = (System.currentTimeMillis() - ms) / 1000D;
+            state.setClipboard(schem);
+            tell(SpigotPrisonCore.PREFIX + "&aCopied in " + time + "s!");
+        });
     }
 }

@@ -2,7 +2,11 @@ package com.soraxus.prisons.gangs.cmd;
 
 import com.soraxus.prisons.gangs.Gang;
 import com.soraxus.prisons.gangs.GangMember;
+import com.soraxus.prisons.util.ComponentUtil;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.ultragrav.command.provider.impl.spigot.PlayerProvider;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import static com.soraxus.prisons.gangs.cmd.CmdGang.PREFIX;
@@ -32,7 +36,11 @@ public class CmdGangInvite extends GangCommand {
             }
             gang.invite(player.getUniqueId(), player.getName());
             gang.broadcastMessage("&e" + sender.getName() + " &7invited &9" + player.getName() + " &7to the gang!");
-            player.sendMessage(PREFIX + "You were invited to " + gang.getName());
+            TextComponent component = ComponentUtil.getClickHoverComponent(PREFIX + "You were invited to " + gang.getName() + ChatColor.GREEN + "" + ChatColor.BOLD + " Click to join!",
+                    "&aClick to join this gang!",
+                    ClickEvent.Action.RUN_COMMAND,
+                    "/gang join " + gang.getName());
+            player.spigot().sendMessage(component);
         });
     }
 }

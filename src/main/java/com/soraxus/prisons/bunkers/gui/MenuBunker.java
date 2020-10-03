@@ -4,11 +4,11 @@ import com.soraxus.prisons.bunkers.BunkerManager;
 import com.soraxus.prisons.bunkers.ModuleBunkers;
 import com.soraxus.prisons.bunkers.base.Bunker;
 import com.soraxus.prisons.bunkers.matchmaking.BunkerMatchSelector;
-import com.soraxus.prisons.bunkers.npc.BunkerNPC;
-import com.soraxus.prisons.bunkers.npc.info.BunkerNPCType;
 import com.soraxus.prisons.bunkers.tools.ToolUtils;
 import com.soraxus.prisons.enchants.manager.CooldownUtils;
 import com.soraxus.prisons.gangs.Gang;
+import com.soraxus.prisons.gangs.GangMember;
+import com.soraxus.prisons.gangs.GangRole;
 import com.soraxus.prisons.util.ItemBuilder;
 import com.soraxus.prisons.util.Synchronizer;
 import com.soraxus.prisons.util.menus.Menu;
@@ -16,7 +16,6 @@ import com.soraxus.prisons.util.menus.MenuElement;
 import com.soraxus.prisons.util.time.DateUtils;
 import com.soraxus.prisons.util.time.Timer;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.HumanEntity;
@@ -33,10 +32,18 @@ public class MenuBunker extends Menu {
     private Gang gang;
 
     public MenuBunker(Gang gang) {
-        super("Your Bunker", 3);
-        if(gang == null)
+        super("Your Bunker", 5);
+        if (gang == null)
             throw new IllegalArgumentException("Gang must not be null!");
         this.gang = gang;
+    }
+
+    private MenuElement backButton = null;
+
+    public MenuBunker(Gang gang, MenuElement backButton) {
+        super(gang.getName() + "'s Bunker", 5);
+        this.gang = gang;
+        this.backButton = backButton;
     }
 
     @Override
@@ -92,6 +99,12 @@ public class MenuBunker extends Menu {
             e.getWhoClicked().getInventory().addItem(ToolUtils.getDefaultTool());
         });
 
+        MenuElement buildTool = new MenuElement(new ItemBuilder(Material.BLAZE_ROD, 1).setName("&6&lGet Quick-Build Tool")
+                .addLore("&7Click this to get the quick-build tool!").build()).setClickHandler((e, i) -> {
+            ((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.6f, 1.1f);
+            e.getWhoClicked().getInventory().addItem(ToolUtils.getBuildTool(null));
+        });
+
         MenuElement info = new MenuElement(new ItemBuilder(Material.SIGN, 1)
                 .setName("&a&lInfo")
                 .addLore("&fRating: &7" + (gang.getBunker() != null ? gang.getBunker().getRating() : "bunker unloaded"))
@@ -99,7 +112,7 @@ public class MenuBunker extends Menu {
                 .build()
         ).setClickHandler((event, info1) -> {
         });
-        MenuElement reload = new MenuElement(new ItemBuilder(Material.REDSTONE_BLOCK, 1)
+        MenuElement reload = new MenuElement(new ItemBuilder(Material.ANVIL, 1)
                 .setName("&c&lRegenerate Bunker")
                 .addLore("&7This will reload your bunker")
                 .addLore("&7You will be removed from the bunker during this process")
@@ -140,7 +153,7 @@ public class MenuBunker extends Menu {
                     if (pl != null) {
                         Synchronizer.synchronize(() -> {
                             if (finalBunker == null) {
-                                Bukkit.broadcastMessage("finalBunker is NULL Approx. ln 123");
+                                Bukkit.broadcastMessage("finalBunker is NULL Approx. ln 156");
                                 return;
                             }
                             finalBunker.teleport(pl);
@@ -152,26 +165,43 @@ public class MenuBunker extends Menu {
             this.getElement(e.getSlot()).addTempLore(this, "&aCompleted in &f" + (timer.getTimeMillis() / 1000f) + "s&a!", 60);
         }));
 
-        MenuElement test1 = new MenuElement(new ItemBuilder(Material.IRON_SWORD, 1).setName("Click to spawn").build()).setClickHandler((e, i) -> {
-            Bunker bunker = gang.getBunker();
-            if(bunker == null)
-                return;
-            Location location = e.getWhoClicked().getLocation();
-            BunkerNPC npc = new BunkerNPC(BunkerNPCType.ARCHER, 1);
-            npc.spawn(bunker, bunker.getAttackingMatch().getNpcManager(), location);
-        });
-
-        MenuElement findMatch = new MenuElement(new ItemBuilder(Material.BOAT, 1).setName("Attack").addLore("&7Click to search for a bunker to attack!").build())
+        MenuElement findMatch = new MenuElement(new ItemBuilder(Material.DIAMOND_SWORD, 1).setName("&cAttack").addLore("&7Click to search for a bunker to attack!").build())
                 .setClickHandler((e, i) -> {
                     e.getWhoClicked().closeInventory();
-                    new BunkerMatchSelector((Player)e.getWhoClicked());
+                    new BunkerMatchSelector((Player) e.getWhoClicked());
                 });
 
+        MenuElement deleteBunker = new MenuElement(new ItemBuilder(Material.REDSTONE_BLOCK).setName("&4&lDelete Bunker")
+                .addLore("&7Deletes this bunker.", "", "&cNOTE: &7This is permanent and your bunker", "&7cannot be restored, you must restart.").build())
+                .setClickHandler((e, i) -> {
+                    if (!gang.isMember(e.getWhoClicked().getUniqueId())) {
+                        getElement(e.getSlot()).addTempLore(this, "&cYou must be a member!", 60);
+                        return;
+                    }
+                    for (GangMember member : gang.getMembers()) {
+                        if (member.getMember().equals(e.getWhoClicked().getUniqueId())) {
+                            if (member.getGangRole() != GangRole.LEADER) {
+                                getElement(e.getSlot()).addTempLore(this, "&cYou must be the leader of the gang!", 60);
+                                return;
+                            }
+                        }
+                    }
+                    boolean hasBunker;
+                    if(hasBunker = (gang.getBunker() != null))
+                        e.getWhoClicked().closeInventory();
+                    BunkerManager.instance.deleteBunkerAsync(gang.getId()).thenAccept((unused) -> {
+                        if (hasBunker)
+                            gang.broadcastMessage("The gang bunker has been&c deleted&7 by &e" + e.getWhoClicked().getName());
+                    });
+                });
+
+        this.setElement(4, backButton);
         this.setElement(10, teleport);
         this.setElement(12, info);
         this.setElement(14, tool);
-        this.setElement(16, reload);
-        this.setElement(18, test1);
-        this.setElement(20, findMatch);
+        this.setElement(16, buildTool);
+        this.setElement(28, reload);
+        this.setElement(30, findMatch);
+        this.setElement(32, deleteBunker);
     }
 }

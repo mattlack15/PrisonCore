@@ -10,17 +10,18 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 public class BHoloTextBox implements GravSerializable {
     private static final double AS_HEIGHT = 0.25;
 
-    private ArrayList<UUID> lines = new ArrayList<>();
-
-    private double lineSpacing;
     private Location location;
+    private double lineSpacing;
     private boolean moveUpwards;
+
+    private List<UUID> lines = new ArrayList<>();
 
     private Supplier<World> worldSupplier;
 
@@ -32,7 +33,10 @@ public class BHoloTextBox implements GravSerializable {
     }
 
     public BHoloTextBox(GravSerializer serializer) {
-        // TODO: Create deserialization
+        this.location = serializer.readObject();
+        this.lineSpacing = serializer.readDouble();
+        this.moveUpwards = serializer.readBoolean();
+        this.lines = serializer.readObject();
     }
 
     private ArmorStand getEntity(int line) {
@@ -127,6 +131,7 @@ public class BHoloTextBox implements GravSerializable {
      * Removes all lines
      */
     public void clear() {
+        location.getChunk().load();
         for (UUID line : this.lines) {
             ArmorStand stand = (ArmorStand) WorldUtil.getEntity(worldSupplier.get(), line);
             if (stand != null)
@@ -137,6 +142,9 @@ public class BHoloTextBox implements GravSerializable {
 
     @Override
     public void serialize(GravSerializer serializer) {
-
+        serializer.writeObject(location);
+        serializer.writeDouble(lineSpacing);
+        serializer.writeBoolean(moveUpwards);
+        serializer.writeObject(lines);
     }
 }

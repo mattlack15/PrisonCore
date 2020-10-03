@@ -51,9 +51,9 @@ public class TokenFinder extends AbstractCE {
         ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
         if (hasEnchant(item)) {
             int level = getLevel(item);
-            double chance = 0.01 + percentIncrease * level; // TODO: Balance this
+            double chance = 0.01 + percentIncrease * level;
             if (MathUtils.isRandom(chance, 100.0)) {
-                long amount = level * 2; // TODO: Balance this
+                long amount = level * 2;
                 Economy.tokens.addBalance(event.getPlayer().getUniqueId(), amount);
                 event.getPlayer().sendMessage("§a+§e" + amount + " Tokens");
             }

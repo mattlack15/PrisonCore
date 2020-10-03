@@ -31,6 +31,10 @@ public class Storage implements GravSerializable {
         amount += storage.getAmount();
     }
 
+    public synchronized boolean isFull() {
+        return this.amount >= this.cap;
+    }
+
     public Storage(GravSerializer serializer) {
         this.resource = (BunkerResource) serializer.readObject();
         this.amount = serializer.readDouble();

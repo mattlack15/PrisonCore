@@ -14,7 +14,16 @@ public class NPCArcher extends CombatNPCController {
 
     public NPCArcher(BunkerNPC parent) {
         super(parent);
-        this.addAbility(new AbilityShoot("Shoot", this));
+        this.addAbility(new AbilityShoot(this));
+        if(this.getParent().getLevel() > 1) {
+            this.addAbility(new AbilityArrowBarrage(this));
+        }
+        if(this.getParent().getLevel() > 2) {
+            this.addAbility(new AbilityExplosiveArrow(this));
+        }
+        if(this.getParent().getLevel() > 3) {
+
+        }
     }
 
     @Override

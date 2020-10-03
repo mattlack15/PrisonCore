@@ -23,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Explosive extends AbstractCE {
@@ -90,19 +91,24 @@ public class Explosive extends AbstractCE {
             Vector3D starting = Vector3D.fromBukkitVector(event.getBlock().getLocation().toVector());
             CuboidRegion region = new CuboidRegion(event.getPlayer().getWorld(), starting.add(radius, radius, radius), starting.add(-radius, -radius, -radius));
             AsyncWorld world = new SpigotAsyncWorld(event.getPlayer().getWorld());
-            Map<Vector3D, Integer> blocks = new HashMap<>();
+            Map<Vector3D, Integer> blocks = new ConcurrentHashMap<>();
             AtomicInteger total = new AtomicInteger();
             final double radSqrd = radius*radius;
+
+            Map<Integer, AtomicInteger> broken = new ConcurrentHashMap<>();
+
             world.syncForAllInRegion(region, (v, b) -> {
                 if (!(v.distanceSq(starting) > radSqrd) && mine.getRegion().contains(v)) {
                     if(b == 0)
                         return;
-                    ModuleBreak.instance.onBreak(event.getPlayer(), v, b);
+
+                    broken.putIfAbsent(b, new AtomicInteger());
+                    broken.get(b).incrementAndGet();
+
                     world.setBlock((int) v.getX(), (int) v.getY(), (int) v.getZ(), 0, (byte) 0);
                     total.getAndIncrement();
                     if(rand.nextInt(10) < 3)
                         blocks.put(v, b);
-
                 }
             }, true);
             world.flush().thenAccept((n) -> new BukkitRunnable() {
@@ -125,8 +131,11 @@ public class Explosive extends AbstractCE {
 
             event.getBlock().getWorld().spawnParticle(Particle.EXPLOSION_HUGE, event.getBlock().getLocation(), 1);
             event.getBlock().getWorld().playSound(event.getBlock().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 0.7f, 1f);
-            mine.incrementBlocksMined(total.get() - 1);
-            PickaxeLevelManager.addXp(event.getPlayer(), total.get() - 1);
+            mine.incrementBlocksMined(total.get());
+            PickaxeLevelManager.addXp(event.getPlayer(), total.get());
+
+            //Call events
+            broken.forEach((k, v) -> ModuleBreak.instance.onBreak(event.getPlayer(), Vector3D.fromBukkitVector(event.getBlock().getLocation().toVector()), k, v.get()));
         }
     }
 

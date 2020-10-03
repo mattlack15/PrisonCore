@@ -31,7 +31,7 @@ public class ModulePluginHooks extends CoreModule {
             Bukkit.getLogger().severe("[PrisonCore] No Vault dependency found!");
         }
         if (Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null)
-            PlaceholderAPI.registerPlaceholderHook(getParent().getName(), new SPlaceholderHook()); // TODO Make sure to add this to the workspace
+            PlaceholderAPI.registerPlaceholderHook(getParent().getName(), new SPlaceholderHook());
     }
 
     private boolean setupEconomy() {

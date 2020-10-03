@@ -4,10 +4,10 @@ import com.soraxus.prisons.bunkers.matchmaking.Match;
 import com.soraxus.prisons.bunkers.npc.AbstractBunkerNPCController;
 import com.soraxus.prisons.bunkers.npc.AvailableTarget;
 import com.soraxus.prisons.bunkers.npc.BunkerNPC;
+import com.soraxus.prisons.bunkers.npc.TargetType;
 import com.soraxus.prisons.util.list.LockingList;
 import lombok.Getter;
 import lombok.Setter;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +15,11 @@ import java.util.List;
 public abstract class CombatNPCController extends AbstractBunkerNPCController {
     @Getter
     @Setter
-    @Nullable
     private Match currentMatch;
+
+    @Getter
+    @Setter
+    private TargetType targetingType = TargetType.HOSTILE;
 
     public CombatNPCController(BunkerNPC parent) {
         super(parent);
@@ -37,7 +40,7 @@ public abstract class CombatNPCController extends AbstractBunkerNPCController {
             return new ArrayList<>();
         List<AvailableTarget<?>> targets = new ArrayList<>();
         if (this.getCurrentMatch() != null) {
-            targets.addAll(getCurrentMatch().getAttacker().equals(this.getBunker()) ?
+            targets.addAll(getCurrentMatch().getAttacker().equals(this.getBunker()) ^ targetingType == TargetType.FRIENDLY ?
                     this.getCurrentMatch().getAttackerTargets() :
                     this.getCurrentMatch().getDefenderTargets());
         }
@@ -48,11 +51,12 @@ public abstract class CombatNPCController extends AbstractBunkerNPCController {
     public void tick() {
         super.tick();
         this.getAbilities().forEach(a -> {
-            if(a.getCooldown().get() != 0){
+            a.tick();
+            if(a.getCooldown().get() > 0){
                 a.getCooldown().decrementAndGet();
             }
             if(a.canUse()) {
-                if(a.getCooldown().get() == 0) {
+                if(a.getCooldown().get() <= 0) {
                     a.getCooldown().set(a.cooldownTicks());
                     a.use();
                 }

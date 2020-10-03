@@ -6,17 +6,30 @@ import com.soraxus.prisons.bunkers.base.elements.type.BunkerElementType;
 import com.soraxus.prisons.bunkers.npc.BunkerNPC;
 import com.soraxus.prisons.bunkers.npc.ElementDrop;
 import com.soraxus.prisons.bunkers.npc.info.BunkerNPCType;
-import com.soraxus.prisons.bunkers.util.BunkerSchematics;
-import net.ultragrav.asyncworld.schematics.Schematic;
+import com.soraxus.prisons.util.EventSubscription;
+import com.soraxus.prisons.util.EventSubscriptions;
+import com.soraxus.prisons.util.Synchronizer;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.event.NPCRightClickEvent;
+import net.citizensnpcs.api.npc.NPC;
 import net.ultragrav.serializer.GravSerializer;
+import net.ultragrav.utils.CuboidRegion;
 import net.ultragrav.utils.IntVector2D;
-import org.jetbrains.annotations.NotNull;
+import net.ultragrav.utils.Vector3D;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ElementArmyCamp extends BunkerElement {
+    private static final Vector3D CAMP_LEADER_POS = new Vector3D(3.5, 0, 8.5);
+    private NPC campLeader;
+
     /**
      * All non-abstract BunkerElement child classes must have an exact matching constructor
      * They may have more than one constructor but one of them must be matching for de-serialization
@@ -40,7 +53,7 @@ public class ElementArmyCamp extends BunkerElement {
 
     public synchronized List<BunkerNPC> getNPCs() {
         List<BunkerNPC> npcList = getMeta().getObject("npcs");
-        if(npcList == null) {
+        if (npcList == null) {
             npcList = Collections.synchronizedList(new ArrayList<>());
             setNPCs(npcList);
         }
@@ -78,11 +91,6 @@ public class ElementArmyCamp extends BunkerElement {
     }
 
     @Override
-    public String getName() {
-        return getType().getName();
-    }
-
-    @Override
     public BunkerElementType getType() {
         return BunkerElementType.ARMY_CAMP;
     }
@@ -90,5 +98,64 @@ public class ElementArmyCamp extends BunkerElement {
     @Override
     public ElementDrop getDropForDamage(double damage) {
         return null;
+    }
+
+    @Override
+    protected void onEnable() {
+        EventSubscriptions.instance.subscribe(this);
+        Synchronizer.synchronize(() -> {
+            campLeader = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ChatColor.BLUE + "Camp Leader");
+            campLeader.spawn(CAMP_LEADER_POS.toBukkitVector().toLocation(getBunker().getWorld().getBukkitWorld()).add(this.getLocation()));
+        });
+    }
+
+    @Override
+    protected void onDisable() {
+        EventSubscriptions.instance.unSubscribe(this);
+        Synchronizer.synchronize(() -> {
+            campLeader.despawn();
+            campLeader.destroy();
+        });
+    }
+
+    public void makeCampLeaderSayNear(String message) {
+        if (getBunker().getWorld() != null) {
+            List<Player> players = getBunker().getWorld().getBukkitWorld().getPlayers();
+            CuboidRegion region = getBoundingRegion(20);
+            for (Player player : players) {
+                if (region.contains(Vector3D.fromBukkitVector(player.getLocation().toVector()))) {
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bCamp Leader &f&l> &7" + message));
+                }
+            }
+        }
+    }
+
+    public void makeCampLeaderSayNear(String message, double distance) {
+        if (getBunker().getWorld() != null) {
+            List<Player> players = getBunker().getWorld().getBukkitWorld().getPlayers();
+            CuboidRegion region = getBoundingRegion(20);
+            for (Player player : players) {
+                if (region.smallestDistance(Vector3D.fromBukkitVector(player.getLocation().toVector())) <= distance) {
+                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bCamp Leader &f&l> &7" + message));
+                }
+            }
+        }
+    }
+
+    public void makeCampLeaderSayGang(String message) {
+        List<Player> players = getBunker().getGang().getMembers().stream().map((m) -> Bukkit.getPlayer(m.getMember())).collect(Collectors.toList());
+        for (Player player : players) {
+            if (player == null)
+                return;
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bCamp Leader &f&l> &7" + message));
+        }
+    }
+
+    @EventSubscription
+    private void onLeaderClick(NPCRightClickEvent event) {
+        if (event.getNPC() != campLeader || campLeader == null)
+            return;
+        new MenuArmyCamp(this).open(event.getClicker());
+        makeCampLeaderSayNear("We have &d" + getNPCs().size() + "&5/&d" + getCapacity() + "&7 warriors ready to go sir!", 8);
     }
 }

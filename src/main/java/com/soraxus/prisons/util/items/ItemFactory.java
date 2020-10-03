@@ -43,12 +43,12 @@ public class ItemFactory {
         this.damage = item.getDurability();
         this.lore = new ArrayList<>();
         this.enchants = new HashMap<>();
+        this.nbt = NBTUtils.instance.hasNBTCompound(item) ? ((NBTUtils1_12) NBTUtils.instance).getNBTCompound(item) : new NBTTagCompound();
         if (item.hasItemMeta()) {
             ItemMeta meta = item.getItemMeta();
             this.name = meta.hasDisplayName() ? meta.getDisplayName() : null;
             this.lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
             this.enchants = meta.hasEnchants() ? meta.getEnchants() : new HashMap<>();
-            this.nbt = NBTUtils.instance.hasNBTCompound(item) ? ((NBTUtils1_12) NBTUtils.instance).getNBTCompound(item) : new NBTTagCompound();
         }
     }
 

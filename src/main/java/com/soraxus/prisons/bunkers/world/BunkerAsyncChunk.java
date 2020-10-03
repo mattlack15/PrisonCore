@@ -5,8 +5,10 @@ import net.ultragrav.asyncworld.AsyncChunk;
 import net.ultragrav.asyncworld.AsyncWorld;
 import net.ultragrav.asyncworld.ChunkLocation;
 import net.ultragrav.asyncworld.nbt.*;
+import net.ultragrav.utils.IntVector3D;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class BunkerAsyncChunk extends AsyncChunk {
@@ -53,6 +55,11 @@ public class BunkerAsyncChunk extends AsyncChunk {
     }
 
     @Override
+    public void sendPackets(int i) {
+
+    }
+
+    @Override
     public synchronized void writeBlock(int section, int index, int combinedBlockId, boolean addTile) {
         writeBlock(getLX(index), getLY(index) + (section << 4), getLZ(index), combinedBlockId, addTile);
     }
@@ -84,7 +91,7 @@ public class BunkerAsyncChunk extends AsyncChunk {
     }
 
     @Override
-    public short getCombinedBlockSync(int x, int y, int z) {
+    public int getCombinedBlockSync(int x, int y, int z) {
         return 0;
     }
 
@@ -101,6 +108,81 @@ public class BunkerAsyncChunk extends AsyncChunk {
     public void end(int mask) {
     }
 
+    @Override
+    public int syncGetEmittedLight(int i, int i1, int i2) {
+        return 0;
+    }
+
+    @Override
+    public int syncGetSkyLight(int i, int i1, int i2) {
+        return 0;
+    }
+
+    @Override
+    public int syncGetBrightnessOpacity(int i, int i1, int i2) {
+        return 0;
+    }
+
+    @Override
+    public void syncSetEmittedLight(int i, int i1, int i2, int i3) {
+
+    }
+
+    @Override
+    public void syncSetSkyLight(int i, int i1, int i2, int i3) {
+
+    }
+
+    @Override
+    public Map<IntVector3D, TagCompound> syncGetTiles() {
+        return null;
+    }
+
+    @Override
+    public List<TagCompound> syncGetEntities() {
+        return null;
+    }
+
+    @Override
+    public int[] syncGetHeightMap() {
+        return new int[0];
+    }
+
+    @Override
+    public void syncGetBlocksAndData(byte[] bytes, byte[] bytes1, int i) {
+
+    }
+
+    @Override
+    public byte[] syncGetEmittedLight(int i) {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] syncGetSkyLight(int i) {
+        return new byte[0];
+    }
+
+    @Override
+    public short getSectionBitMask() {
+        return 0;
+    }
+
+    @Override
+    public byte[] syncGetBiomes() {
+        return new byte[0];
+    }
+
+    @Override
+    public boolean sectionExists(int i) {
+        return false;
+    }
+
+    @Override
+    public void loadTiles() {
+
+    }
+
     public synchronized void waitForFinish() {
         if (!this.finished) {
             try {
@@ -111,7 +193,7 @@ public class BunkerAsyncChunk extends AsyncChunk {
         }
     }
 
-    public synchronized void finish(BunkerWorldServer server) {
+        public synchronized void finish(BunkerWorldServer server) {
         nmsStoredChunk = new Chunk(server, this.getX(), this.getZ());
         Chunk nmsChunk = nmsStoredChunk;
         nmsChunk.mustSave = true;
@@ -130,8 +212,23 @@ public class BunkerAsyncChunk extends AsyncChunk {
             //Tile Entities
             getTiles().forEach((intVector3D, te) -> {
                 BlockPosition bp = new BlockPosition(intVector3D.getX(), intVector3D.getY(), intVector3D.getZ());
-                TileEntity entity = nmsChunk.a(bp, Chunk.EnumTileEntityState.IMMEDIATE); //Get or Create tile entity or null if none is applicable to the block at that position
+                TileEntity entity;
+                synchronized (server) {
+
+                    //All of this is to prevent the world from calling a chunk load when adding the tile to the world
+                    //Otherwise we'd use world.getTileEntity(bp) which does all of this for us but also calls a chunk load
+                    //Which spigot catches as asynchronous and blocks until main thread catches up, causing a crash
+                    IBlockData iblockdata = nmsChunk.getBlockData(bp);
+                    Block block = iblockdata.getBlock();
+                    entity = !block.isTileEntity() ? null : ((ITileEntity)block).a(nmsChunk.getWorld(), iblockdata.getBlock().toLegacyData(iblockdata));
+                    if(entity != null) {
+                        entity.a(nmsChunk.getWorld()); //Set world
+                        nmsChunk.getWorld().a(entity); //Add to world
+                        nmsChunk.a(bp, entity); //Add to chunk
+                    }
+                }
                 if (entity != null) {
+
                     //Set Tile Entity's Coordinates in it's NBT
                     te.getData().put("x", new TagInt(bp.getX()));
                     te.getData().put("y", new TagInt(bp.getY()));

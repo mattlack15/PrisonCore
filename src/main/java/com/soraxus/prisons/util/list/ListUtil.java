@@ -21,4 +21,13 @@ public class ListUtil {
         }
         return in.get(ThreadLocalRandom.current().nextInt(in.size()));
     }
+
+    public static <T> String toString(List<T> list) {
+        StringBuilder str = new StringBuilder("List{");
+        for (T t : list) {
+            str.append(t.toString());
+        }
+        str.append("}");
+        return str.toString();
+    }
 }

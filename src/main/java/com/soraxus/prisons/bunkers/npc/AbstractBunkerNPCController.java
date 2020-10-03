@@ -3,6 +3,7 @@ package com.soraxus.prisons.bunkers.npc;
 import com.soraxus.prisons.bunkers.base.Bunker;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.ultragrav.utils.Vector3D;
@@ -15,6 +16,7 @@ import org.bukkit.entity.LivingEntity;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 public abstract class AbstractBunkerNPCController {
@@ -33,6 +35,9 @@ public abstract class AbstractBunkerNPCController {
 
     private NPCManager manager = null;
 
+    @Setter
+    private volatile boolean autoTargeting = true;
+
     public AbstractBunkerNPCController(BunkerNPC parent) {
         this.parent = parent;
     }
@@ -44,6 +49,7 @@ public abstract class AbstractBunkerNPCController {
         this.worldId = world.getUID();
         this.manager = manager;
         this.onSpawn(npc);
+        manager.addNPC(parent);
     }
 
     public abstract void onSpawn(NPC npc);
@@ -61,6 +67,7 @@ public abstract class AbstractBunkerNPCController {
     public void remove() {
         if (this.npc != null) {
             this.getBunker().getNpcManager().removeNPC(this.getID());
+            this.npc.despawn();
             this.npc.destroy();
             this.npc = null;
         }
@@ -70,41 +77,44 @@ public abstract class AbstractBunkerNPCController {
         return this.npc != null;
     }
 
-    private boolean targetApplied = false;
+    private final AtomicBoolean targetApplied = new AtomicBoolean(false);
+
+    public void retarget() {
+        List<AvailableTarget<?>> targets = this.getAvailableTargets();
+        AvailableTarget<?> closest = null;
+        double closestDist = -1D;
+        for (AvailableTarget<?> target : targets) {
+            if (target.get().equals(this.getParent()))
+                continue;
+            double dist = target.getImmediateLocation().distanceSquared(this.getLocation().toBukkitVector().toLocation(this.getWorld()));
+            if (dist < closestDist || closestDist == -1D) {
+                closestDist = dist;
+                closest = target;
+            }
+        }
+
+        if (this.getCurrentTarget() != null && closest != null)
+            if (closest.get() == this.getCurrentTarget().getTarget().get())
+                return;
+
+        if (closest != null)
+            setTarget(target(closest));
+        targetApplied.set(false);
+    }
 
     public void tick() {
         if (!this.npc.isSpawned()) {
-            Bukkit.broadcastMessage("This NPC is not spawned, or has despawned");
             return;
         }
-        if (this.npc.getEntity() == null) {
-            Bukkit.broadcastMessage("The NPC is spawned, but there is no entity. Has it died?");
+        if (autoTargeting && (this.getCurrentTarget() == null || !this.getCurrentTarget().exists())) {
+            retarget();
             return;
         }
-        if (this.getCurrentTarget() == null || !this.getCurrentTarget().exists()) {
-            List<AvailableTarget<?>> targets = this.getAvailableTargets();
-            AvailableTarget<?> closest = null;
-            double closestDist = -1D;
-            for (AvailableTarget<?> target : targets) {
-                if (target.get().equals(this.getParent()))
-                    continue;
-                double dist = target.getImmediateLocation().distanceSquared(this.getLocation().toBukkitVector().toLocation(this.getWorld()));
-                if (dist < closestDist || closestDist == -1D) {
-                    closestDist = dist;
-                    closest = target;
-                }
-            }
-            if (closest != null)
-                setTarget(target(closest));
-            return;
-        }
-        if (currentTarget.conditionsMet(npc)) {
-            npc.getNavigator().setPaused(true);
-            targetApplied = false;
-        } else if (!npc.getNavigator().isNavigating() && !targetApplied) {
-            targetApplied = true;
+        if (currentTarget != null && currentTarget.conditionsMet(npc) && npc.getNavigator().isNavigating()) {
+            npc.getNavigator().cancelNavigation();
+            targetApplied.set(false);
+        } else if (currentTarget != null && targetApplied.compareAndSet(false, true)) {
             currentTarget.apply(targetter);
-            Bukkit.broadcastMessage("Applying target");
         }
     }
 
@@ -112,18 +122,18 @@ public abstract class AbstractBunkerNPCController {
      * Kill the NPC, playing any death animations
      */
     public void die() {
-        damage(2000);
-
-        //TODO ...
-
+        Entity ent = this.npc.getEntity();
+        // TODO: Death animation
         remove();
     }
 
     public void damage(double damage) {
         this.npc.setProtected(false);
         Entity ent = this.npc.getEntity();
+        boolean died = ((LivingEntity) ent).getHealth() - damage <= 0;
         ((LivingEntity) ent).damage(damage);
         this.npc.setProtected(true);
+        if (died) this.die();
     }
 
     public World getWorld() {

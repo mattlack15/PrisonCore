@@ -1,7 +1,14 @@
 package com.soraxus.prisons.gangs;
 
+import com.soraxus.prisons.bunkers.BunkerManager;
+import com.soraxus.prisons.gangs.events.GangUnloadEvent;
+import com.soraxus.prisons.privatemines.PrivateMine;
+import com.soraxus.prisons.privatemines.PrivateMineManager;
+import com.soraxus.prisons.util.list.ElementableList;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class GangManager {
     public static GangManager instance;
-    private List<Gang> gangs = new ArrayList<>();
+    private ElementableList<Gang> gangs = new ElementableList<>();
     private File folder;
     private File indexFile;
     private FileConfiguration indexConfig;
@@ -114,6 +121,7 @@ public class GangManager {
             this.gangs.removeIf(g -> g.getId().equals(gang.getId()));
             this.gangs.add(gang);
         }
+        BunkerManager.instance.loadBunkerAsync(gang.getId());
         return gang;
     }
 
@@ -183,8 +191,25 @@ public class GangManager {
 
     public void unload(UUID gangId) {
         synchronized (this) {
-            this.gangs.removeIf(gang -> gang.getId().equals(gangId));
+            Gang g = this.gangs.byFunction(gangId, Gang::getId);
+            if (g == null) {
+                return;
+            }
+            GangUnloadEvent event = new GangUnloadEvent(g);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) {
+                return;
+            }
+            this.gangs.remove(g);
         }
+
+        //Unload bunker
+        BunkerManager.instance.tryUnload(BunkerManager.instance.getLoadedBunker(gangId));
+
+        //Unload private mine
+        PrivateMine mine = PrivateMineManager.instance.getLoadedPrivateMine(gangId);
+        if (mine != null)
+            PrivateMineManager.instance.saveAndUnloadPrivateMineAsync(mine);
     }
 
     public void saveIndex() {

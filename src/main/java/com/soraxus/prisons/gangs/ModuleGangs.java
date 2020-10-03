@@ -1,10 +1,12 @@
 package com.soraxus.prisons.gangs;
 
 import com.soraxus.prisons.core.CoreModule;
+import com.soraxus.prisons.event.PrisonBlockBreakEvent;
 import com.soraxus.prisons.gangs.cmd.CmdGang;
 import com.soraxus.prisons.util.EventSubscription;
 import com.soraxus.prisons.util.menus.MenuElement;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -58,20 +60,32 @@ public class ModuleGangs extends CoreModule {
     @EventSubscription
     private void onQuit(PlayerQuitEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
-        getAsyncExecutor().submit(() -> {
-            UUID gangId = GangMemberManager.instance.getMember(playerId).getGang();
-            Gang gang = GangManager.instance.getLoadedGang(gangId);
-            long onlineCount = gang.getMembers().stream()
-                    .map(GangMember::getMember)
-                    .map(Bukkit::getPlayer)
-                    .filter(Objects::nonNull)
-                    .count();
-            if (onlineCount == 0) {
-                for (GangMember member : gang.getMembers()) {
-                    GangMemberManager.instance.unloadMember(member.getMember());
-                }
-                GangManager.instance.unload(gangId);
+        UUID gangId = GangMemberManager.instance.getMember(playerId).getGang();
+        Gang gang = GangManager.instance.getLoadedGang(gangId);
+        if(gang == null)
+            return;
+        long onlineCount = gang.getMembers().stream()
+                .map(GangMember::getMember)
+                .map(Bukkit::getPlayer)
+                .filter(Objects::nonNull)
+                .filter(p -> !p.equals(event.getPlayer()))
+                .count();
+        if (onlineCount == 0) {
+            for (GangMember member : gang.getMembers()) {
+                GangMemberManager.instance.unloadMember(member.getMember());
             }
-        });
+            GangManager.instance.unload(gangId);
+        }
+    }
+
+    @EventSubscription
+    public void onBreak(PrisonBlockBreakEvent e) {
+        Player player = e.getPlayer();
+        GangMember member = GangMemberManager.instance.getMember(player);
+        if (member == null || member.getGang() == null) {
+            return;
+        }
+        Gang gang = GangManager.instance.getLoadedGang(member.getGang());
+        gang.addXp(e.getAmount());
     }
 }

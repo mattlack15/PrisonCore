@@ -1,11 +1,17 @@
 package com.soraxus.prisons.bunkers.workers;
 
+import com.soraxus.prisons.bunkers.base.Bunker;
 import com.soraxus.prisons.bunkers.base.Tile;
 import com.soraxus.prisons.bunkers.npc.ElementDrop;
+import net.ultragrav.serializer.GravSerializer;
 
 public class TaskBreak extends Task {
 
     private double health = 0D;
+
+    public TaskBreak(GravSerializer serializer, Bunker bunker, Worker worker) {
+        super(serializer, bunker, worker);
+    }
 
     public TaskBreak(Tile tile, Worker worker) {
         super("Breaking", tile.getBunker().getTileMap().getTile(tile.getParent().getPosition()), worker);
@@ -19,10 +25,13 @@ public class TaskBreak extends Task {
     }
 
     @Override
-    public synchronized void start() throws IllegalStateException {
-        super.start();
-        health = getTarget().getParent().getHealth();
-        getTarget().getParent().disable();
+    public synchronized boolean start() throws IllegalStateException {
+        if(super.start()) {
+            health = getTarget().getParent().getHealth();
+            getTarget().getParent().disable();
+            return true;
+        }
+        return false;
     }
 
     @Override

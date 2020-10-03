@@ -5,6 +5,7 @@ import com.soraxus.prisons.bunkers.ModuleBunkers;
 import com.soraxus.prisons.bunkers.base.Bunker;
 import com.soraxus.prisons.bunkers.base.BunkerElement;
 import com.soraxus.prisons.bunkers.base.Tile;
+import com.soraxus.prisons.bunkers.npc.BunkerNPC;
 import com.soraxus.prisons.bunkers.npc.ElementDrop;
 import com.soraxus.prisons.bunkers.npc.combat.BunkerNPCAbility;
 import com.soraxus.prisons.util.EventSubscription;
@@ -17,16 +18,19 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.projectiles.ProjectileSource;
+import org.bukkit.util.Vector;
 
 import java.util.UUID;
 
 import static com.soraxus.prisons.bunkers.ModuleBunkers.WORLD_PREFIX;
 
 public class AbilityShoot extends BunkerNPCAbility {
+    private static final Vector DIFF = new Vector(0, 1, 0);
+
     private final NPCArcher npcArcher;
 
-    public AbilityShoot(String name, NPCArcher parent) {
-        super(name, parent);
+    public AbilityShoot(NPCArcher parent) {
+        super("Shoot", parent);
         this.npcArcher = parent;
         EventSubscriptions.instance.subscribe(this);
     }
@@ -41,13 +45,13 @@ public class AbilityShoot extends BunkerNPCAbility {
         LivingEntity ent = (LivingEntity) npcArcher.getNpc().getEntity();
         Location loc = ent.getEyeLocation();
         Location target = npcArcher.getCurrentTarget().getTarget().getImmediateLocation().clone();
-        Arrow arrow = loc.getWorld().spawnArrow(loc.add(loc.getDirection()), target.subtract(loc).toVector(), 1, 0);
+        Arrow arrow = loc.getWorld().spawnArrow(loc.add(target.subtract(loc).toVector().normalize()), target.subtract(loc).toVector().multiply(1.5D).add(DIFF), 1, 0);
         arrow.setShooter(ent);
     }
 
     @Override
     public boolean canUse() {
-        return npcArcher.getCurrentTarget() != null && npcArcher.getCurrentTarget().conditionsMet(npcArcher.getNpc());
+        return npcArcher.getCurrentTarget() != null && npcArcher.getCurrentTarget().exists() && npcArcher.getCurrentTarget().conditionsMet(npcArcher.getNpc());
     }
 
 
@@ -68,8 +72,14 @@ public class AbilityShoot extends BunkerNPCAbility {
             if (source == getParent().getNpc().getEntity()) {
                 Block block = e.getHitBlock();
                 if (block == null) {
-                    // Hit an entity, don't know what to do
+                    //Hit an entity
+                    BunkerNPC npc = getParent().getManager().getNpc(e.getHitEntity());
+                    if(npc != null) {
+                        double damage = 3.141592653589 * getParent().getParent().getLevel();
+                        npc.damage(damage);
+                    }
                 } else {
+                    //Hit a block/element
                     Location loc = block.getLocation();
                     String worldName = loc.getWorld().getName();
                     String id = worldName.substring(WORLD_PREFIX.length());
@@ -88,7 +98,7 @@ public class AbilityShoot extends BunkerNPCAbility {
                         double damage = 3.141592653589 * getParent().getParent().getLevel();
                         ElementDrop drop = element.getDropForDamage(damage);
                         if (drop != null) {
-                            drop.apply(bunker.getAttackingMatch().getAttacker());
+                            drop.apply(bunker.getDefendingMatch().getAttacker());
                         }
                         element.damage(damage);
                     }

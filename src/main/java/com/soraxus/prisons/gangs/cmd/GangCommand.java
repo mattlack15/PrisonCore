@@ -1,9 +1,7 @@
 package com.soraxus.prisons.gangs.cmd;
 
-import com.soraxus.prisons.gangs.Gang;
-import com.soraxus.prisons.gangs.GangManager;
-import com.soraxus.prisons.gangs.GangMember;
-import com.soraxus.prisons.gangs.GangMemberManager;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.soraxus.prisons.gangs.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.ultragrav.command.UltraCommand;
@@ -15,11 +13,15 @@ import java.util.concurrent.Executors;
 
 public abstract class GangCommand extends UltraCommand {
     @Getter
-    private ExecutorService asyncExecutor = Executors.newCachedThreadPool();
+    private final ExecutorService asyncExecutor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setUncaughtExceptionHandler((e, e1) -> e1.printStackTrace()).build());
 
     @Getter
     @Setter
     private boolean requiresGang = false;
+
+    @Getter
+    @Setter
+    private GangRole minimumRole = GangRole.values()[0];
 
     public GangMember getGangMember() {
         return GangMemberManager.instance.getMember(getPlayer().getUniqueId());
@@ -36,6 +38,9 @@ public abstract class GangCommand extends UltraCommand {
     public void preConditions() {
         if (requiresGang && (getGang() == null || getGangMember() == null)) {
             throw new CommandException("§cThis command requires you to be in a gang!");
+        }
+        if(minimumRole.ordinal() > getGangMember().getGangRole().ordinal()) {
+            throw new CommandException("&cYou are not a high enough role to use this!");
         }
     }
 

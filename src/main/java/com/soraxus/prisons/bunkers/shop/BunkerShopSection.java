@@ -16,7 +16,7 @@ public class BunkerShopSection {
 
     public BunkerShopSection(String name, ItemStack displayItem) {
         this.name = name;
-        this.displayItem = new ItemBuilder(displayItem.clone()).addLore("&8Shop Section").build();
+        this.displayItem = new ItemBuilder(displayItem.clone()).addLore("", "&8Shop Section").build();
     }
 
     public synchronized void addItem(BunkerShopItem item) {

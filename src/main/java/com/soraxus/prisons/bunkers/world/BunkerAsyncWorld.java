@@ -1,6 +1,7 @@
 package com.soraxus.prisons.bunkers.world;
 
 import lombok.Getter;
+import net.ultragrav.asyncworld.AsyncChunk;
 import net.ultragrav.asyncworld.AsyncWorld;
 import net.ultragrav.asyncworld.nbt.TagCompound;
 import net.ultragrav.asyncworld.schematics.Schematic;
@@ -131,7 +132,8 @@ public class BunkerAsyncWorld extends AsyncWorld {
                 throw new RuntimeException("Waited too long to paste schematic!");
             }
         }
-        schematic.getTiles().forEach((p, t) -> setTile(p.getX(), p.getY(), p.getZ(), t));
+        IntVector3D finalPosition = position;
+        schematic.getTiles().forEach((p, t) -> setTile(p.getX() + finalPosition.getX(), p.getY() + finalPosition.getY(), p.getZ() + finalPosition.getZ(), t));
     }
 
     public void pasteSchematic(Schematic schematic, IntVector3D position) {
@@ -345,5 +347,40 @@ public class BunkerAsyncWorld extends AsyncWorld {
                 futures.clear();
             }
         }
+    }
+
+    @Override
+    public int syncGetBrightnessOpacity(int i, int i1, int i2) {
+        return 0;
+    }
+
+    @Override
+    public void syncSetEmittedLight(int i, int i1, int i2, int i3) {
+
+    }
+
+    @Override
+    public void syncSetSkyLight(int i, int i1, int i2, int i3) {
+
+    }
+
+    @Override
+    public int syncGetEmittedLight(int i, int i1, int i2) {
+        return 0;
+    }
+
+    @Override
+    public int syncGetSkyLight(int i, int i1, int i2) {
+        return 0;
+    }
+
+    @Override
+    public void ensureChunkLoaded(AsyncChunk... asyncChunks) {
+
+    }
+
+    @Override
+    public Schematic optimizedCreateSchematic(CuboidRegion cuboidRegion, IntVector3D intVector3D, int i) {
+        return new Schematic(intVector3D, this, cuboidRegion, i);
     }
 }

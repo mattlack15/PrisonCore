@@ -70,6 +70,8 @@ public class DateUtils {
     }
 
     public static String readableDate(BigInteger seconds, boolean sh) {
+        if(seconds.equals(BigInteger.ZERO))
+            return "0s";
         List<String> ret = new ArrayList<>();
         int years = seconds.divide(BigInteger.valueOf(60 * 60 * 24 * 30 * 12)).intValue();
         seconds = seconds.mod(BigInteger.valueOf(60 * 60 * 24 * 30 * 12));

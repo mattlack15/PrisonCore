@@ -6,10 +6,10 @@ package com.soraxus.prisons.economy;
 
 import com.soraxus.prisons.util.data.PlayerData;
 import lombok.Getter;
-import org.bukkit.OfflinePlayer;
 
-import java.math.BigInteger;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 // Max balance: 18,446,744,073,709,551,615
 @Getter
@@ -40,27 +40,27 @@ public class Economy {
         economies.put(name, this);
     }
 
-    public long getBalance(UUID id) {
+    public synchronized long getBalance(UUID id) {
         return PlayerData.getLong(id, "economy." + name);
     }
 
-    public long setBalance(UUID id, long amount) {
+    public synchronized long setBalance(UUID id, long amount) {
         return PlayerData.set(id, "economy." + name, amount);
     }
 
-    public long addBalance(UUID id, long amount) {
+    public synchronized long addBalance(UUID id, long amount) {
         return setBalance(id, getBalance(id) + amount);
     }
 
-    public long removeBalance(UUID id, long amount) {
+    public synchronized long removeBalance(UUID id, long amount) {
         return setBalance(id, getBalance(id) - amount);
     }
 
-    public boolean hasBalance(UUID id, long amount) {
+    public synchronized boolean hasBalance(UUID id, long amount) {
         return getBalance(id) >= amount;
     }
 
-    public long resetBalance(UUID id) {
+    public synchronized long resetBalance(UUID id) {
         return setBalance(id, defaultBalance);
     }
 

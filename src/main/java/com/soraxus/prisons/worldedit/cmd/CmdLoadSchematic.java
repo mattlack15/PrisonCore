@@ -1,7 +1,7 @@
 package com.soraxus.prisons.worldedit.cmd;
 
 import com.soraxus.prisons.SpigotPrisonCore;
-import com.soraxus.prisons.worldedit.ModuleWorldEdit;
+import com.soraxus.prisons.bunkers.ModuleBunkers;
 import com.soraxus.prisons.worldedit.WorldEditPlayerManager;
 import com.soraxus.prisons.worldedit.WorldEditPlayerState;
 import net.ultragrav.asyncworld.schematics.Schematic;
@@ -29,7 +29,7 @@ public class CmdLoadSchematic extends UltraCommand {
         Player player = getPlayer();
 
         String name = getArgument(0);
-        File f = new File(ModuleWorldEdit.instance.getDataFolder(), "schematics/" + name + ".bschem");
+        File f = new File(ModuleBunkers.instance.getDataFolder(), "schematics/" + name + ".bschem");
         if (!f.exists()) {
             returnTell("§cThat schematic does not exist");
         }

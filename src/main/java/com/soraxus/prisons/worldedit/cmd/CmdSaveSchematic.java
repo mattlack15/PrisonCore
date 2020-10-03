@@ -1,7 +1,7 @@
 package com.soraxus.prisons.worldedit.cmd;
 
 import com.soraxus.prisons.SpigotPrisonCore;
-import com.soraxus.prisons.worldedit.ModuleWorldEdit;
+import com.soraxus.prisons.bunkers.ModuleBunkers;
 import com.soraxus.prisons.worldedit.WorldEditPlayerManager;
 import com.soraxus.prisons.worldedit.WorldEditPlayerState;
 import net.ultragrav.asyncworld.SpigotAsyncWorld;
@@ -32,7 +32,7 @@ public class CmdSaveSchematic extends UltraCommand {
         IntVector3D origin = getArgument(1);
         int ignoredBlock = getArgument(2);
 
-        File f = new File(ModuleWorldEdit.instance.getDataFolder(), "schematics/" + name + ".bschem");
+        File f = new File(ModuleBunkers.instance.getDataFolder(), "schematics/" + name + ".bschem");
         if (f.getParentFile() != null)
             f.getParentFile().mkdirs();
         if (!f.exists()) {
@@ -50,7 +50,7 @@ public class CmdSaveSchematic extends UltraCommand {
         Schematic schem = new Schematic(origin, new SpigotAsyncWorld(region.getWorld()), region, ignoredBlock);
         try {
             schem.save(f);
-            sender.sendMessage(SpigotPrisonCore.PREFIX + "§aSuccess! Custom Origin: " + origin.getX() + " " + origin.getY() + " " + origin.getZ() + (ignoredBlock != -1 ? " ignoredBlock: " + args.get(4) + " (" + ignoredBlock + ")" : ""));
+            sender.sendMessage(SpigotPrisonCore.PREFIX + "§aSuccess! Custom Origin: " + origin.getX() + " " + origin.getY() + " " + origin.getZ() + (ignoredBlock != -1 ? " ignoredBlock: " + args.get(2) + " (" + ignoredBlock + ")" : ""));
         } catch (IOException e) {
             e.printStackTrace();
             sender.sendMessage(SpigotPrisonCore.PREFIX + "§cShit happened during the process of attempting to try to saving your schematic");

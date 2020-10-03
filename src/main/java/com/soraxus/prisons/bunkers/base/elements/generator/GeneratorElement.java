@@ -6,6 +6,7 @@ import com.soraxus.prisons.bunkers.base.BunkerElement;
 import com.soraxus.prisons.bunkers.base.elements.storage.Storage;
 import com.soraxus.prisons.bunkers.base.resources.BunkerResource;
 import com.soraxus.prisons.bunkers.util.BHoloTextBox;
+import com.soraxus.prisons.util.math.MathUtils;
 import net.ultragrav.serializer.GravSerializer;
 import org.bukkit.Sound;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -15,6 +16,7 @@ public abstract class GeneratorElement extends BunkerElement {
     private final Storage currentStorage;
     private int ticker = 0;
     private BHoloTextBox textBox;
+    protected String getTextColour = "";
 
     public GeneratorElement(GravSerializer serializer, Bunker bunker, BunkerResource generatingType) {
         super(serializer, bunker);
@@ -29,6 +31,7 @@ public abstract class GeneratorElement extends BunkerElement {
 
     @Override
     protected void onEnable() {
+        this.currentStorage.setCap(Math.round(getLevel() * 900 / (double) getDelay()));
         this.updateTextBox();
     }
 
@@ -37,22 +40,26 @@ public abstract class GeneratorElement extends BunkerElement {
         this.textBox.clear();
     }
 
-    private synchronized void updateTextBox() {
-        if (currentStorage.getAmount() > this.currentStorage.getCap() / 30D) {
-            if (textBox == null) {
-                textBox = new BHoloTextBox(this.getLocation().add(this.getShape().getX() * BunkerManager.TILE_SIZE_BLOCKS / 2D, this.getSchematic().getDimensions().getY() - this.getSchematic().getOrigin().getY() + 1, this.getShape().getY() * BunkerManager.TILE_SIZE_BLOCKS / 2D),
-                        0.3, false, () -> getBunker().getWorld().getBukkitWorld());
+    private void updateTextBox() {
+        synchronized (currentStorage) {
+            if (currentStorage.getAmount() > currentStorage.getCap() / 30D) {
+                if (textBox == null) {
+                    textBox = new BHoloTextBox(this.getLocation().add(this.getShape().getX() * BunkerManager.TILE_SIZE_BLOCKS / 2D, this.getSchematic().getDimensions().getY() - this.getSchematic().getOrigin().getY() + 1, this.getShape().getY() * BunkerManager.TILE_SIZE_BLOCKS / 2D),
+                            0.3, false, () -> getBunker().getWorld().getBukkitWorld());
+                }
+                textBox.setOrMake(0, "&aGET");
+                textBox.setOrMake(1, "&f" + getTextColour + currentStorage.getAmount());
+            } else {
+                if (textBox != null)
+                    textBox.clear();
             }
-            textBox.setOrMake(0, "&aGET");
-            textBox.setOrMake(1, "&f" + currentStorage.getAmount());
-        } else {
-            if (textBox != null)
-                textBox.clear();
         }
     }
 
     public boolean collect() {
         Storage curr = getBunker().getCombinedStorages().get(generatingType);
+        if(curr == null)
+            return false;
         double amount; //Avoiding possible deadlocks here
         double amountCollected;
         synchronized (currentStorage) {
@@ -85,11 +92,17 @@ public abstract class GeneratorElement extends BunkerElement {
 
     public abstract double getAmount();
 
+    public Storage getCurrentStorage() {
+        return currentStorage;
+    }
+
     @Override
     public void onClick(PlayerInteractEvent e) {
         if (this.currentStorage.getAmount() > 0D) {
             double amount = currentStorage.getAmount();
             if (this.collect()) {
+                amount -= currentStorage.getAmount();
+                amount = MathUtils.round(amount, 1);
                 getBunker().messageMembersInWorld("&a+" + amount + " " + generatingType.getColor() + generatingType.getDisplayName());
                 e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(), Sound.ENTITY_CHICKEN_EGG, 1f, 1.1f);
             } else {

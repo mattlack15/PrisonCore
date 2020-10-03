@@ -71,7 +71,7 @@ public class ElementWorkerHut extends BunkerElement {
 
     @Override
     public double getMaxHealth() {
-        return 50; // TODO
+        return 50;
     }
 
     @Override
@@ -86,6 +86,6 @@ public class ElementWorkerHut extends BunkerElement {
 
     @Override
     public ElementDrop getDropForDamage(double damage) {
-        return null; // TODO
+        return null;
     }
 }

@@ -155,7 +155,6 @@ public class ElementMineField extends BunkerElement {
                 _exploding = false;
             }
         });
-        //TODO getDropForDamage attackers
     }
 
     /**

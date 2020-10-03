@@ -14,7 +14,7 @@ public class CmdGangRename extends GangCommand {
     public CmdGangRename() {
         this.addAlias("rename");
         this.setRequiresGang(true);
-        this.addParameter(StringProvider.getInstance());
+        this.addParameter(StringProvider.getInstance(), "new name");
     }
 
     public void perform() {

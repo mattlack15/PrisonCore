@@ -40,7 +40,7 @@ public class CmdGangKick extends GangCommand {
                 }
             }
             member.setGang(null);
-            gang.broadcastMessage("&e" + op.getName() + " was kicked from the gang!");
+            gang.broadcastMessage("&c" + op.getName() + "&f was kicked from the gang!");
         });
     }
 }

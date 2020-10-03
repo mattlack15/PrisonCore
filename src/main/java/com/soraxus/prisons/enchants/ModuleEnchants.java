@@ -2,10 +2,13 @@ package com.soraxus.prisons.enchants;
 
 import com.soraxus.prisons.core.CoreModule;
 import com.soraxus.prisons.enchants.gui.MenuEnchant;
+import com.soraxus.prisons.enchants.gui.MenuModuleEnchants;
 import com.soraxus.prisons.enchants.manager.AbilityCooldownManager;
 import com.soraxus.prisons.enchants.manager.EnchantManager;
 import com.soraxus.prisons.util.EventSubscription;
+import com.soraxus.prisons.util.ItemBuilder;
 import com.soraxus.prisons.util.menus.MenuElement;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -33,7 +36,9 @@ public class ModuleEnchants extends CoreModule {
 
     @Override
     public MenuElement getGUI(MenuElement backButton) {
-        return null;
+        return new MenuElement(new ItemBuilder(Material.ENCHANTED_BOOK).setName("&d&lEnchantments")
+        .addLore("&7Click to view custom enchantments").build())
+                .setClickHandler((e, i) -> new MenuModuleEnchants(backButton).open(e.getWhoClicked()));
     }
 
     @EventSubscription

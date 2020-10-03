@@ -22,4 +22,9 @@ public abstract class NaturalElement extends BunkerElement {
         this.remove();
         return false;
     }
+
+    @Override
+    public boolean isVisibleToAttackers() {
+        return false;
+    }
 }

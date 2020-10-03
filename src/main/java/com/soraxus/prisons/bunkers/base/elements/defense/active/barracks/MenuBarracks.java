@@ -1,5 +1,6 @@
 package com.soraxus.prisons.bunkers.base.elements.defense.active.barracks;
 
+import com.soraxus.prisons.bunkers.matchmaking.MatchInfo;
 import com.soraxus.prisons.bunkers.npc.info.BunkerNPCType;
 import com.soraxus.prisons.util.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
@@ -15,6 +16,7 @@ import java.util.List;
 
 public class MenuBarracks extends Menu {
     private final ElementBarracks barracks;
+
     public MenuBarracks(ElementBarracks barracks) {
         super(barracks.getName(), 5);
         this.barracks = barracks;
@@ -22,25 +24,21 @@ public class MenuBarracks extends Menu {
     }
 
     public void setup() {
-
         this.setAll(null);
         List<BunkerNPCType> available = barracks.getAvailableTypes();
         this.setupActionableList(10, 26, 27, 35, (index -> {
-            if(BunkerNPCType.values().length <= index)
+            if (BunkerNPCType.values().length <= index)
                 return null;
             BunkerNPCType type = BunkerNPCType.values()[index];
-            if(available.contains(type)) {
-                //TODO level
-                int level = 1;
+            if (available.contains(type)) {
+                int level = barracks.getBunker().getNpcSkillManager().getLevel(type);
                 return new MenuElement(getItem(type, level)).setClickHandler((e, i) -> {
-                    if(barracks.getBunker().hasResources(type.getCost(level))) {
+                    if (barracks.getBunker().hasResources(type.getCost(level))) {
                         barracks.getBunker().removeResources(type.getCost(1));
                         barracks.startGeneration(type, level);
                         setup();
                     }
-                }).setDoUpdates(true).setUpdateEvery(20).setUpdateHandler((e) -> {
-                    e.setItem(getItem(type, level)); //TODO update level
-                });
+                }).setDoUpdates(true).setUpdateEvery(20).setUpdateHandler((e) -> e.setItem(getItem(type, level)));
             } else {
                 ItemBuilder builder = new ItemBuilder(Material.BEDROCK, 1).setName("&c???")
                         .addLore("&8" + type.getDescription());
@@ -48,7 +46,22 @@ public class MenuBarracks extends Menu {
             }
         }), 0);
 
+        MatchInfo lastMatchInfo = null;
+        MenuElement lastMatch = null;
+        if(barracks.getBunker().getPastMatches().size() != 0)
+            lastMatchInfo = barracks.getBunker().getPastMatches().get(0);
+        if (lastMatchInfo != null) {
+            boolean attacker = lastMatchInfo.getAttackingBunker().equals(barracks.getBunker().getId());
+            boolean won = lastMatchInfo.getMatchStats().getAttackerSuccess() ^ (!attacker);
+            lastMatch = new MenuElement(new ItemBuilder(Material.ENCHANTED_BOOK, 1).setName("&8Last Match")
+                    .addLore("",
+                            "&7Role: &f" + (lastMatchInfo.getAttackingBunker() == barracks.getBunker().getId() ? "Attacker" : "Defender"),
+                            "&7Duration: &f" + DateUtils.readableDate(lastMatchInfo.getMatchStats().getMatchDurationSeconds(), true),
+                            "&7Result: " + (won ? "&aVictory" : "&cDefeat")).build());
+        }
+
         this.setElement(4, barracks.getInfoElement());
+        this.setElement(8, lastMatch);
 
         this.fillElement(new MenuElement(new ItemBuilder(Material.STAINED_GLASS_PANE, 1, (byte) 7).setName(" ").build())
                 .setClickHandler((e, i) -> ((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.ENTITY_ITEM_BREAK, 0.8f, 1f)));
@@ -63,7 +76,7 @@ public class MenuBarracks extends Menu {
         builder.addLore("&fLevel: &7" + level + "&f/&7" + type.getInfo().getMaxLevel());
         int ticks = 0;
         int amount = 0;
-        for(ProcessNPCTraining training : barracks.getTrainingListByType(type)) {
+        for (ProcessNPCTraining training : barracks.getTrainingListByType(type)) {
             ticks += training.getTicksLeft();
             amount++;
         }

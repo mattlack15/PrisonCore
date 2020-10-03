@@ -41,9 +41,13 @@ public class ModuleBreak extends CoreModule {
         this.onBreak(event.getPlayer(), Vector3D.fromBukkitVector(event.getBlock().getLocation().toVector()), event.getBlock().getData() << 12 | event.getBlock().getTypeId());
         event.setDropItems(false);
     }
-
     public synchronized void onBreak(Player player, Vector3D location, int combinedId) {
+        onBreak(player, location, combinedId, 1);
+    }
+
+    public synchronized void onBreak(Player player, Vector3D location, int combinedId, int amount) {
         PrisonBlockBreakEvent event = new PrisonBlockBreakEvent(player, location, combinedId);
+        event.setAmount(amount);
         Bukkit.getPluginManager().callEvent(event);
         if (event.getAmount() > 0) {
             player.getInventory().addItem(new ItemStack(combinedId & 4095, event.getAmount(), (short) 0, (byte) (combinedId >> 12)));

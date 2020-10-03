@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class Menu {
 
@@ -30,9 +31,7 @@ public abstract class Menu {
     private com.soraxus.prisons.util.menus.MenuElement.ClickHandler defaultClickHandler = null;
 
     //Storage vars
-    private Map<Integer, MenuElement> elements = new HashMap<>();
-    @Getter
-    private int currentPage = 0;
+    private final Map<Integer, MenuElement> elements = new HashMap<>();
 
     //Construction
     public Menu(String title, int rows) {
@@ -204,9 +203,13 @@ public abstract class Menu {
         return elements;
     }
 
-    public void setupActionableList(int startPos, int endPos, int backPos, int nextPos, MenuElementSupplier elementSupplier, int page) {
+    public AtomicInteger setupActionableList(int startPos, int endPos, int backPos, int nextPos, MenuElementSupplier elementSupplier, int page) {
+        return setupActionableList(startPos, endPos, backPos, nextPos, elementSupplier, new AtomicInteger(page));
+    }
+
+    public AtomicInteger setupActionableList(int startPos, int endPos, int backPos, int nextPos, MenuElementSupplier elementSupplier, AtomicInteger pageHandler) {
         //Pageable list
-        currentPage = page;
+        int page = pageHandler.get();
 
         int calculatedMarginLeft = startPos % 9;
         int calculatedMarginRight = 8 - endPos % 9;
@@ -214,9 +217,6 @@ public abstract class Menu {
         int elementIndex = page * (9 - calculatedMarginLeft - calculatedMarginRight) * (((endPos - (endPos % 9)) / 9) - ((startPos - (startPos % 9)) / 9) + 1);
         boolean placing = true;
         for (int slot = startPos; slot <= endPos; slot++) {
-            if (8 - slot % 9 < calculatedMarginRight) {
-                slot += calculatedMarginLeft + calculatedMarginRight;
-            }
 
             if (placing) {
                 MenuElement element = elementSupplier.getElement(elementIndex);
@@ -229,13 +229,24 @@ public abstract class Menu {
             } else {
                 this.setElement(slot, null);
             }
+
+            if (8 - slot % 9 <= calculatedMarginRight) {
+                slot += calculatedMarginLeft + calculatedMarginRight;
+            }
+
             elementIndex++;
         }
 
-        MenuElement back = new MenuElement(new ItemBuilder(Material.ARROW, 1).setName("&fBack").build()).setClickHandler((e, i) -> this.setupActionableList(startPos, endPos, backPos
-                , nextPos, elementSupplier, page - 1));
-        MenuElement next = new MenuElement(new ItemBuilder(Material.ARROW, 1).setName("&fNext").build()).setClickHandler((e, i) -> this.setupActionableList(startPos, endPos, backPos
-                , nextPos, elementSupplier, page + 1));
+        MenuElement back = new MenuElement(new ItemBuilder(Material.ARROW, 1).setName("&fBack").build()).setClickHandler((e, i) -> {
+            pageHandler.decrementAndGet();
+            this.setupActionableList(startPos, endPos, backPos
+                    , nextPos, elementSupplier, pageHandler);
+        });
+        MenuElement next = new MenuElement(new ItemBuilder(Material.ARROW, 1).setName("&fNext").build()).setClickHandler((e, i) -> {
+            pageHandler.incrementAndGet();
+            this.setupActionableList(startPos, endPos, backPos
+                    , nextPos, elementSupplier, pageHandler);
+        });
 
         if (page != 0) {
             this.setElement(backPos, back);
@@ -248,6 +259,7 @@ public abstract class Menu {
             this.setElement(nextPos, null);
         }
         MenuManager.instance.invalidateInvsForMenu(this);
+        return pageHandler;
     }
 
     protected MenuElement getFiller(int dat) {

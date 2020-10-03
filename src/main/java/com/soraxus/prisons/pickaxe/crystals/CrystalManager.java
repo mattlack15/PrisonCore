@@ -8,14 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class CrystalManager {
-    public static CrystalManager instance;
-
     private static final String TAG_NAME = "spc.pickaxe.crystals";
-
-    public CrystalManager() {
-        instance = this;
-        EventSubscriptions.instance.subscribe(this);
-    }
 
     public static CrystalInfo getInfo(@NotNull ItemStack stack) {
         if(NBTUtils.instance.hasTag(stack, TAG_NAME)) {

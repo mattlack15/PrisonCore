@@ -10,11 +10,14 @@ import com.soraxus.prisons.util.EventSubscription;
 import net.ultragrav.asyncworld.AsyncWorld;
 import net.ultragrav.asyncworld.SpigotAsyncWorld;
 import net.ultragrav.utils.CuboidRegion;
+import net.ultragrav.utils.Vector3D;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,7 +56,7 @@ public class JackHammer extends AbstractCE {
             return;
 
         EnchantInfo info = getInfo(event.getPlayer().getInventory().getItemInMainHand());
-        if(rand.nextDouble() > info.getEnchants().get(this) * percentIncrease)
+        if (rand.nextDouble() > info.getEnchants().get(this) * percentIncrease)
             return;
 
         Mine mine = MineManager.instance.getMineOf(event.getBlock().getLocation());
@@ -66,19 +69,28 @@ public class JackHammer extends AbstractCE {
             AsyncWorld session = new SpigotAsyncWorld(event.getBlock().getWorld());
 
             AtomicInteger broken = new AtomicInteger();
-            session.syncForAllInRegion(hammerRegion, (v, block) -> {
-                        if (block == 0)
-                            return;
-                        broken.getAndIncrement();
-                        ModuleBreak.instance.onBreak(event.getPlayer(), v, block);
-                    }, true);
+
+            Map<Integer, AtomicInteger> broken1 = new ConcurrentHashMap<>();
+
+            session.asyncForAllInRegion(hammerRegion, (v, block, tag, light) -> {
+                if (block == 0)
+                    return;
+
+                broken1.putIfAbsent(block, new AtomicInteger());
+                broken1.get(block).incrementAndGet();
+
+                broken.getAndIncrement();
+            }, true);
 
             service.execute(() -> {
                 session.setBlocks(hammerRegion, () -> (short) 0);
                 session.flush();
             });
-            mine.incrementBlocksMined(broken.get() - 1);
-            PickaxeLevelManager.addXp(event.getPlayer(), broken.get() - 1);
+            mine.incrementBlocksMined(broken.get());
+            PickaxeLevelManager.addXp(event.getPlayer(), broken.get());
+
+            //Call events
+            broken1.forEach((k, v) -> ModuleBreak.instance.onBreak(event.getPlayer(), Vector3D.fromBukkitVector(event.getBlock().getLocation().toVector()), k, v.get()));
 
         }
     }

@@ -6,6 +6,7 @@ import net.citizensnpcs.api.ai.NavigatorParameters;
 import net.citizensnpcs.api.npc.NPC;
 import net.ultragrav.utils.Vector3D;
 import org.bukkit.Bukkit;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 /**
  * Just for cleanness
@@ -27,7 +28,7 @@ public class Targetter {
         params.range((float) npc.getEntity().getLocation().toVector().distance(target.toBukkitVector()) + 5);
         params.stuckAction((npc1, navigator) -> {
             Bukkit.broadcastMessage("I've fallen and I can't get up");
-            params.range((float) npc.getEntity().getLocation().toVector().distance(target.toBukkitVector()) + 5);
+            npc1.teleport(npc1.getEntity().getLocation().add(0, 1, 0), PlayerTeleportEvent.TeleportCause.PLUGIN);
             return true;
         });
         //params.useNewPathfinder(true);
@@ -48,7 +49,7 @@ public class Targetter {
         params.range((float) npc.getEntity().getLocation().toVector().distance(other.getNpc().getEntity().getLocation().toVector()) + 5);
         params.stuckAction((npc1, navigator) -> {
             Bukkit.broadcastMessage("I've fallen and I can't get up");
-            params.range((float) npc.getEntity().getLocation().toVector().distance(other.getNpc().getEntity().getLocation().toVector()) + 5);
+            npc1.teleport(npc1.getEntity().getLocation().add(0, 1, 0), PlayerTeleportEvent.TeleportCause.PLUGIN);
             return true;
         });
         //params.useNewPathfinder(true);

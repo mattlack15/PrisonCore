@@ -1,7 +1,6 @@
 package com.soraxus.prisons.bunkers.npc;
 
 import com.soraxus.prisons.bunkers.base.BunkerElement;
-import com.soraxus.prisons.bunkers.base.elements.type.BunkerElementType;
 import lombok.AllArgsConstructor;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +36,6 @@ public class ElementAvailableTarget implements AvailableTarget<BunkerElement> {
 
     public boolean exists() {
         BunkerElement el = e.get();
-        return el != null && !el.isDestroyed();
+        return el != null && !el.isDestroyed() && el.getBunker().getTileMap().byId(el.getId()) != null;
     }
 }

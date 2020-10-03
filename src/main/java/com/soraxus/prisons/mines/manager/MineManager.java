@@ -3,6 +3,8 @@ package com.soraxus.prisons.mines.manager;
 import com.soraxus.prisons.core.Manager;
 import com.soraxus.prisons.mines.MineFiles;
 import com.soraxus.prisons.mines.object.Mine;
+import com.soraxus.prisons.privatemines.PrivateMine;
+import com.soraxus.prisons.privatemines.PrivateMineManager;
 import lombok.Getter;
 import net.ultragrav.utils.Vector3D;
 import org.bukkit.Location;
@@ -71,8 +73,16 @@ public class MineManager extends Manager<Mine, String> {
         return null;
     }
 
+    //Includes private mines
     public synchronized Mine getMineOf(Location location) {
         for(Mine mines : loadedMines) {
+            if(mines.getRegion().getWorld().equals(location.getWorld()) && mines.getRegion().contains(Vector3D.fromBukkitVector(location.toVector()))) {
+                return mines;
+            }
+        }
+        for(PrivateMine mines : PrivateMineManager.instance.getLoadedPrivateMines()) {
+            if(mines.getWorld() == null)
+                continue;
             if(mines.getRegion().getWorld().equals(location.getWorld()) && mines.getRegion().contains(Vector3D.fromBukkitVector(location.toVector()))) {
                 return mines;
             }
@@ -146,6 +156,9 @@ public class MineManager extends Manager<Mine, String> {
     }
 
     public synchronized void queueSaveMineOperation(Mine mine) {
+        if(!mine.shouldSave())
+            return;
+
         mine.getIoLock().lock();
         if (!this.saveOperations.containsKey(mine.getName())) {
             Future<Void> future = service.submit(() -> {

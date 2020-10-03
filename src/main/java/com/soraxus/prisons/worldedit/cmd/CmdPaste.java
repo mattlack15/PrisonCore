@@ -20,7 +20,7 @@ public class CmdPaste extends UltraCommand {
         this.setAllowConsole(false);
     }
 
-    private ExecutorService service = Executors.newCachedThreadPool((r) -> new Thread(r, "AsyncWorld CmdPaste"));
+    private final ExecutorService service = Executors.newCachedThreadPool((r) -> new Thread(r, "AsyncWorld CmdPaste"));
 
     @Override
     public void perform() {
@@ -36,11 +36,12 @@ public class CmdPaste extends UltraCommand {
             AsyncWorld world = new SpigotAsyncWorld(player.getLocation().getWorld());
             long ms = System.currentTimeMillis();
             world.pasteSchematic(schem, IntVector3D.fromBukkitVector(player.getLocation().toVector()));
+            player.sendMessage(SpigotPrisonCore.PREFIX + "Pasted in memory in " + ((System.currentTimeMillis() - ms) / 1000D) + "s");
             world.flush().thenAccept((vo) -> {
                 double time = (System.currentTimeMillis() - ms) / 1000D;
                 player.sendMessage(SpigotPrisonCore.PREFIX + "Pasted in " + time + "s");
             });
-            player.sendMessage(SpigotPrisonCore.PREFIX + "Pasted in memory in " + ((System.currentTimeMillis() - ms) / 1000D) + "s");
+            player.sendMessage(SpigotPrisonCore.PREFIX + "Flushed in memory in " + ((System.currentTimeMillis() - ms) / 1000D) + "s");
         });
     }
 }

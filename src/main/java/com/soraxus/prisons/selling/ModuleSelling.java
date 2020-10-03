@@ -6,6 +6,7 @@ import com.soraxus.prisons.event.PrisonBlockBreakEvent;
 import com.soraxus.prisons.event.PrisonPreSellEvent;
 import com.soraxus.prisons.selling.autosell.AutoSellInfo;
 import com.soraxus.prisons.selling.autosell.AutoSellManager;
+import com.soraxus.prisons.selling.autosell.command.AutoSellCmd;
 import com.soraxus.prisons.selling.mutlipliers.Multiplier;
 import com.soraxus.prisons.selling.mutlipliers.MultiplierInfo;
 import com.soraxus.prisons.selling.mutlipliers.MultiplierManager;
@@ -14,7 +15,6 @@ import com.soraxus.prisons.util.EventSubscription;
 import com.soraxus.prisons.util.NumberUtils;
 import com.soraxus.prisons.util.items.ItemUtils;
 import com.soraxus.prisons.util.menus.MenuElement;
-import com.soraxus.prisons.selling.autosell.command.CommandAutoSell;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -57,7 +57,7 @@ public class ModuleSelling extends CoreModule {
         instance = this;
         multiplierManager.startLoop();
         reloadPrices();
-        new CommandAutoSell();
+        new AutoSellCmd().register();
         new CommandMultiplier();
     }
 
@@ -76,13 +76,14 @@ public class ModuleSelling extends CoreModule {
             prices.add(SellItem.fromSection(sellprices.getConfigurationSection(key)));
         }
     }
+
     public void savePrices() {
         FileConfiguration config = getConfig();
         config.set("sellprices", null);
         ConfigurationSection sellprices = config.createSection("sellprices");
         int i = 0;
         for (SellItem item : prices) {
-            item.saveTo(sellprices.createSection((i ++) + ""));
+            item.saveTo(sellprices.createSection((i++) + ""));
         }
     }
 
@@ -125,7 +126,7 @@ public class ModuleSelling extends CoreModule {
         player.sendMessage("§8§m------------------------");
         player.sendMessage("§dOriginal: §f" + NumberUtils.formatFull(tot));
         player.sendMessage("§dMultiplier: §f" + event.getMultiplier());
-        tot *= (long)event.getMultiplier();
+        tot *= (long) event.getMultiplier();
         player.sendMessage("§dTotal: §f" + NumberUtils.formatFull(tot));
         player.sendMessage("§8§m------------------------");
         Economy.money.addBalance(player.getUniqueId(), tot);

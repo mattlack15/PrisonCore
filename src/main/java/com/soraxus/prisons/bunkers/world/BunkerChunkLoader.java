@@ -16,7 +16,7 @@ public class BunkerChunkLoader extends ChunkRegionLoader {
     // Load chunk
     @Override
     public Chunk a(World nmsWorld, int x, int z) {
-        Chunk chunk = bunkerWorld.getChunk(x, z);
+        Chunk chunk = null;
         if(chunk == null)
             return null;
         chunk.d(true);
@@ -45,7 +45,6 @@ public class BunkerChunkLoader extends ChunkRegionLoader {
     }
 
 
-    // TODO: Make sure that entity code is not necessary, if it is, check below
     /*private byte[] toByteArray(int[] ints) {
         ByteBuffer buf = ByteBuffer.allocate(ints.length * 4).order(ByteOrder.LITTLE_ENDIAN);
         buf.asIntBuffer().put(ints);

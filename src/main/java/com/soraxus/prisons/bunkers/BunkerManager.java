@@ -5,16 +5,21 @@ import com.soraxus.prisons.bunkers.base.Bunker;
 import com.soraxus.prisons.bunkers.matchmaking.BunkerMatchMaker;
 import com.soraxus.prisons.bunkers.util.BunkerSchematics;
 import com.soraxus.prisons.bunkers.world.BunkerWorld;
+import com.soraxus.prisons.event.bunkers.AsyncBunkerCreationEvent;
+import com.soraxus.prisons.event.bunkers.AsyncBunkerLoadEvent;
+import com.soraxus.prisons.event.bunkers.BunkerSaveEvent;
+import com.soraxus.prisons.event.bunkers.BunkerUnloadEvent;
 import com.soraxus.prisons.gangs.Gang;
+import com.soraxus.prisons.gangs.GangManager;
 import com.soraxus.prisons.util.Synchronizer;
 import com.soraxus.prisons.util.WeakList;
-import com.soraxus.prisons.util.locks.SaveLoadLock;
+import com.soraxus.prisons.util.locks.ManagerLock;
 import com.soraxus.prisons.util.maps.LockingMap;
-import com.soraxus.prisons.util.time.Timer;
 import lombok.Getter;
 import net.ultragrav.asyncworld.schematics.Schematic;
 import net.ultragrav.serializer.GravSerializer;
 import net.ultragrav.serializer.compressors.ZstdCompressor;
+import net.ultragrav.utils.IntVector2D;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -22,7 +27,7 @@ import org.bukkit.Location;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -32,13 +37,13 @@ public class BunkerManager {
 
     public static final int TILE_SIZE_BLOCKS = 7;
     public static final int BUNKER_SIZE_TILES = 33;
-    public static final int BORDER_WIDTH_CHUNKS = 3;
+    public static final int BORDER_WIDTH_CHUNKS = 4;
     public static BunkerManager instance;
     @Getter
     private final File baseDir;
     private final Map<UUID, Bunker> loadedBunkers = new HashMap<>();
     private final ReentrantLock lock = new ReentrantLock(true);
-    private final SaveLoadLock<UUID, Bunker> ioLock = new SaveLoadLock<>();
+    private final ManagerLock<UUID, Bunker> ioLock = new ManagerLock<>();
     private final ExecutorService loadingService = Executors.newFixedThreadPool(20);
 
     @Getter
@@ -46,7 +51,9 @@ public class BunkerManager {
 
     private final LockingMap<UUID, Double> cachedRatings = new LockingMap<>();
 
-    protected volatile long lastTick = -1;
+    private final AtomicBoolean ignoreFirstAvg = new AtomicBoolean(true);
+
+    public volatile long lastTick = -1;
 
     public BunkerManager(File bunkerFolder) {
         instance = this;
@@ -100,12 +107,23 @@ public class BunkerManager {
                 ioException.printStackTrace();
             }
         }
+
+        //Make sure the save lock class is loaded before disabling
+        UUID id = UUID.randomUUID();
+        ioLock.saveLock(id);
+        ioLock.saveUnlock(id);
     }
 
+    /**
+     * Get the cached ratings
+     */
     public LockingMap<UUID, Double> getCachedRatings() {
         return getCachedRatings(true);
     }
 
+    /**
+     * Update the cached ratings then return the cached ratings
+     */
     public LockingMap<UUID, Double> getCachedRatings(boolean update) {
         if (update) {
             getLoadedBunkers().forEach((b) -> cachedRatings.put(b.getId(), b.getRating()));
@@ -113,6 +131,9 @@ public class BunkerManager {
         return cachedRatings;
     }
 
+    /**
+     * Save the cached ratings file
+     */
     public void saveCachedRatings() {
         GravSerializer serializer = new GravSerializer();
         LockingMap<UUID, Double> ratings = cachedRatings.copy();
@@ -128,6 +149,9 @@ public class BunkerManager {
         }
     }
 
+    /**
+     * Get all loaded bunkers
+     */
     public List<Bunker> getLoadedBunkers() {
         lock.lock();
         List<Bunker> bunkers = new ArrayList<>(this.loadedBunkers.values());
@@ -135,6 +159,9 @@ public class BunkerManager {
         return bunkers;
     }
 
+    /**
+     * Get a bunker that is currently loaded
+     */
     public Bunker getLoadedBunker(UUID id) {
         lock.lock();
         try {
@@ -144,66 +171,122 @@ public class BunkerManager {
         }
     }
 
+    /**
+     * Create a bunker asynchronously
+     */
     private CompletableFuture<Bunker> createBunker(Gang gang) {
         CompletableFuture<Bunker> future = new CompletableFuture<>();
 
-        if (gang.getBunker() != null) {
-            future.complete(gang.getBunker());
+        lock.lock();
+        try {
+            Bunker b;
+            if ((b = gang.getBunker()) != null) {
+                future.complete(b);
+                return future;
+            }
+
+
+            loadingService.submit(() -> {
+
+                //Loop in order to acquire, in case the loading fails
+                while(true) {
+                    CompletableFuture<Bunker> bunkerFuture = ioLock.loadLock(gang.getId(), future);
+                    if (bunkerFuture != null) {
+                        Bunker bunker = bunkerFuture.join();
+                        if(bunker == null) //Load failure - Try to create again
+                            continue;
+                        future.complete(bunker);
+                        return; //Load/Creation successful
+                    }
+                    break; //Acquired
+                }
+
+                //Check once again
+                Bunker b1;
+                if ((b1 = gang.getBunker()) != null) {
+                    ioLock.loadUnlock(gang.getId(), b1);
+                    return;
+                }
+
+                try {
+
+                    //Concurrency
+
+                    long now = System.currentTimeMillis();
+                    long temp = now;
+
+                    //Create bunker
+                    Bunker bunker = new Bunker(gang, "bunkertheme1");
+
+                    //Create world
+                    initWorld(bunker);
+
+                    //Enable
+                    bunker.enable();
+
+                    //Add to loaded bunker list
+                    lock.lock();
+                    this.bunkerWeakList.add(bunker);
+                    this.loadedBunkers.put(bunker.getId(), bunker);
+                    lock.unlock();
+
+                    cachedRatings.put(bunker.getId(), bunker.getRating());
+
+                    AsyncBunkerCreationEvent event = new AsyncBunkerCreationEvent(bunker);
+                    Bukkit.getPluginManager().callEvent(event);
+
+                    long time = System.currentTimeMillis() - now;
+                    Bukkit.broadcastMessage(ChatColor.RED + "STAT > " + ChatColor.WHITE + "Took " + ChatColor.YELLOW + time + ChatColor.WHITE + "ms to create bunker asynchronously!");
+
+                    //Concurrency
+                    ioLock.loadUnlock(gang.getId(), bunker);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    ioLock.loadUnlock(gang.getId(), null);
+                }
+            });
             return future;
+        } finally {
+            lock.unlock();
         }
+    }
 
-
-        loadingService.submit(() -> {
-            Future<Bunker> bunkerFuture = ioLock.loadLock(gang.getId(), future);
-            if (bunkerFuture != null) {
-                return bunkerFuture.get();
+    public void syncDeleteBunker(UUID id) {
+        ioLock.saveLock(id);
+        try {
+            Bunker bunker = getLoadedBunker(id);
+            if (bunker != null) {
+                try {
+                    getUnloadOp(bunker).call();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-            try {
+            this.cachedRatings.remove(id);
+            this.getFile(id).delete();
+        } finally {
+            ioLock.saveUnlock(id);
+        }
+    }
 
-                //Concurrency
-
-                long now = System.currentTimeMillis();
-                long temp = now;
-
-                //Create bunker
-                Bunker bunker = new Bunker(gang, "bunkertheme1");
-
-                //Create world
-                initWorld(bunker);
-
-                //Enable
-                bunker.enable();
-
-                //Add to loaded bunker list
-                lock.lock();
-                this.bunkerWeakList.add(bunker);
-                this.loadedBunkers.put(bunker.getId(), bunker);
-                lock.unlock();
-
-                cachedRatings.put(bunker.getId(), bunker.getRating());
-
-                long time = System.currentTimeMillis() - now;
-                Bukkit.broadcastMessage(ChatColor.RED + "STAT > " + ChatColor.WHITE + "Took " + ChatColor.YELLOW + time + ChatColor.WHITE + "ms to create bunker asynchronously!");
-
-                //Concurrency
-                ioLock.loadUnlock(gang.getId(), bunker);
-
-                return bunker;
-            } catch (Exception e) {
-                e.printStackTrace();
-                ioLock.loadUnlock(gang.getId(), null);
-                return null;
-            }
+    public CompletableFuture<Void> deleteBunkerAsync(UUID id) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        this.loadingService.submit(() -> {
+            this.syncDeleteBunker(id);
+            future.complete(null);
         });
         return future;
     }
 
+    /**
+     * Load a bunker asynchronously
+     */
     public CompletableFuture<Bunker> loadBunkerAsync(UUID id) {
         lock.lock();
         try {
             CompletableFuture<Bunker> future = new CompletableFuture<>();
             Bunker b = this.getLoadedBunker(id);
-            if (b != null) {
+            if (b != null || id == null) {
                 future.complete(b);
                 return future;
             }
@@ -218,18 +301,21 @@ public class BunkerManager {
                     } catch (InterruptedException | ExecutionException e) {
                         e.printStackTrace();
                     } finally {
+
                         if (!future.isDone()) {
                             future.complete(null);
                         }
                     }
                     return;
                 }
+
                 File file = getFile(id);
                 if (!file.exists()) {
                     future.complete(null);
                     ioLock.loadUnlock(id, null);
                     return;
                 }
+
                 try (FileInputStream stream = new FileInputStream(file)) {
                     long now = System.currentTimeMillis();
 
@@ -250,11 +336,17 @@ public class BunkerManager {
 
                     cachedRatings.put(bunker.getId(), bunker.getRating());
 
+                    AsyncBunkerLoadEvent event = new AsyncBunkerLoadEvent(bunker);
+                    Bukkit.getPluginManager().callEvent(event);
+
                     long time = System.currentTimeMillis() - now;
                     Bukkit.broadcastMessage(ChatColor.RED + "STAT > " + ChatColor.WHITE + "Took " + ChatColor.YELLOW + time + ChatColor.WHITE + "ms to load bunker asynchronously!");
 
+                    if(!ignoreFirstAvg.compareAndSet(true, false))
+                        BunkerDebugStats.measureMap.get(BunkerDebugStats.DebugStat.BUNKER_LOAD_TOTAL).addEntry(time);
+
                     ioLock.loadUnlock(id, bunker);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     ModuleBunkers.messageDevs(id + " Could not load bunker, see console");
                     future.complete(null);
                     e.printStackTrace();
@@ -267,6 +359,9 @@ public class BunkerManager {
         }
     }
 
+    /**
+     * Load or create a bunker if it does not exist
+     */
     public CompletableFuture<Bunker> createOrLoadBunker(Gang gang) {
         CompletableFuture<Bunker> result = new CompletableFuture<>();
         loadingService.submit(() -> {
@@ -290,19 +385,26 @@ public class BunkerManager {
     public void saveAndUnloadBunkerSync(Bunker bunker) {
         try {
             getSaveAndUnloadOp(bunker).call();
+            BunkerSaveEvent event = new BunkerSaveEvent(bunker, false);
+            Bukkit.getPluginManager().callEvent(event);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Get the operation to unload a bunker
+     */
     public Callable<Void> getUnloadOp(Bunker bunker) {
         return () -> {
-            ioLock.saveLock(bunker.getId()); //Lock
 
             try {
+
+                //Doesn't need to hold save lock because it's not writing to any files
                 CompletableFuture<Void> future = new CompletableFuture<>();
 
-                //Synchronous part
+                //Also it's pretty much all synchronous
+
                 Synchronizer.synchronize(() -> {
                     try {
 
@@ -313,7 +415,7 @@ public class BunkerManager {
                             bunker.getDefendingMatch().end();
 
                         //Unload world
-                        if (bunker.getWorld().getWorld() != null) {
+                        if (bunker.getWorld().getBukkitWorld() != null) {
                             bunker.getWorld().getBukkitWorld().getPlayers().forEach(p -> {
                                 if (!bunker.teleportBack(p))
                                     p.teleport(new Location(Bukkit.getWorld("world"), 0, 80, 0)); //TEMPORARILY WORLD
@@ -340,17 +442,18 @@ public class BunkerManager {
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
-            } finally {
-                ioLock.saveUnlock(bunker.getId());
             }
         };
     }
 
+    /**
+     * Get the operation to save and unload a bunker
+     */
     public Callable<Void> getSaveAndUnloadOp(Bunker bunker) {
         return () -> {
             ioLock.saveLock(bunker.getId()); //Lock
             try {
-                getAsyncSaveOp(bunker).call();
+                getBunkerSaveOp(bunker).call();
                 getUnloadOp(bunker).call();
                 return null;
             } catch (Exception e) {
@@ -362,31 +465,54 @@ public class BunkerManager {
         };
     }
 
+    /**
+     * Save and unload a bunker, unloading is synchronous, saving is async and completes the returned future
+     */
     public Future<Void> saveAndUnloadBunker(Bunker bunker) {
-        return loadingService.submit(getSaveAndUnloadOp(bunker));
+        try {
+            getUnloadOp(bunker).call();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return loadingService.submit(() -> {
+            getBunkerSaveOp(bunker).call();
+            BunkerSaveEvent event = new BunkerSaveEvent(bunker, true);
+            Bukkit.getPluginManager().callEvent(event);
+            return null;
+        });
     }
 
+    /**
+     * Unload a bunker
+     */
     public Future<Void> unloadBunker(Bunker bunker) {
         return loadingService.submit(getUnloadOp(bunker));
     }
 
-    public Callable<Void> getAsyncSaveOp(Bunker bunker) {
+    /**
+     * Get the operation to save a bunker
+     */
+    public Callable<Void> getBunkerSaveOp(Bunker bunker) {
         return () -> {
-            //Concurrency
-            ioLock.saveLock(bunker.getId());
-
             long ms = System.currentTimeMillis();
             File file = getFile(bunker.getId());
+            if (!file.exists())
+                file.createNewFile();
+
+            GravSerializer serializer = new GravSerializer();
+            bunker.serialize(serializer);
+
+            ioLock.saveLock(bunker.getId());
+
             try (FileOutputStream stream = new FileOutputStream(file)) {
-                GravSerializer serializer = new GravSerializer();
-                bunker.serialize(serializer);
+
                 serializer.writeToStream(stream, ZstdCompressor.instance);
 
                 cachedRatings.put(bunker.getId(), bunker.getRating());
 
                 long time = System.currentTimeMillis() - ms;
                 Bukkit.broadcastMessage(ChatColor.RED + "STAT > " + ChatColor.WHITE + "Took " + ChatColor.YELLOW + time + ChatColor.WHITE + "ms to save bunker asynchronously!");
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
             } finally {
                 ioLock.saveUnlock(bunker.getId());
@@ -395,57 +521,49 @@ public class BunkerManager {
         };
     }
 
+    /**
+     * Save a bunker asynchronously
+     */
     public Future<Void> saveBunkerAsync(Bunker bunker) throws IllegalStateException {
-        return loadingService.submit(getAsyncSaveOp(bunker));
+        return loadingService.submit(() -> {
+            getBunkerSaveOp(bunker).call();
+            BunkerSaveEvent event = new BunkerSaveEvent(bunker, true);
+            Bukkit.getPluginManager().callEvent(event);
+            return null;
+        });
     }
 
     /**
+     * Creates the world of a bunker
      * Warning: Will take AT LEAST 50ms to execute
      */
     private void initWorld(Bunker bunker) {
         BunkerWorld world = new BunkerWorld(bunker, BUNKER_SIZE_TILES, TILE_SIZE_BLOCKS, BORDER_WIDTH_CHUNKS);
 
-        bunker.setWorld(world);
-
-        AtomicLong sync = new AtomicLong();
-
-        world.createWorld();
-
-        Timer timer = new Timer();
         world.generate();
 
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        Synchronizer.synchronize(() -> {
-            try {
-                long t = System.currentTimeMillis();
-                world.finishCreation();
-                t = System.currentTimeMillis() - t;
-                sync.addAndGet(t);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                future.complete(null);
-            }
-        });
-
-        try {
-            future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        Bunker.setWorld(bunker, world);
     }
 
     private void internalUnloadBunker(Bunker bunker) {
+        BunkerUnloadEvent event = new BunkerUnloadEvent(bunker, !Bukkit.isPrimaryThread());
+        Bukkit.getPluginManager().callEvent(event);
         this.lock.lock();
         loadedBunkers.remove(bunker.getId());
         this.lock.unlock();
     }
 
-    private File getFile(UUID id) {
+    /**
+     * Get the file for a bunker
+     */
+    public File getFile(UUID id) {
         return new File(baseDir, id.toString() + ".bunker");
     }
 
-    void tick() { // TODO: Call this in a scheduler sync
+    /**
+     * Tick all bunkers and matches
+     */
+    void tick() {
         lastTick = System.currentTimeMillis();
         for (Bunker bunker : loadedBunkers.values()) {
             if (bunker.shouldTick()) {
@@ -458,7 +576,18 @@ public class BunkerManager {
     /**
      * Get the default schematic for an element with a schematic that could not be found
      */
-    public Schematic getDefaultSchematic() {
-        return BunkerSchematics.get("default-schematic");
+    public Schematic getDefaultSchematic(IntVector2D shape) {
+        return BunkerSchematics.getDefaultSchematic(shape);
+    }
+
+    public boolean tryUnload(Bunker loadedBunker) {
+        if(loadedBunker == null)
+            return false;
+        if (GangManager.instance.getLoadedGang(loadedBunker.getId()) != null)
+            return false;
+        if (this.getLoadedBunker(loadedBunker.getId()) == null)
+            return false;
+        this.saveAndUnloadBunker(loadedBunker);
+        return true;
     }
 }

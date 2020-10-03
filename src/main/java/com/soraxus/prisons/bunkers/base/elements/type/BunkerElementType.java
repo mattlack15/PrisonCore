@@ -2,23 +2,26 @@ package com.soraxus.prisons.bunkers.base.elements.type;
 
 import com.soraxus.prisons.bunkers.base.elements.ElementCore;
 import com.soraxus.prisons.bunkers.base.elements.ElementWorkerHut;
+import com.soraxus.prisons.bunkers.base.elements.decoration.ElementPath;
 import com.soraxus.prisons.bunkers.base.elements.defense.active.barracks.ElementBarracks;
+import com.soraxus.prisons.bunkers.base.elements.defense.active.mortar.ElementMortar;
+import com.soraxus.prisons.bunkers.base.elements.defense.active.tower.archer.ElementArcherTower;
 import com.soraxus.prisons.bunkers.base.elements.defense.nonactive.ElementGate;
 import com.soraxus.prisons.bunkers.base.elements.defense.nonactive.ElementMineField;
 import com.soraxus.prisons.bunkers.base.elements.defense.nonactive.ElementWall;
 import com.soraxus.prisons.bunkers.base.elements.defense.nonactive.camp.ElementArmyCamp;
 import com.soraxus.prisons.bunkers.base.elements.entertainment.ElementPlot;
 import com.soraxus.prisons.bunkers.base.elements.envoy.ElementEnvoy;
+import com.soraxus.prisons.bunkers.base.elements.generator.ElementFarm;
 import com.soraxus.prisons.bunkers.base.elements.generator.ElementGeneratorStone;
 import com.soraxus.prisons.bunkers.base.elements.generator.ElementGeneratorTimber;
+import com.soraxus.prisons.bunkers.base.elements.generator.ElementWell;
 import com.soraxus.prisons.bunkers.base.elements.natural.ElementPond;
 import com.soraxus.prisons.bunkers.base.elements.natural.ElementRock;
 import com.soraxus.prisons.bunkers.base.elements.natural.ElementStump;
 import com.soraxus.prisons.bunkers.base.elements.natural.ElementTree;
 import com.soraxus.prisons.bunkers.base.elements.research.ElementLaboratory;
-import com.soraxus.prisons.bunkers.base.elements.storage.ElementStorageStone;
-import com.soraxus.prisons.bunkers.base.elements.storage.ElementStorageTimber;
-import com.soraxus.prisons.bunkers.base.elements.storage.Storage;
+import com.soraxus.prisons.bunkers.base.elements.storage.*;
 import com.soraxus.prisons.bunkers.base.elements.type.info.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -103,6 +106,20 @@ public enum BunkerElementType {
             "Block your enemies out, but with a gate",
             (b, o) -> new ElementGate(b)
     ),
+    DEFENSIVE_ARCHER_TOWER(
+            "Archer Tower",
+            new InfoDefensiveArcherTower(),
+            IntVector2D.ONE,
+            "Shoot your enemies with flying sticks",
+            (b, o) -> new ElementArcherTower(b)
+    ),
+    DEFENSIVE_MORTAR(
+            "Mortar",
+            new InfoDefensiveMortar(),
+            new IntVector2D(2, 2),
+            "Fire bombs at your enemy",
+            (b, o) -> new ElementMortar(b)
+    ),
 
     // -------------- Generators ---------------
     GENERATOR_TIMBER(
@@ -110,14 +127,28 @@ public enum BunkerElementType {
             new InfoGeneratorTimber(),
             IntVector2D.ONE,
             "Generates timber",
-            (b, o) -> new ElementGeneratorTimber(null, b)
+            (b, o) -> new ElementGeneratorTimber(b)
     ),
     GENERATOR_STONE(
             "Stone Generator",
             new InfoGeneratorStone(),
             IntVector2D.ONE,
             "Generates stone",
-            (b, o) -> new ElementGeneratorStone(null, b)
+            (b, o) -> new ElementGeneratorStone(b)
+    ),
+    GENERATOR_FARM(
+            "Farm",
+            new InfoFarm(),
+            IntVector2D.ONE,
+            "Source of food",
+            (b, o) -> new ElementFarm(b)
+    ),
+    GENERATOR_WELL(
+            "Well",
+            new InfoWell(),
+            IntVector2D.ONE,
+            "Source of water",
+            (b, o) -> new ElementWell(b)
     ),
 
     // ------------------ Storage -------------
@@ -134,6 +165,18 @@ public enum BunkerElementType {
             "Store your rocks",
             (b, o) -> new ElementStorageStone(b)),
 
+    STORAGE_WATER("Water Tank",
+            new InfoWaterTank(),
+            IntVector2D.ONE,
+            "Big water bottle",
+            (b, o) -> new ElementStorageWater(b)),
+
+    STORAGE_FOOD("Food Bank",
+            new InfoStorageFood(),
+            IntVector2D.ONE,
+            "Store your food",
+            (b, o) -> new ElementStorageFood(b)),
+
     // ------------------ Army -------------
     ARMY_BARRACKS("Barracks",
             new InfoArmyBarracks(),
@@ -146,14 +189,14 @@ public enum BunkerElementType {
             "Camp for your dedicated warriors",
             (b, o) -> new ElementArmyCamp(b)),
     RESEARCH_LABORATORY("Laboratory",
-            new InfoResearchLaboratory(),
+            new InfoArmyLaboratory(),
             new IntVector2D(2, 2),
             "Do research, make your warriors work harder, better, faster, stronger",
             (b, o) -> new ElementLaboratory(b)),
 
     // ------------------- Envoy --------------
     ENVOY_ENVOY("Envoy",
-            null,
+            new InfoNaturalGeneric(),
             IntVector2D.ONE,
             "Right click me to get some stuff",
             (b, o) -> new ElementEnvoy(null, b)
@@ -163,8 +206,14 @@ public enum BunkerElementType {
     new InfoPlot(),
     new IntVector2D(3, 3),
     "Build whatever you please",
-            (b, o) -> new ElementPlot(b));
+            (b, o) -> new ElementPlot(b)),
 
+    //------------------- Decoration --------------
+    DECORATION_PATH("Path",
+    new InfoDecorationPath(),
+    IntVector2D.ONE,
+            "A path :/",
+            (b, o) -> new ElementPath(b));
 
     private final String name;
     private final BunkerElementTypeInfo info;

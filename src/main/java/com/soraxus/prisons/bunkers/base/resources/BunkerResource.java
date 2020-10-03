@@ -7,11 +7,12 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public enum BunkerResource {
-    TIMBER("§6", "Timber"), // TODO Brown color code?
+    TIMBER("§6", "Timber"),
     STONE("§7", "Stone"),
     GOLD("§e", "Gold"),
-    SAPPHIRE("§5", "Sapphire"),
-    TBD("", "");
+    NETHEREM("§5", "Netherem"),
+    WATER("§9", "Water"),
+    FOOD("§d", "Food");
 
 
     private final String color;

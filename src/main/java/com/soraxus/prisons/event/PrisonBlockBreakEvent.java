@@ -36,10 +36,4 @@ public class PrisonBlockBreakEvent extends Event {
         this.location = location;
         this.block = combinedId;
     }
-
-    public ItemStack getToBeGiven() {
-        ItemStack broken = ItemUtils.fromBlock(this.getBlock(), 1);
-        //TODO
-        return broken;
-    }
 }

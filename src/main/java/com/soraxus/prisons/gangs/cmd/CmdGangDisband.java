@@ -21,6 +21,7 @@ public class CmdGangDisband extends GangCommand {
                 tell(PREFIX + "&cYou must be the leader to disband your gang!");
                 return;
             }
+            gang.broadcastMessage(PREFIX + "Your gang was disbanded by &e" + getPlayer().getName() + "!");
             gang.disband();
             tell(PREFIX + "Gang disbanded!");
         });

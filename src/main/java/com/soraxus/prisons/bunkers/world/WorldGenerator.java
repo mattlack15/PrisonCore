@@ -29,7 +29,6 @@ public class WorldGenerator {
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
-
     }
 
     public static BunkerWorldServer createWorld(BunkerWorld world) {
@@ -46,11 +45,11 @@ public class WorldGenerator {
         //Check for synchronized map
         safetyLock.lock();
 
-        int dimension = -1;
+        int dimension;
         try {
             craftBukkitWorldMap.setAccessible(true);
             Map<Object, Object> current = (Map<Object, Object>) craftBukkitWorldMap.get(Bukkit.getServer());
-            if (!current.getClass().getName().contains("ConcurrentMap")) {
+            if (!current.getClass().getName().contains("Synchronized")) {
                 CompletableFuture<Void> future = new CompletableFuture<>();
                 Synchronizer.synchronize(() -> {
                     try {
@@ -80,32 +79,25 @@ public class WorldGenerator {
                     }
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            return (BunkerWorldServer) new BunkerWorldServer(dataManager, dimension).b();
+        } catch(Exception e) {
+            throw new RuntimeException(e);
         } finally {
             safetyLock.unlock();
         }
-
-        return (BunkerWorldServer) new BunkerWorldServer(dataManager, dimension).b();
     }
+
+    private static final ReentrantLock addLock = new ReentrantLock(true);
 
     public static void addWorldToServerList(BunkerWorldServer worldObject) {
         if (worldObject == null) {
             throw new IllegalArgumentException("World object must be an instance of WorldServer!");
         }
 
-        //String worldName = worldObject.getWorldData().getName();
-
-        /*if (Bukkit.getWorld(worldName) != null) {
-            throw new IllegalArgumentException("World " + worldName + " already exists! Maybe it's an outdated SlimeWorld object?");
-        }*/
-
-        //Bukkit.getLogger().info("Loading world " + worldName);
-
         worldObject.setReady(true);
         MinecraftServer mcServer = MinecraftServer.getServer();
 
-        safetyLock.lock();
+        addLock.lock();
         try {
             if (mcServer.server.getWorld(worldObject.getWorld().getUID()) == null) {
                 mcServer.server.addWorld(worldObject.getWorld());
@@ -114,12 +106,14 @@ public class WorldGenerator {
                 mcServer.worlds.add(worldObject);
             }
         } finally {
-            safetyLock.unlock();
+            addLock.unlock();
         }
 
         //NOTE: It would seem calling these is necessary for certain spigot functions to work in this world
         //The one I encountered was falling blocks not caring for setDropItem(false)
-        Bukkit.getPluginManager().callEvent(new WorldInitEvent(worldObject.getWorld()));
-        Bukkit.getPluginManager().callEvent(new WorldLoadEvent(worldObject.getWorld()));
+        Synchronizer.synchronize(() -> {
+                Bukkit.getPluginManager().callEvent(new WorldInitEvent(worldObject.getWorld()));
+                Bukkit.getPluginManager().callEvent(new WorldLoadEvent(worldObject.getWorld()));
+            });
     }
 }

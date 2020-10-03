@@ -15,12 +15,15 @@ import com.soraxus.prisons.bunkers.base.elements.natural.ElementTree;
 import com.soraxus.prisons.bunkers.base.elements.storage.Storage;
 import com.soraxus.prisons.bunkers.base.elements.storage.StorageElement;
 import com.soraxus.prisons.bunkers.base.elements.type.BunkerElementType;
+import com.soraxus.prisons.bunkers.base.handler.BunkerInfoMessageHandler;
 import com.soraxus.prisons.bunkers.base.resources.BunkerResource;
 import com.soraxus.prisons.bunkers.base.resources.SkillManager;
 import com.soraxus.prisons.bunkers.base.shops.BunkerElementShop;
 import com.soraxus.prisons.bunkers.matchmaking.BunkerMatchMaker;
 import com.soraxus.prisons.bunkers.matchmaking.Match;
+import com.soraxus.prisons.bunkers.matchmaking.stats.BunkerMatchStatistics;
 import com.soraxus.prisons.bunkers.npc.BunkerNPC;
+import com.soraxus.prisons.bunkers.npc.BunkerNPCSkillManager;
 import com.soraxus.prisons.bunkers.npc.NPCManager;
 import com.soraxus.prisons.bunkers.npc.info.BunkerNPCType;
 import com.soraxus.prisons.bunkers.shop.BunkerShop;
@@ -28,11 +31,20 @@ import com.soraxus.prisons.bunkers.util.BunkerSchematics;
 import com.soraxus.prisons.bunkers.workers.Task;
 import com.soraxus.prisons.bunkers.workers.Worker;
 import com.soraxus.prisons.bunkers.world.BunkerWorld;
+import com.soraxus.prisons.event.bunkers.BunkerDisableEvent;
+import com.soraxus.prisons.event.bunkers.BunkerEnableEvent;
+import com.soraxus.prisons.event.bunkers.BunkerMatchEndEvent;
 import com.soraxus.prisons.gangs.Gang;
 import com.soraxus.prisons.gangs.GangManager;
+import com.soraxus.prisons.util.EventSubscription;
+import com.soraxus.prisons.util.EventSubscriptions;
+import com.soraxus.prisons.util.display.chat.ChatBuilder;
+import com.soraxus.prisons.util.display.chat.ClickUtil;
+import com.soraxus.prisons.util.display.chat.HoverUtil;
 import com.soraxus.prisons.util.math.MathUtils;
 import lombok.Getter;
 import lombok.Setter;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.ultragrav.asyncworld.schematics.Schematic;
 import net.ultragrav.serializer.GravSerializable;
 import net.ultragrav.serializer.GravSerializer;
@@ -50,31 +62,30 @@ import java.util.concurrent.Future;
 
 @Getter
 public class Bunker implements GravSerializable {
+    private final NPCManager npcManager = new NPCManager();
+    private final BunkerInfoMessageHandler infoMessageHandler = new BunkerInfoMessageHandler(this);
     Map<UUID, Vector3D> previousLocations = new HashMap<>();
     Map<UUID, Location> previousLocations2 = new HashMap<>();
-    private TileMap tileMap = new TileMap(this); //TODO serialize
+    private TileMap tileMap = new TileMap(this);
     private Gang gang;
-    @Setter
-    @Getter
     private BunkerWorld world;
-
-    @Getter
     private Meta meta = new Meta();
-
     private SkillManager skillManager = new SkillManager(this);
-    private final NPCManager npcManager = new NPCManager();
-
-    @Getter
     @Setter
     private IntVector3D bunkerLocation;
     private long seed = System.currentTimeMillis();
-
     @Setter
     private String mapSchematicName;
-
+    @Setter
+    private int destroyedTicksLeft = 120;
+    private BunkerMatchStatistics matchStatistics = new BunkerMatchStatistics();
+    private BunkerNPCSkillManager npcSkillManager = new BunkerNPCSkillManager(this);
     private UUID id;
+    @Getter
+    private boolean newlyCreated = false;
 
     public Bunker(Gang gang, String mapSchematicName) {
+        this.newlyCreated = true;
         this.gang = gang;
         this.id = gang.getId();
         this.mapSchematicName = mapSchematicName;
@@ -116,11 +127,16 @@ public class Bunker implements GravSerializable {
         }
     }
 
+    public static void setWorld(Bunker bunker, BunkerWorld world) {
+        bunker.world = world;
+    }
+
     public List<Worker> getWorkers() {
         List<Worker> list = new ArrayList<>();
         for (ElementWorkerHut elementWorkerHut : tileMap.byClass(ElementWorkerHut.class)) {
             if (elementWorkerHut.isEnabled())
-                list.add(elementWorkerHut.getWorker());
+                if (elementWorkerHut.getWorker() != null)
+                    list.add(elementWorkerHut.getWorker());
         }
         return list;
     }
@@ -142,23 +158,32 @@ public class Bunker implements GravSerializable {
      * Call after initialization/generation - Enables all elements that were enabled before last disable()
      */
     public void enable() {
+        BunkerEnableEvent event = new BunkerEnableEvent(this, !Bukkit.isPrimaryThread());
+        Bukkit.getPluginManager().callEvent(event);
         this.getTileMap().getElements().forEach(e -> {
             if (e.getGenerationSettings().isNeedsEnabling()) {
-                e.enable();
+                try {
+                    e.enable();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
+        EventSubscriptions.instance.subscribe(this);
     }
 
     /**
      * Call before serialization - Disables all elements
      */
     public void disable() {
+        BunkerDisableEvent event = new BunkerDisableEvent(this, !Bukkit.isPrimaryThread());
+        Bukkit.getPluginManager().callEvent(event);
         this.getTileMap().getElements().forEach(e -> {
             if (e.isEnabled()) {
-                e.setGenerationSettings(new ElementGenerationSettings(true, e.getGenerationSettings().isNeedsBuilding()));
                 e.disable();
             }
         });
+        EventSubscriptions.instance.unSubscribe(this);
     }
 
     /**
@@ -204,10 +229,21 @@ public class Bunker implements GravSerializable {
         return getTileMap().setElement(ex, ez, element);
     }
 
+    /**
+     * Remove the element at the specified position
+     *
+     * @param position The position
+     */
     public void removeElement(IntVector2D position) {
         removeElement(position.getX(), position.getY());
     }
 
+    /**
+     * Remove the element at the specified position
+     *
+     * @param ex The x position
+     * @param ez The z or y position... the second position value
+     */
     public void removeElement(int ex, int ez) {
         getTileMap().removeElement(ex, ez);
     }
@@ -215,19 +251,16 @@ public class Bunker implements GravSerializable {
     private void deserialize(GravSerializer serializer) {
         this.seed = serializer.readLong();
         UUID gangId = serializer.readUUID();
-        this.gang = GangManager.instance.getLoadedGang(gangId);
+        this.gang = GangManager.instance.getOrLoadGang(gangId);
         this.id = gangId;
         tileMap = serializer.readObject(this);
         previousLocations = serializer.readObject();
         this.mapSchematicName = serializer.readString();
         this.meta = serializer.readObject();
 
-        this.skillManager = this.meta.getObject("skillManager", this);
-        if (this.skillManager == null) {
-            this.skillManager = new SkillManager(this);
-            this.meta.set("skillManager", skillManager);
-        } else {
-        }
+        this.skillManager = this.meta.getOrSet("skillManager", new SkillManager(this), this);
+        this.matchStatistics = this.meta.getOrSet("matchStatistics", new BunkerMatchStatistics());
+        this.npcSkillManager = this.meta.getOrSet("npcSkillManager", new BunkerNPCSkillManager(this), this);
     }
 
     @Override
@@ -239,9 +272,16 @@ public class Bunker implements GravSerializable {
         serializer.writeString(mapSchematicName);
 
         this.meta.set("skillManager", this.skillManager);
+        this.meta.set("matchStatistics", this.matchStatistics);
+        this.meta.set("npcSkillManager", this.npcSkillManager);
         serializer.writeObject(meta);
     }
 
+    /**
+     * Get the id of this bunker
+     *
+     * @return The id of this bunker
+     */
     public UUID getId() {
         return id;
     }
@@ -254,7 +294,7 @@ public class Bunker implements GravSerializable {
      * Call asynchronously
      */
     public synchronized Future<Void> unload(boolean save) {
-        if(save)
+        if (save)
             return BunkerManager.instance.saveAndUnloadBunker(this);
         return BunkerManager.instance.unloadBunker(this);
     }
@@ -277,6 +317,12 @@ public class Bunker implements GravSerializable {
         player.setFlying(true);
     }
 
+    /**
+     * Teleport a player to the last known teleport from location, according to this bunker's cache
+     *
+     * @param player The player
+     * @return Whether the teleportation was successful
+     */
     public boolean teleportBack(Player player) {
         if (!player.getLocation().getWorld().getName().equalsIgnoreCase(world.getName())) {
             Bukkit.broadcastMessage("Player World: " + player.getLocation().getWorld().getName() + " is not bunker");
@@ -307,31 +353,41 @@ public class Bunker implements GravSerializable {
         previousLocations2.put(id, loc);
     }
 
+    /**
+     * Get the rating of this bunker.
+     * The rating of a bunker is a value between 0 and 10 and
+     * is calculated from many variables such as amount of elements, level of elements,
+     * and win rates of the bunker
+     *
+     * @return The rating of this bunker
+     */
     public double getRating() {
         AvgMeasure measure = new AvgMeasure(0, 0);
         List<BunkerElement> elements = getTileMap().getElements();
         elements.removeIf(e -> e instanceof NaturalElement || e instanceof ElementWorkerHut);
-        for(BunkerElement element : elements) {
-            if(element instanceof NaturalElement || element instanceof ElementWorkerHut)
+        for (BunkerElement element : elements) {
+            if (element instanceof NaturalElement || element instanceof ElementWorkerHut)
                 continue;
             double effectiveLevel = element.getLevel() / (double) element.getMaxLevel() * 10D;
-            if(element instanceof StorageElement && !element.getType().equals(BunkerElementType.ESSENTIAL_CORE)) {
+            if (element instanceof StorageElement && !element.getType().equals(BunkerElementType.ESSENTIAL_CORE)) {
                 ((StorageElement) element).getStorageList().forEach(s -> measure.addEntry(effectiveLevel + (s.getAmount() / s.getCap())));
             } else {
                 double weight = 1D;
-                if(element instanceof ElementWall)
+                if (element instanceof ElementWall)
                     weight = 0.1D;
-                if(element instanceof ElementCore)
+                if (element instanceof ElementCore)
                     weight = Math.max(elements.size() / 15D, 1D);
                 measure.addEntry(effectiveLevel, weight);
             }
         }
+        measure.addEntry(matchStatistics.getWinRate(), 1.0D); // TODO: Adjust weight
         return MathUtils.round(measure.getAvg(), 2);
     }
 
     public void tick() {
         tileMap.tick();
         npcManager.tick();
+        infoMessageHandler.tick();
         for (Worker worker : getWorkers()) {
             if (worker.isWorking()) {
                 Task task = worker.getTask();
@@ -342,7 +398,7 @@ public class Bunker implements GravSerializable {
         }
 
         // Envoys
-        if (MathUtils.isRandom(1, 69420)) { // Temporary small number for testing
+        if (MathUtils.isRandom(1, 69420 * 2.5)) {
             ElementEnvoy envoy = new ElementEnvoy(null, this);
             IntVector2D pos = tileMap.getRandomPlaceablePosition(envoy.getShape());
             if (pos == null) {
@@ -353,12 +409,30 @@ public class Bunker implements GravSerializable {
 
             getWorld().getBukkitWorld().getPlayers().forEach(p -> p.playSound(p.getLocation(), Sound.ENTITY_ARMORSTAND_BREAK, 1f, 1f));
         }
+
+        //Undestroy elements
+        if (destroyedTicksLeft > 0 && --destroyedTicksLeft <= 0) {
+            getTileMap().getElements().forEach(e -> {
+                if (e.isDestroyed()) {
+                    e.unDestroy();
+                }
+                if (e.getHealth() != e.getMaxHealth()) {
+                    e.setHealth(e.getMaxHealth());
+                }
+            });
+        }
     }
 
     public boolean shouldTick() {
         return true;
     }
 
+    /**
+     * Add an amount of a type of resource to this bunker's stores
+     *
+     * @param generatingType The type of resource
+     * @param amount         The amount of resources
+     */
     public void addResource(BunkerResource generatingType, double amount) {
         double addAm = amount;
         for (StorageElement el : getTileMap().byClass(StorageElement.class)) {
@@ -375,6 +449,9 @@ public class Bunker implements GravSerializable {
         }
     }
 
+    /**
+     * Get a map of all the available resources this bunker has
+     */
     public Map<BunkerResource, Double> getResources() {
         Map<BunkerResource, Double> ret = new HashMap<>();
         for (StorageElement el : getTileMap().byClass(StorageElement.class)) {
@@ -385,18 +462,27 @@ public class Bunker implements GravSerializable {
         return ret;
     }
 
+    /**
+     * Get a list (copy) of all the available NPCs this bunker has
+     */
     public List<BunkerNPC> getAvailableNPCs() {
         List<BunkerNPC> npcList = new ArrayList<>();
-        for(ElementArmyCamp camps : getTileMap().byClass(ElementArmyCamp.class)) {
+        for (ElementArmyCamp camps : getTileMap().byClass(ElementArmyCamp.class)) {
             npcList.addAll(camps.getNPCs());
         }
         return npcList;
     }
 
+    /**
+     * Get and remove an npc of some type from this bunker's stores
+     *
+     * @param type The type of npc
+     * @return The npc
+     */
     public BunkerNPC getAndRemoveNPC(BunkerNPCType type) {
-        for(ElementArmyCamp camps : getTileMap().byClass(ElementArmyCamp.class)) {
+        for (ElementArmyCamp camps : getTileMap().byClass(ElementArmyCamp.class)) {
             for (BunkerNPC npc : new ArrayList<>(camps.getNPCs())) {
-                if(npc.getType().equals(type)) {
+                if (npc.getType().equals(type)) {
                     camps.getNPCs().remove(npc);
                     return npc;
                 }
@@ -405,8 +491,13 @@ public class Bunker implements GravSerializable {
         return null;
     }
 
-    public long getAvailableNPCCount(BunkerNPCType type) {
-        return getAvailableNPCs().stream()
+    /**
+     * Get the amount of a specified type of npc that this bunker has available
+     *
+     * @param type The type of npc
+     */
+    public int getAvailableNPCCount(BunkerNPCType type) {
+        return (int) getAvailableNPCs().stream()
                 .filter(npc -> npc.getType().equals(type))
                 .count();
     }
@@ -426,7 +517,7 @@ public class Bunker implements GravSerializable {
 
     public BunkerArmy getArmy() {
         List<BunkerNPC> npcs = new ArrayList<>();
-        for(ElementArmyCamp armyCamp : getTileMap().byClass(ElementArmyCamp.class)) {
+        for (ElementArmyCamp armyCamp : getTileMap().byClass(ElementArmyCamp.class)) {
             npcs.addAll(armyCamp.getNPCs());
         }
         return new BunkerArmy(this, npcs);
@@ -467,6 +558,15 @@ public class Bunker implements GravSerializable {
         return true;
     }
 
+    //
+
+    /**
+     * Gets the players in the world that holds this bunker
+     */
+    public List<Player> getContainingPlayers() {
+        return this.getWorld().getBukkitWorld().getPlayers();
+    }
+
     //Matches
 
     /**
@@ -485,14 +585,24 @@ public class Bunker implements GravSerializable {
 
     //Messaging
     public void messageMembers(String message) {
+        if (gang == null)
+            return;
         String messageToSend = ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "Bunker " + ChatColor.WHITE + "> " + ChatColor.translateAlternateColorCodes('&', message);
         gang.getMembers().forEach(m -> {
-            Bukkit.getPlayer(m.getMember()).sendMessage(messageToSend);
+            if (m == null || m.getMember() == null) {
+                return;
+            }
+            Player player = Bukkit.getPlayer(m.getMember());
+            if (player == null) {
+                return;
+            }
+            player.sendMessage(messageToSend);
         });
     }
 
     /**
      * Message all players in the bunker world
+     *
      * @param message The message to send
      */
     public void messageWorld(String message) {
@@ -502,9 +612,12 @@ public class Bunker implements GravSerializable {
 
     /**
      * Send a message to all gang members in the bunker world
+     *
      * @param message Message to send to all gang members
      */
     public void messageMembersInWorld(String message) {
+        if (gang == null)
+            return;
         String messageToSend = ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "Bunker " + ChatColor.WHITE + "> " + ChatColor.translateAlternateColorCodes('&', message);
         gang.getMembers().forEach(m -> {
             if (getWorld().getBukkitWorld().getPlayers().contains(Bukkit.getPlayer(m.getMember())))
@@ -513,12 +626,55 @@ public class Bunker implements GravSerializable {
     }
 
     /**
+     * Send a message to all gang members in the bunker world
+     *
+     * @param message Message to send to all gang members
+     */
+    public void messageMembersInWorld(TextComponent message) {
+        if (gang == null)
+            return;
+        gang.getMembers().forEach(m -> {
+            if (getWorld().getBukkitWorld().getPlayers().contains(Bukkit.getPlayer(m.getMember())))
+                Bukkit.getPlayer(m.getMember()).spigot().sendMessage(message);
+        });
+    }
+
+    /**
      * Send a message to a specific player
-     * @param player Player to send a message to
+     *
+     * @param player  Player to send a message to
      * @param message Message to send to the player
      */
     public void messageMember(Player player, String message) {
         String messageToSend = ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "Bunker " + ChatColor.WHITE + "> " + ChatColor.translateAlternateColorCodes('&', message);
         player.sendMessage(messageToSend);
+    }
+
+    /**
+     * Send the messages that are sent when you first go to your bunker
+     */
+    public void sendExplanationMessages() {
+        TextComponent comp = new ChatBuilder("\n\n&f&lWelcome to your bunker!\n")
+                .addText("&7Bunkers is a new game similar to ")
+                .addText("&eClash of Clans", HoverUtil.text("&7Read more"), ClickUtil.url("https://supercell.com/en/games/clashofclans/"))
+                .addText("&7.\n")
+                .addText("&7The aim is to build up your army in order to attack other bunkers\n")
+                .addText("&7while also building up your defenses in case of an attack.\n")
+                .addText("&7To start off, grab an edit wand from ")
+                .addText("&e/gang bunker", HoverUtil.text("&7Click to run!"), ClickUtil.command("/gang bunker"))
+                .addText("&7 and begin\n")
+                .addText("&7by breaking down some rocks and trees.\n\n")
+                .addText("&eIn order to open your core's menu, sneak right click it\n\n")
+                .build();
+        messageMembersInWorld(comp);
+    }
+
+    //Save match information
+    @EventSubscription
+    private void onMatchEnd(BunkerMatchEndEvent event) {
+        if (event.getMatch().getDefender() == this ||
+                event.getMatch().getAttacker() == this) {
+            this.matchStatistics.addMatch(event.getMatch().getMatchInfoSnapshot());
+        }
     }
 }

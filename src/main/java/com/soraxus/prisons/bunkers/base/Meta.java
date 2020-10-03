@@ -54,7 +54,7 @@ public class Meta implements GravSerializable {
     }
 
     public long getLong(String key) {
-        return (long) get(key);
+        return get(key);
     }
 
     public void set(String key, Object object) {
@@ -99,10 +99,10 @@ public class Meta implements GravSerializable {
         }
     }
 
-    public <T> T getOrSet(String key, T defaultValue) {
+    public <T> T getOrSet(String key, T defaultValue, Object... constructionArgs) {
         lock.lock(key);
         try {
-            Object object = get(key);
+            Object object = get(key, constructionArgs);
             if (object == null) {
                 set(key, defaultValue);
                 return defaultValue;

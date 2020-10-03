@@ -56,7 +56,7 @@ public class TextUtil {
         return generateBar(onColor, offColor, ':', length, curr, max);
     }
 
-    public static String generateBar(char onColor, char offColor, char ch, int length, int curr, int max) {
+    public static String generateBar(char onColor, char offColor, char ch, int length, long curr, long max) {
         return generateBar(onColor, offColor, ch, length, BigInteger.valueOf(curr), BigInteger.valueOf(max));
     }
 

@@ -2,15 +2,24 @@ package com.soraxus.prisons.bunkers.matchmaking;
 
 import com.soraxus.prisons.bunkers.base.Bunker;
 import com.soraxus.prisons.bunkers.base.army.BunkerArmy;
+import com.soraxus.prisons.bunkers.base.elements.storage.Storage;
 import com.soraxus.prisons.bunkers.matchmaking.stats.MatchStats;
 import com.soraxus.prisons.bunkers.npc.*;
 import com.soraxus.prisons.bunkers.npc.info.BunkerNPCType;
+import com.soraxus.prisons.event.bunkers.BunkerMatchEndEvent;
+import com.soraxus.prisons.event.bunkers.BunkerMatchStartEvent;
+import com.soraxus.prisons.event.bunkers.MatchNPCSpawnEvent;
+import com.soraxus.prisons.util.DateUtils;
 import com.soraxus.prisons.util.ItemBuilder;
 import com.soraxus.prisons.util.SavedInventory;
+import com.soraxus.prisons.util.display.chat.ChatBuilder;
+import com.soraxus.prisons.util.display.chat.HoverUtil;
 import com.soraxus.prisons.util.display.hotbar.HotbarSelector;
 import com.soraxus.prisons.util.display.hotbar.HotbarSelectorManager;
 import com.soraxus.prisons.util.display.hotbar.SelectableElement;
 import lombok.Getter;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -37,9 +46,7 @@ public class Match {
     private final BunkerMatchMaker matchMaker;
 
     @Getter
-    private final MatchStats defendingStats = new MatchStats();
-    @Getter
-    private final MatchStats attackingStats = new MatchStats();
+    private final MatchStats matchStats = new MatchStats();
 
     @Getter
     private final NPCManager npcManager = new NPCManager() {
@@ -47,6 +54,8 @@ public class Match {
         public void addNPC(BunkerNPC npc) {
             super.addNPC(npc);
             npc.setMatch(Match.this);
+            MatchNPCSpawnEvent event = new MatchNPCSpawnEvent(Match.this, npc.getController().getBunker() == getAttacker() ? MatchTeam.ATTACKER : MatchTeam.DEFENDER, npc);
+            Bukkit.getPluginManager().callEvent(event);
         }
     };
 
@@ -67,9 +76,8 @@ public class Match {
     public List<AvailableTarget<?>> getAttackerTargets() {
         Bunker bunker = defender;
         List<AvailableTarget<?>> targetList = new ArrayList<>();
-        NPCManager manager = bunker.getNpcManager();
-        manager.getNpcList().forEach(n -> {
-            if (n.getController() != null && n.getController().isSpawned()) {
+        npcManager.getNpcList().forEach(n -> {
+            if (n.getController() != null && n.getController().isSpawned() && n.getController().getBunker() == getDefender()) {
                 targetList.add(new NPCAvailableTarget(n));
             }
         });
@@ -83,9 +91,8 @@ public class Match {
 
     public List<AvailableTarget<?>> getDefenderTargets() {
         List<AvailableTarget<?>> targetList = new ArrayList<>();
-        NPCManager manager = attacker.getNpcManager();
-        manager.getNpcList().forEach(n -> {
-            if (n.getController() != null && n.getController().isSpawned()) {
+        npcManager.getNpcList().forEach(n -> {
+            if (n.getController() != null && n.getController().isSpawned() && n.getController().getBunker() == getAttacker()) {
                 targetList.add(new NPCAvailableTarget(n));
             }
         });
@@ -110,6 +117,16 @@ public class Match {
         } finally {
             attackerLock.unlock();
         }
+        warnDefenders();
+
+        BunkerMatchStartEvent event = new BunkerMatchStartEvent(this);
+        Bukkit.getPluginManager().callEvent(event);
+    }
+
+    private void warnDefenders() {
+        getDefender().messageMembers("&c&lWARNING: &8Your bunker is being attacked!");
+        getDefender().messageMembers("&8Really all you can do is watch :/ teleport anyways to see how your defenses do!");
+
     }
 
     public void addAttacker(Player player) {
@@ -177,22 +194,51 @@ public class Match {
         this.started = false;
 
         boolean success = this.defender.getCore().isDestroyed();
+        this.matchStats.setAttackerSuccess(success);
+
+        this.matchStats.setMatchDurationSeconds((MATCH_TIME_TICKS - ticksLeft.get()) / 20);
 
         //Remove all NPCs
         this.npcManager.destroyAllNPCs();
 
         //Send messages
         this.getDefender().messageWorld("&cMatch Ended!");
-        this.getDefender().getWorld().getBukkitWorld().getPlayers().forEach(p -> sendMatchStats(p, getAttackingStats()));
+        this.getDefender().getWorld().getBukkitWorld().getPlayers().forEach(p -> sendMatchStats(p, matchStats));
+
+        //Set destroyed ticks
+        this.getDefender().setDestroyedTicksLeft(160);
 
         //Remove all attackers
         new ArrayList<>(this.attackers).forEach(a -> removeAttacker(Bukkit.getPlayer(a)));
 
         BunkerMatchMaker.instance.freeMatch(this);
+        BunkerMatchEndEvent event = new BunkerMatchEndEvent(this);
+        Bukkit.getPluginManager().callEvent(event);
     }
 
     private void sendMatchStats(Player player, MatchStats stats) {
-        //TODO
+        List<Storage> resources = stats.getCollectedResources();
+        List<String> text = new ArrayList<>();
+        double count = 0;
+        for (Storage storage : resources) {
+            count += storage.getAmount();
+            text.add(storage.getResource().getDisplayName() + "&7: " + storage.getAmount());
+        }
+
+        TextComponent comp = new ChatBuilder() // Useless util
+                .addText("&7Resources: " + count, HoverUtil.text(String.join("\n", text)))
+                .addText("&7Deaths: " + stats.getDeaths().get())
+                .addText("&7")
+                .build();
+        player.spigot().sendMessage(comp);
+    }
+
+    public MatchInfo getMatchInfoSnapshot() {
+        return new MatchInfo(getDefender().getGang().getName(),
+                getDefender().getId(),
+                getAttacker().getGang().getName(),
+                getAttacker().getId(),
+                getMatchStats());
     }
 
     @Override
@@ -205,15 +251,25 @@ public class Match {
 
     public void tick() {
         this.npcManager.tick();
-        if (ticksLeft.decrementAndGet() <= 0) {
-            this.end();
+        if(this.started) {
+            if (ticksLeft.decrementAndGet() <= 0) {
+                this.end();
+            }
+
+            this.sendActionbar();
+
+            int n;
+            if(((n = MATCH_TIME_TICKS - ticksLeft.get()) < 60 || MATCH_TIME_TICKS - n < 60) && n % 20 == 0) {
+                //Play sound
+                getDefender().getWorld().getBukkitWorld().getPlayers().forEach((p) -> p.playSound(p.getLocation(), Sound.BLOCK_LEVER_CLICK, 1f, 0.8f));
+            }
         }
     }
 
     public HotbarSelector getAttackHotbarSelector() {
         AtomicInteger selectedNPC = new AtomicInteger();
-        AtomicReference<HotbarSelector> npcSelector = new AtomicReference<>();
-        HotbarSelector selector = new HotbarSelector(
+        AtomicReference<HotbarSelector> selector = new AtomicReference<>();
+        selector.set(new HotbarSelector(
                 null,
                 new SelectableElement(
                         new ItemBuilder(Material.EGG, 64)
@@ -226,7 +282,9 @@ public class Match {
                                 .addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
                                 .build(),
                         (e) -> {
-                            e.getItem().setAmount(64);
+                            if(e.getItem() == null)
+                                return false;
+                            e.getItem().setAmount(this.getAttacker().getAvailableNPCCount(BunkerNPCType.values()[selectedNPC.get()]));
                             if (e.getClickedBlock() != null) {
                                 Location spawn = e.getClickedBlock().getLocation().add(0, 1, 0);
                                 BunkerNPC npc = this.getAttacker().getAndRemoveNPC(BunkerNPCType.values()[selectedNPC.get()]);
@@ -238,9 +296,9 @@ public class Match {
                 ),
                 null, null,
                 new SelectableElement(new ItemBuilder(BunkerNPCType.values()[selectedNPC.get()].getDisplayItem().clone())
-                        .setAmount((int) Math.min(64, this.getAttacker().getAvailableNPCCount(BunkerNPCType.values()[selectedNPC.get()])))
+                        .setAmount(Math.min(64, this.getAttacker().getAvailableNPCCount(BunkerNPCType.values()[selectedNPC.get()])))
                         .build(), (e) -> {
-                    npcSelector.get().open(e.getPlayer());
+                    getNPCSelector(selector.get(), selectedNPC).open(e.getPlayer());
                     return false;
                 }),
                 null, null,
@@ -253,23 +311,39 @@ public class Match {
                             return true;
                         }
                 )
-        );
+        ));
 
-        List<SelectableElement> elementList = new ArrayList<>();
-        for (int i = 0, length = BunkerNPCType.values().length; i < length && i < 9; i++) {
-            int finalI = i;
-            elementList.add(new SelectableElement(
+        return selector.get();
+    }
+
+    private HotbarSelector getNPCSelector(HotbarSelector back, AtomicInteger selectedNPC) {
+        return new HotbarSelector(i -> {
+            if (i >= BunkerNPCType.values().length) {
+                return null;
+            }
+            return new SelectableElement(
                     new ItemBuilder(BunkerNPCType.values()[i].getDisplayItem().clone())
-                            .setAmount((int) Math.min(64, this.getAttacker().getAvailableNPCCount(BunkerNPCType.values()[i])))
+                            .setAmount(Math.min(64, this.getAttacker().getAvailableNPCCount(BunkerNPCType.values()[i])))
                             .build(), (e) -> {
-                selectedNPC.set(finalI);
-                selector.open(e.getPlayer());
+                selectedNPC.set(i);
+                back.open(e.getPlayer());
                 return false;
-            }));
-        }
+            });
+        });
+    }
 
-        npcSelector.set(new HotbarSelector(elementList));
+    private void sendActionbar() {
+        World world = getDefender().getWorld().getBukkitWorld();
+        world.getPlayers().forEach(p -> {
+            StringBuilder message = new StringBuilder();
+            message.append("&aTime &f").append(DateUtils.readableDate(ticksLeft.get() / 20, true));
+            message.append("   &8Buildings left &f").append(getDefender().getTileMap().getElements()
+                    .stream()
+                    .filter((b) -> !b.isDestroyed() && b.isVisibleToAttackers())
+                    .count());
 
-        return selector;
+            message = new StringBuilder(ChatColor.translateAlternateColorCodes('&', message.toString()));
+            p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(message.toString()));
+        });
     }
 }

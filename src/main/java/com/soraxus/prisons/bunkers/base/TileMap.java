@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,8 @@ public class TileMap implements GravSerializable {
     private final List<BunkerElement> elements;
 
     private final ReentrantLock lock = new ReentrantLock(true);
+
+    private final AtomicBoolean deserializing = new AtomicBoolean(false);
 
     /**
      * Crate a new empty tile map
@@ -46,6 +49,7 @@ public class TileMap implements GravSerializable {
     public TileMap(GravSerializer serializer, Bunker parent) {
         this(parent);
         lock.lock();
+        deserializing.set(true);
         try {
             Tile[][] arr;
             Object[] o = serializer.readObject(parent);
@@ -76,11 +80,11 @@ public class TileMap implements GravSerializable {
                         continue;
                     }
                     BunkerElement el;
-                    if((el = tile.getParent()) == null) {
+                    if ((el = tile.getParent()) == null) {
                         tileArr[y] = null;
                         continue;
                     }
-                    if(!tile.getInternalPosition().equals(IntVector2D.ZERO))
+                    if (!tile.getInternalPosition().equals(IntVector2D.ZERO))
                         continue;
                     for (int i2 = 0; i2 < el.getShape().getX(); i2++) {
                         for (int j2 = 0; j2 < el.getShape().getY(); j2++) {
@@ -95,6 +99,7 @@ public class TileMap implements GravSerializable {
                 }
             }
         } finally {
+            deserializing.set(false);
             lock.unlock();
         }
     }
@@ -188,6 +193,9 @@ public class TileMap implements GravSerializable {
     public Tile setOrMakeTile(int x, int y, BunkerElement element, IntVector2D internalPosition) {
         if (x < 0 || y < 0 || x >= tileMap.length || y >= tileMap[x].length)
             throw new IllegalArgumentException("Tile location out of bounds! (" + x + ", " + y + ")");
+        if(internalPosition.equals(IntVector2D.ZERO)) {
+            element.setPosition(new IntVector2D(x, y));
+        }
         addElement(element);
         lock.lock();
         try {
@@ -230,7 +238,7 @@ public class TileMap implements GravSerializable {
         lock.lock();
         map = new Tile[tileMap.length][];
         try {
-            for(int i = 0; i < tileMap.length; i++) {
+            for (int i = 0; i < tileMap.length; i++) {
                 map[i] = new Tile[tileMap[i].length];
                 System.arraycopy(tileMap[i], 0, map[i], 0, tileMap[i].length);
             }
@@ -248,12 +256,10 @@ public class TileMap implements GravSerializable {
         List<BunkerElement> list = getElements();
         lock.unlock();
         for (BunkerElement element : list) {
-            if (element.isEnabled()) {
-                try {
-                    element.tick();
-                } catch(Exception e) {
-                    e.printStackTrace();
-                }
+            try {
+                element.tick();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -274,6 +280,13 @@ public class TileMap implements GravSerializable {
                 return;
             }
             elements.add(el);
+            if(!deserializing.get()) {
+                try {
+                    el.onPlacement();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         } finally {
             lock.unlock();
         }
@@ -289,9 +302,11 @@ public class TileMap implements GravSerializable {
             tile = getTile(element.getPosition());
             if (tile == null)
                 throw new IllegalStateException("Complicated Situation: Tile has parent element1 but the tile at element1.getPosition() is null");
+
+            IntVector2D basePos = tile.getInternalPosition().multiply(-1).add(new IntVector2D(ex, ez));
             for (int x = 0; x < element.getShape().getX(); x++) {
                 for (int z = 0; z < element.getShape().getY(); z++) {
-                    removeTile(ex + x, ez + z);
+                    removeTile(basePos.getX() + x, basePos.getY() + z);
                 }
             }
             element.remove();
@@ -304,9 +319,9 @@ public class TileMap implements GravSerializable {
     /**
      * Check if a BunkerElement can be placed at a certain position
      *
-     * @param ex      Tile X Position
-     * @param ez      Tile Z Position
-     * @param size    Size of the element
+     * @param ex   Tile X Position
+     * @param ez   Tile Z Position
+     * @param size Size of the element
      * @return {@code true} if there are no other elements within the space
      */
     public boolean canPlace(int ex, int ez, IntVector2D size) {
@@ -356,12 +371,12 @@ public class TileMap implements GravSerializable {
             return false;
         lock.lock();
         try {
+            element.setPosition(new IntVector2D(ex, ez));
             for (int x = 0; x < element.getShape().getX(); x++) {
                 for (int z = 0; z < element.getShape().getY(); z++) {
                     setOrMakeTile(ex + x, ez + z, element, new IntVector2D(x, z));
                 }
             }
-            element.setPosition(new IntVector2D(ex, ez));
         } finally {
             lock.unlock();
         }
@@ -370,8 +385,8 @@ public class TileMap implements GravSerializable {
 
     public List<IntVector2D> getPlaceablePositions(IntVector2D size) {
         List<IntVector2D> possibles = new ArrayList<>();
-        for (int x = 0; x < BunkerManager.BUNKER_SIZE_TILES - size.getX() + 1; x ++) {
-            for (int y = 0; y < BunkerManager.BUNKER_SIZE_TILES - size.getY() + 1; y ++) {
+        for (int x = 0; x < BunkerManager.BUNKER_SIZE_TILES - size.getX() + 1; x++) {
+            for (int y = 0; y < BunkerManager.BUNKER_SIZE_TILES - size.getY() + 1; y++) {
                 if (canPlace(x, y, size)) {
                     possibles.add(new IntVector2D(x, y));
                 }

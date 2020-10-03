@@ -109,6 +109,10 @@ public class BunkerMatchSelector {
         }
         Bunker toUnload = loadedBefore ? currentBunker : null;
         UUID bunkerId = getNextMatch();
+
+        if(bunkerId == null)
+            return false;
+
         currentBunker = BunkerManager.instance.getLoadedBunker(bunkerId);
         loadedBefore = false;
         if (currentBunker == null) {
