@@ -52,6 +52,10 @@ public class JackHammer extends AbstractCE {
 
     @EventSubscription
     private void onBreak(BlockBreakEvent event) {
+
+        if(event.isCancelled())
+            return;
+
         if (event.getPlayer().getInventory().getItemInMainHand() == null || !hasEnchant(event.getPlayer().getItemInHand()))
             return;
 

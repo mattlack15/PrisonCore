@@ -6,14 +6,12 @@ import com.soraxus.prisons.bunkers.base.resources.BunkerResource;
 import com.soraxus.prisons.bunkers.npc.ElementDrop;
 import net.ultragrav.serializer.GravSerializer;
 import net.ultragrav.utils.IntVector2D;
-import org.bukkit.ChatColor;
 
 public class ElementWell extends GeneratorElement {
 
 
     public ElementWell(GravSerializer serializer, Bunker bunker) {
         super(serializer, bunker, BunkerResource.WATER);
-        this.getTextColour = ChatColor.BLUE + "";
     }
 
     public ElementWell(Bunker bunker) {

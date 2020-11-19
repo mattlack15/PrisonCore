@@ -3,7 +3,7 @@ package com.soraxus.prisons.crate;
 import com.soraxus.prisons.core.CoreModule;
 import com.soraxus.prisons.crate.gui.MenuCrates;
 import com.soraxus.prisons.util.EventSubscription;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.items.ItemUtils;
 import com.soraxus.prisons.util.menus.MenuElement;
 import org.bukkit.Material;
@@ -30,7 +30,7 @@ public class ModuleCrates extends CoreModule {
     @Override
     public MenuElement getGUI(MenuElement backButton) {
         return new MenuElement(new ItemBuilder(Material.ENDER_CHEST, 1).setName("&f&lCrates").addLore("&7Click to manage &f&lCrates").build())
-        .setClickHandler((e, i) -> new MenuCrates(backButton).open((Player) e.getWhoClicked()));
+                .setClickHandler((e, i) -> new MenuCrates(backButton).open((Player) e.getWhoClicked()));
     }
 
     @EventSubscription

@@ -1,8 +1,7 @@
 package com.soraxus.prisons.mines.gui;
 
-import com.soraxus.prisons.mines.manager.MineManager;
 import com.soraxus.prisons.mines.object.Mine;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
 import com.soraxus.prisons.util.menus.MenuManager;
@@ -12,6 +11,7 @@ import org.bukkit.entity.Player;
 public class MenuMine extends Menu {
     private Mine mine;
     private MenuElement backElement;
+
     public MenuMine(Mine mine, MenuElement backElement) {
         super(mine.getName(), 5);
         this.mine = mine;
@@ -21,12 +21,13 @@ public class MenuMine extends Menu {
 
     public void setup() {
         MenuElement reset = new MenuElement(new ItemBuilder(Material.BEACON, 1).setName("&c&lReset").addLore("&7Click to reset this mine")
-        .build()).setClickHandler((e, i) -> mine.reset());
+                .build()).setClickHandler((e, i) -> mine.reset());
 
         MenuElement delete = new MenuElement(new ItemBuilder(Material.REDSTONE_BLOCK, 1).setName("&4&lDelete")
-        .build()).setClickHandler((e, i) -> {
-            MineManager.instance.remove(mine.getName());
-            backElement.getClickHandler().handleClick(e, i);
+                .build()).setClickHandler((e, i) -> {
+                    getElement(e.getSlot()).addTempLore(this, "&cRemoving is currently disabled!", 60);
+//            MineManager.instance.remove(mine.getName());
+//            backElement.getClickHandler().handleClick(e, i);
         });
 
         MenuElement blocks = new MenuElement(new ItemBuilder(Material.COAL_BLOCK, 1).setName("&6&lBlocks").build())

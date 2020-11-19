@@ -4,7 +4,7 @@ import com.soraxus.prisons.enchants.gui.MenuEnchant;
 import com.soraxus.prisons.pickaxe.crystals.Crystal;
 import com.soraxus.prisons.pickaxe.crystals.CrystalInfo;
 import com.soraxus.prisons.pickaxe.crystals.CrystalManager;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Handlers;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
@@ -33,7 +33,7 @@ public class MenuCrystals extends Menu {
                     .setDurability((short) 5)
                     .build()
             ).setClickHandler((event, i) -> {
-                ItemStack cr = event.getCursor(); // TODO: Make sure this actually works
+                ItemStack cr = event.getCursor();
                 if (cr == null) {
                     return;
                 }

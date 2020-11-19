@@ -3,7 +3,6 @@ package com.soraxus.prisons.bunkers.util;
 import com.soraxus.prisons.bunkers.ModuleBunkers;
 import net.ultragrav.asyncworld.schematics.Schematic;
 import net.ultragrav.utils.IntVector2D;
-import net.ultragrav.utils.IntVector3D;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 

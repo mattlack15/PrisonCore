@@ -8,6 +8,11 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Based on ArrayList, but uses a lock to prevent concurrent access
+ *
+ * @param <E> Type of list
+ */
 public class LockingList<E> extends ArrayList<E> {
     @Getter
     private final CustomLock lock = new CustomLock(true);

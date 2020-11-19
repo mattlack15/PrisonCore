@@ -3,7 +3,7 @@ package com.soraxus.prisons.worldedit;
 import com.soraxus.prisons.SpigotPrisonCore;
 import com.soraxus.prisons.util.EventSubscription;
 import com.soraxus.prisons.util.EventSubscriptions;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;

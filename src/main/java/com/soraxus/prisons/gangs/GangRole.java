@@ -5,8 +5,8 @@ import lombok.Getter;
 public enum GangRole {
     RECRUIT(true, false),
     MEMBER(true, false),
-    MOD(true, false), //TODO
-    ADMIN(true, true), //TODO
+    MOD(true, false),
+    ADMIN(true, true),
     LEADER(false, true);
 
     @Getter
@@ -21,6 +21,7 @@ public enum GangRole {
     }
 
     private static GangRole[] values = null;
+
     public static GangRole[] getValues() {
         if (values == null) {
             values = values();

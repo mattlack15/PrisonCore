@@ -45,7 +45,7 @@ public class MenuManager implements Listener {
                         if (!e.isDoingUpdates() || e.getUpdateHandler() == null) {
                             continue;
                         }
-                        if (counter % (e.getUpdateEvery() != 0 ? Math.max(e.getUpdateEvery()/2, 1) : 0) == 0) {
+                        if (counter % (e.getUpdateEvery() != 0 ? Math.max(e.getUpdateEvery() / 2, 1) : 0) == 0) {
                             e.getUpdateHandler().handleUpdate(e);
                             MenuManager.instance.invalidateElementsInInvForMenu(m, i);
                         }

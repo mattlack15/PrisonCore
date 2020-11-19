@@ -203,15 +203,15 @@ public enum BunkerElementType {
     ),
     // ------------------ Entertainment --------------
     ENTERTAINMENT_PLOT("Plot",
-    new InfoPlot(),
-    new IntVector2D(3, 3),
-    "Build whatever you please",
+            new InfoPlot(),
+            new IntVector2D(3, 3),
+            "Build whatever you please",
             (b, o) -> new ElementPlot(b)),
 
     //------------------- Decoration --------------
     DECORATION_PATH("Path",
-    new InfoDecorationPath(),
-    IntVector2D.ONE,
+            new InfoDecorationPath(),
+            IntVector2D.ONE,
             "A path :/",
             (b, o) -> new ElementPath(b));
 

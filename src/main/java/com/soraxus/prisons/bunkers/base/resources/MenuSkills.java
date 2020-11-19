@@ -2,7 +2,7 @@ package com.soraxus.prisons.bunkers.base.resources;
 
 import com.soraxus.prisons.bunkers.base.Bunker;
 import com.soraxus.prisons.bunkers.base.elements.storage.Storage;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
 import com.soraxus.prisons.util.menus.MenuManager;

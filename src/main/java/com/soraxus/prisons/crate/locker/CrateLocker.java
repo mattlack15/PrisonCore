@@ -2,7 +2,7 @@ package com.soraxus.prisons.crate.locker;
 
 import com.soraxus.prisons.crate.Crate;
 import com.soraxus.prisons.crate.CrateManager;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.items.NBTUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

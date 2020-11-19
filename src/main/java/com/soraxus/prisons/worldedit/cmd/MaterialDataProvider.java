@@ -20,7 +20,8 @@ public class MaterialDataProvider extends UltraProvider<Integer> {
     public Integer convert(@NonNull String s) throws CommandException {
         try {
             return Integer.parseInt(s);
-        } catch(Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         String[] arg = s.split(":");
         if (arg.length > 0) {
             Material mat = Material.matchMaterial(arg[0]);

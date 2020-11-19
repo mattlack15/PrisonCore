@@ -1,7 +1,7 @@
 package com.soraxus.prisons.util.menus;
 
-import com.soraxus.prisons.util.ItemBuilder;
 import com.soraxus.prisons.util.Scheduler;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 

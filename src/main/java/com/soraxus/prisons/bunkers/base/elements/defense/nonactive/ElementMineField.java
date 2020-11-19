@@ -13,6 +13,7 @@ import net.ultragrav.asyncworld.schematics.Schematic;
 import net.ultragrav.serializer.GravSerializer;
 import net.ultragrav.utils.CuboidRegion;
 import net.ultragrav.utils.IntVector2D;
+import net.ultragrav.utils.IntVector3D;
 import net.ultragrav.utils.Vector3D;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -128,7 +129,7 @@ public class ElementMineField extends BunkerElement {
         CuboidRegion region = new CuboidRegion(this.getLocation().subtract(0, 1, 0),
                 this.getLocation().add(this.getShape().getX() * BunkerManager.TILE_SIZE_BLOCKS - 1, 3, this.getShape().getY() * BunkerManager.TILE_SIZE_BLOCKS - 1));
         Random random = new Random(System.currentTimeMillis());
-        Map<Vector3D, Integer> blocks = new HashMap<>();
+        Map<IntVector3D, Integer> blocks = new HashMap<>();
         world.syncForAllInRegion(region, (p, b) -> {
             if (random.nextInt(2) == 0) {
                 if (b == 0)
@@ -159,6 +160,7 @@ public class ElementMineField extends BunkerElement {
 
     /**
      * Get the schematic of this mine
+     *
      * @return Schematic
      */
     @Override
@@ -172,8 +174,8 @@ public class ElementMineField extends BunkerElement {
 
     /**
      * Get the maximum health of this mine
-     * @return 1
      *
+     * @return 1
      */
     @Override
     public double getMaxHealth() {

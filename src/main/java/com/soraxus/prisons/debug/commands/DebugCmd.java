@@ -7,7 +7,10 @@ public class DebugCmd extends UltraCommand {
         addAlias("debug");
 
         addChildren(
-                new DebugNbtCmd()
+                new DebugNbtCmd(),
+                new DebugChatBuilder(),
+                new DebugNpcTestCmd(),
+                new DebugWorldId()
         );
     }
 }

@@ -2,7 +2,7 @@ package com.soraxus.prisons.bunkers.matchmaking;
 
 import com.soraxus.prisons.util.EventSubscription;
 import com.soraxus.prisons.util.EventSubscriptions;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;

@@ -2,7 +2,7 @@ package com.soraxus.prisons.bunkers.base.elements.defense.active.barracks;
 
 import com.soraxus.prisons.bunkers.matchmaking.MatchInfo;
 import com.soraxus.prisons.bunkers.npc.info.BunkerNPCType;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
 import com.soraxus.prisons.util.menus.MenuManager;
@@ -48,8 +48,8 @@ public class MenuBarracks extends Menu {
 
         MatchInfo lastMatchInfo = null;
         MenuElement lastMatch = null;
-        if(barracks.getBunker().getPastMatches().size() != 0)
-            lastMatchInfo = barracks.getBunker().getPastMatches().get(0);
+        if (barracks.getBunker().getMatchStatistics().getTotalMatches() != 0)
+            lastMatchInfo = barracks.getBunker().getMatchStatistics().getLastMatch();
         if (lastMatchInfo != null) {
             boolean attacker = lastMatchInfo.getAttackingBunker().equals(barracks.getBunker().getId());
             boolean won = lastMatchInfo.getMatchStats().getAttackerSuccess() ^ (!attacker);
@@ -70,18 +70,18 @@ public class MenuBarracks extends Menu {
     }
 
     private ItemStack getItem(BunkerNPCType type, int level) {
-        ItemBuilder builder = new ItemBuilder(type.getDisplayItem()).setName("&f&l" + type.getDisplayName());
-        builder.addLore("&7" + type.getDescription());
-        builder.addLore("");
-        builder.addLore("&fLevel: &7" + level + "&f/&7" + type.getInfo().getMaxLevel());
         int ticks = 0;
         int amount = 0;
         for (ProcessNPCTraining training : barracks.getTrainingListByType(type)) {
             ticks += training.getTicksLeft();
             amount++;
         }
-        builder.addLore("");
-        builder.addLore("&cCurrently training: &f" + amount + " &7(" + DateUtils.readableDate(ticks / 20, true) + ")");
-        return builder.build();
+        return new ItemBuilder(type.getDisplayItem()).setName("&f&l" + type.getDisplayName())
+                .addLore("&7" + type.getDescription())
+                .addLore("")
+                .addLore("&fLevel: &7" + level + "&f/&7" + type.getInfo().getMaxLevel())
+                .addLore("")
+                .addLore("&cCurrently training: &f" + amount + " &7(" + DateUtils.readableDate(ticks / 20, true) + ")")
+                .build();
     }
 }

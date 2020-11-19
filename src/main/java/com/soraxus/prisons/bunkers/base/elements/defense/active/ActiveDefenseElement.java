@@ -21,22 +21,26 @@ public abstract class ActiveDefenseElement extends BunkerElement {
         EventSubscriptions.instance.subscribe(this, ActiveDefenseElement.class);
     }
 
-    protected void onDefendingMatchStart() {}
-    protected void onDefendingMatchEnd() {}
+    protected void onDefendingMatchStart() {
+    }
+
+    protected void onDefendingMatchEnd() {
+    }
+
     public boolean isDefendingMatchActive() {
         return getBunker().getDefendingMatch() != null;
     }
 
     @EventSubscription
     private void onMatchStart(BunkerMatchStartEvent event) {
-        if(event.getMatch().getDefender() == getBunker()) {
+        if (event.getMatch().getDefender() == getBunker()) {
             onDefendingMatchStart();
         }
     }
 
     @EventSubscription
     private void onMatchEnd(BunkerMatchEndEvent event) {
-        if(event.getMatch().getDefender() == getBunker()) {
+        if (event.getMatch().getDefender() == getBunker()) {
             onDefendingMatchEnd();
         }
     }

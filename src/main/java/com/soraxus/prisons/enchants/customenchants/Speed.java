@@ -14,23 +14,23 @@ public class Speed extends AbstractCE {
 
     @Override
     protected void onEnable() {
-        if(taskId == -1)
+        if (taskId == -1)
             taskId = Scheduler.scheduleSyncRepeatingTaskT(this::update, 0, 10);
     }
 
     @Override
     protected void onDisable() {
-        if(taskId != -1) {
+        if (taskId != -1) {
             Bukkit.getScheduler().cancelTask(taskId);
             taskId = -1;
         }
     }
-    
+
     private void update() {
         Bukkit.getOnlinePlayers().forEach(p -> {
-            if(hasEnchant(p.getInventory().getItemInMainHand())) {
+            if (hasEnchant(p.getInventory().getItemInMainHand())) {
                 EnchantInfo info = getInfo(p.getInventory().getItemInMainHand());
-                p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20, info.getEnchants().get(this)-1, false, false), true);
+                p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20, info.getEnchants().get(this) - 1, false, false), true);
             }
         });
     }

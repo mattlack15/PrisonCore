@@ -3,9 +3,9 @@ package com.soraxus.prisons.cells.cmd;
 import com.soraxus.prisons.cells.CellManager;
 import com.soraxus.prisons.cells.ModuleCells;
 import com.soraxus.prisons.economy.Economy;
-import com.soraxus.prisons.util.ComponentUtil;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import com.soraxus.prisons.util.display.chat.ChatBuilder;
+import com.soraxus.prisons.util.display.chat.ClickUtil;
+import com.soraxus.prisons.util.display.chat.HoverUtil;
 import net.ultragrav.command.provider.impl.StringProvider;
 import org.bukkit.ChatColor;
 
@@ -39,9 +39,13 @@ public class CmdCellCreate extends CellCommand {
 
                 String confirm = getArgument(0);
                 if (confirm.isEmpty()) {
-                    TextComponent component = new TextComponent(TextComponent.fromLegacyText(ModuleCells.PREFIX + "It will cost " + ChatColor.RED + "$" + ModuleCells.CELL_COST + ChatColor.getLastColors(ModuleCells.PREFIX) + " to buy a cell... "));
-                    component.addExtra(ComponentUtil.getClickHoverComponent("&a&lConfirm? &7(Click)", "&7Click to confirm", ClickEvent.Action.RUN_COMMAND, "/cell create confirm"));
-                    getPlayer().spigot().sendMessage(component);
+                    new ChatBuilder(ModuleCells.PREFIX + "It will cost &c$" + ModuleCells.CELL_COST + ChatColor.getLastColors(ModuleCells.PREFIX) + " to buy a cell... ")
+                            .addText(
+                                    "&a&lConfirm? &7(Click)",
+                                    HoverUtil.text("&7Click to confirm"),
+                                    ClickUtil.command("/cell create confirm")
+                            )
+                            .send(getPlayer());
                     return;
                 }
 
@@ -49,9 +53,13 @@ public class CmdCellCreate extends CellCommand {
 
                 tell(ModuleCells.PREFIX + "Creating your cell...");
                 CellManager.instance.createCell(getPlayer().getUniqueId()).join();
-                TextComponent component = new TextComponent(TextComponent.fromLegacyText(ModuleCells.PREFIX + "Your cell has been created."));
-                component.addExtra(ComponentUtil.getClickHoverComponent("&a click here to teleport to it!", "&cTeleport", ClickEvent.Action.RUN_COMMAND, "/cell tp"));
-                getPlayer().spigot().sendMessage(component);
+                new ChatBuilder(ModuleCells.PREFIX + "Your cell has been created.")
+                        .addText(
+                                "&a click here to teleport to it!",
+                                HoverUtil.text("&cTeleport"),
+                                ClickUtil.command("/cell tp")
+                        )
+                        .send(getPlayer());
             } catch (Throwable t) {
                 t.printStackTrace();
             }

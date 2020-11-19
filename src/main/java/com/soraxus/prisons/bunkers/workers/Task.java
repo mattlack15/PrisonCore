@@ -6,6 +6,8 @@ import com.soraxus.prisons.bunkers.base.BunkerElement;
 import com.soraxus.prisons.bunkers.base.Meta;
 import com.soraxus.prisons.bunkers.base.Tile;
 import com.soraxus.prisons.bunkers.util.BHoloTextBox;
+import com.soraxus.prisons.event.bunkers.BunkerTaskEndEvent;
+import com.soraxus.prisons.event.bunkers.BunkerTaskStartEvent;
 import com.soraxus.prisons.util.Synchronizer;
 import com.soraxus.prisons.util.particles.ParticleShape;
 import com.soraxus.prisons.util.particles.ParticleUtils;
@@ -15,6 +17,7 @@ import net.ultragrav.serializer.GravSerializable;
 import net.ultragrav.serializer.GravSerializer;
 import net.ultragrav.utils.IntVector3D;
 import net.ultragrav.utils.Vector3D;
+import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.World;
 
@@ -48,13 +51,13 @@ public abstract class Task implements GravSerializable {
         this.meta = serializer.readObject();
         this.worker = worker;
         Synchronizer.synchronize(() -> {
-            if(this.worker.getHut().isEnabled())
+            if (this.worker.getHut().isEnabled())
                 this.setup();
         });
     }
 
     public Task(String name, Tile target, Worker worker) {
-        if(target == null)
+        if (target == null)
             throw new IllegalStateException("Target cannot be null");
         this.taskName = name;
         this.target = target;
@@ -141,12 +144,14 @@ public abstract class Task implements GravSerializable {
      * @throws IllegalStateException If the worker is not available for work
      */
     public synchronized boolean start() throws IllegalStateException {
-        if(this.isStarted())
+        if (this.isStarted())
             return false;
-        if(worker.getTask() != null && worker.getTask() != this) {
+        if (worker.getTask() != null && worker.getTask() != this) {
             throw new IllegalStateException("Worker not available!");
-        } else if(worker.setTask(this)){
+        } else if (worker.setTask(this)) {
             this.startTime = System.currentTimeMillis();
+            BunkerTaskStartEvent event = new BunkerTaskStartEvent(this);
+            Bukkit.getPluginManager().callEvent(event);
             return true;
         }
         return false;
@@ -157,6 +162,10 @@ public abstract class Task implements GravSerializable {
             this.finished = true;
         }
         this.textBoxs.forEach(BHoloTextBox::clear);
+
+        BunkerTaskEndEvent event = new BunkerTaskEndEvent(this, true);
+        Bukkit.getPluginManager().callEvent(event);
+
         try {
             this.getCallback().run();
         } catch (Exception e) {
@@ -192,7 +201,7 @@ public abstract class Task implements GravSerializable {
             end();
             return;
         }
-        if(getRemainingTimeT() % 7 == 0) {
+        if (getRemainingTimeT() % 7 == 0) {
             particles.draw();
         }
         textBoxs.forEach(t -> t.setLine(0, getCurrentText()));

@@ -15,6 +15,12 @@ public class OpenHotbarSelector {
     private SavedInventory state;
     private HotbarSelector selector;
 
+    /**
+     * Create an OpenHotbarSelector for a player
+     *
+     * @param player   Player
+     * @param selector HotbarSelector to open
+     */
     OpenHotbarSelector(Player player, HotbarSelector selector) {
         this.player = player;
         EventSubscriptions.instance.subscribe(this);
@@ -22,10 +28,15 @@ public class OpenHotbarSelector {
         setSelector(selector);
     }
 
+    /**
+     * Open a HotbarSelector for the player
+     *
+     * @param sel HotbarSelector
+     */
     public void setSelector(HotbarSelector sel) {
         this.selector = sel;
         player.getInventory().clear();
-        for (int i = 0; i < selector.getElements().size(); i ++) {
+        for (int i = 0; i < selector.getElements().size(); i++) {
             SelectableElement e = selector.getElements().get(i);
             if (e == null) {
                 continue;
@@ -34,12 +45,20 @@ public class OpenHotbarSelector {
         }
     }
 
+    /**
+     * Close the current HotbarSelector of the player
+     */
     public void close() {
         HotbarSelectorManager.getInstance().close(this);
         EventSubscriptions.instance.unSubscribe(this);
         state.restore(player.getInventory());
     }
 
+    /**
+     * Prevent the player from clicking items in their inventory while a HotbarSelector is open
+     *
+     * @param e Event
+     */
     @EventSubscription
     public void onInventoryClick(InventoryClickEvent e) {
         if (!e.getWhoClicked().getUniqueId().equals(player.getUniqueId())) {
@@ -48,6 +67,11 @@ public class OpenHotbarSelector {
         e.setCancelled(true);
     }
 
+    /**
+     * Prevent the player from dropping items from their hotbar
+     *
+     * @param e Event
+     */
     @EventSubscription
     public void onDrop(PlayerDropItemEvent e) {
         if (!e.getPlayer().getUniqueId().equals(player.getUniqueId())) {
@@ -56,8 +80,13 @@ public class OpenHotbarSelector {
         e.setCancelled(true);
     }
 
+    /**
+     * Detect when the player clicks with a specific slot
+     *
+     * @param e Event
+     */
     @EventSubscription
-    public void onRightClick(PlayerInteractEvent e) {
+    public void onClick(PlayerInteractEvent e) {
         if (!e.getPlayer().getUniqueId().equals(player.getUniqueId())) {
             return;
         }

@@ -5,10 +5,10 @@ import com.soraxus.prisons.bunkers.base.Bunker;
 import com.soraxus.prisons.gangs.Gang;
 import com.soraxus.prisons.gangs.GangManager;
 import com.soraxus.prisons.gangs.GangMemberManager;
-import com.soraxus.prisons.util.ItemBuilder;
 import com.soraxus.prisons.util.Synchronizer;
 import com.soraxus.prisons.util.display.hotbar.HotbarSelector;
 import com.soraxus.prisons.util.display.hotbar.SelectableElement;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -51,7 +51,7 @@ public class BunkerMatchSelector {
 
         getSelector().open(player);
 
-        if(next)
+        if (next)
             loadNextBunker();
     }
 
@@ -60,6 +60,9 @@ public class BunkerMatchSelector {
     }
 
     private UUID getNextMatch() {
+        if (matches.size() == 0) {
+            reset();
+        }
         return matches.remove(0);
     }
 
@@ -76,7 +79,7 @@ public class BunkerMatchSelector {
             return false; //Match will create a new selector
         });
         SelectableElement nextEl = new SelectableElement(next, (e) -> {
-            if(loadNextBunker()) {
+            if (loadNextBunker()) {
                 Bunker bunker = playerBunker.get();
                 if (bunker != null) {
                     bunker.messageMember(e.getPlayer(), "&7Loading next bunker...");
@@ -85,13 +88,16 @@ public class BunkerMatchSelector {
             return false;
         });
 
+        SelectableElement exitEl = new SelectableElement(new ItemBuilder(Material.REDSTONE)
+                .setName("&c&lExit").addLore("&7Click to stop searching").build(), (e) -> true);
+
         return new HotbarSelector(
                 acceptEl,
                 acceptEl,
                 acceptEl,
-                acceptEl,
                 null,
-                nextEl,
+                exitEl,
+                null,
                 nextEl,
                 nextEl,
                 nextEl
@@ -101,17 +107,22 @@ public class BunkerMatchSelector {
     private final AtomicBoolean loadingNextBunker = new AtomicBoolean(false);
 
     public boolean loadNextBunker() {
-        if (matches.size() == 0) {
-            reset();
-        }
-        if(!loadingNextBunker.compareAndSet(false, true)) {
+        if (!loadingNextBunker.compareAndSet(false, true)) {
             return false;
         }
         Bunker toUnload = loadedBefore ? currentBunker : null;
         UUID bunkerId = getNextMatch();
 
-        if(bunkerId == null)
+        if (bunkerId == null)
             return false;
+
+        System.out.println("Trying to get bunker " + bunkerId.toString());
+
+        if (!BunkerManager.instance.getFile(bunkerId).exists()) {
+            allMatches.remove(bunkerId);
+            loadNextBunker();
+            return false;
+        }
 
         currentBunker = BunkerManager.instance.getLoadedBunker(bunkerId);
         loadedBefore = false;
@@ -135,7 +146,7 @@ public class BunkerMatchSelector {
             try {
                 teleport();
                 if (toUnload != null) {
-                    toUnload.unload(false);
+                    BunkerManager.instance.tryUnload(toUnload, false);
                 }
             } finally {
                 loadingNextBunker.set(false);

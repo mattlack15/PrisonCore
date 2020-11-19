@@ -2,7 +2,7 @@ package com.soraxus.prisons.worldedit;
 
 import com.soraxus.prisons.core.CoreModule;
 import com.soraxus.prisons.util.menus.MenuElement;
-import com.soraxus.prisons.worldedit.cmd.*;
+import com.soraxus.prisons.worldedit.cmd.CmdAsyncWorld;
 
 public class ModuleWorldEdit extends CoreModule {
 

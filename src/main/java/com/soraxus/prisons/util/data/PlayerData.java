@@ -17,19 +17,36 @@ import java.util.UUID;
 public class PlayerData {
     private static HashMap<UUID, FileConfiguration> loadedPlayers = new HashMap<>();
 
+    /**
+     * Start all required tasks
+     */
     public static void init() {
         Scheduler.scheduleSyncRepeatingTask(PlayerData::saveAll, 100, 60);
         Scheduler.scheduleSyncRepeatingTask(PlayerData::update, 100, 180);
     }
 
+    /**
+     * De-initialize PlayerData
+     * Saves all PlayerData files
+     * Should be called before shutdown
+     */
     public static void deinit() {
         PlayerData.saveAll();
     }
 
+    /**
+     * Save all loaded PlayerData files to disk
+     */
     public static void saveAll() {
         loadedPlayers.forEach((key, value) -> savePlayerData(key));
     }
 
+    /**
+     * Get a player's PlayerData as a FileConfiguration
+     *
+     * @param op Player
+     * @return FileConfiguration
+     */
     public static FileConfiguration getPlayerData(OfflinePlayer op) {
         return getPlayerData(op.getUniqueId());
     }
@@ -68,12 +85,20 @@ public class PlayerData {
         return cfg;
     }
 
+    /**
+     * Unloads player data of any offline players
+     */
     public static void update() {
         new ArrayList<>(loadedPlayers.keySet()).stream()
                 .filter(i -> Bukkit.getPlayer(i) == null)
                 .forEach(PlayerData::unloadPlayerData);
     }
 
+    /**
+     * Get a list of all UUIDs that currently have a PlayerData file
+     *
+     * @return List of UUIDs
+     */
     public static List<UUID> getDatas() {
         List<UUID> ids = new ArrayList<>();
         File folder = new File(SpigotPrisonCore.instance.getDataFolder(), "players");
@@ -122,6 +147,11 @@ public class PlayerData {
         }
     }
 
+    /**
+     * Save and unload a specific player's PlayerData
+     *
+     * @param op Player
+     */
     public static void unloadPlayerData(OfflinePlayer op) {
         unloadPlayerData(op.getUniqueId());
     }
@@ -152,9 +182,11 @@ public class PlayerData {
     public static String getString(UUID id, String path) {
         return getPlayerData(id).getString(path);
     }
+
     public static int getInt(UUID id, String path) {
         return getPlayerData(id).getInt(path);
     }
+
     public static long getLong(UUID id, String path) {
         return getPlayerData(id).getLong(path);
     }

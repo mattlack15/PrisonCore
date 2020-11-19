@@ -62,7 +62,7 @@ public class ModuleGangs extends CoreModule {
         UUID playerId = event.getPlayer().getUniqueId();
         UUID gangId = GangMemberManager.instance.getMember(playerId).getGang();
         Gang gang = GangManager.instance.getLoadedGang(gangId);
-        if(gang == null)
+        if (gang == null)
             return;
         long onlineCount = gang.getMembers().stream()
                 .map(GangMember::getMember)

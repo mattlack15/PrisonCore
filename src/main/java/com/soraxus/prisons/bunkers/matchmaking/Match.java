@@ -9,14 +9,14 @@ import com.soraxus.prisons.bunkers.npc.info.BunkerNPCType;
 import com.soraxus.prisons.event.bunkers.BunkerMatchEndEvent;
 import com.soraxus.prisons.event.bunkers.BunkerMatchStartEvent;
 import com.soraxus.prisons.event.bunkers.MatchNPCSpawnEvent;
-import com.soraxus.prisons.util.DateUtils;
-import com.soraxus.prisons.util.ItemBuilder;
 import com.soraxus.prisons.util.SavedInventory;
 import com.soraxus.prisons.util.display.chat.ChatBuilder;
 import com.soraxus.prisons.util.display.chat.HoverUtil;
 import com.soraxus.prisons.util.display.hotbar.HotbarSelector;
 import com.soraxus.prisons.util.display.hotbar.HotbarSelectorManager;
 import com.soraxus.prisons.util.display.hotbar.SelectableElement;
+import com.soraxus.prisons.util.items.ItemBuilder;
+import com.soraxus.prisons.util.time.DateUtils;
 import lombok.Getter;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -121,6 +121,8 @@ public class Match {
 
         BunkerMatchStartEvent event = new BunkerMatchStartEvent(this);
         Bukkit.getPluginManager().callEvent(event);
+
+        this.matchStats.getStartTime().set(System.currentTimeMillis());
     }
 
     private void warnDefenders() {
@@ -251,7 +253,7 @@ public class Match {
 
     public void tick() {
         this.npcManager.tick();
-        if(this.started) {
+        if (this.started) {
             if (ticksLeft.decrementAndGet() <= 0) {
                 this.end();
             }
@@ -259,7 +261,7 @@ public class Match {
             this.sendActionbar();
 
             int n;
-            if(((n = MATCH_TIME_TICKS - ticksLeft.get()) < 60 || MATCH_TIME_TICKS - n < 60) && n % 20 == 0) {
+            if (((n = MATCH_TIME_TICKS - ticksLeft.get()) < 60 || MATCH_TIME_TICKS - n < 60) && n % 20 == 0) {
                 //Play sound
                 getDefender().getWorld().getBukkitWorld().getPlayers().forEach((p) -> p.playSound(p.getLocation(), Sound.BLOCK_LEVER_CLICK, 1f, 0.8f));
             }
@@ -282,7 +284,7 @@ public class Match {
                                 .addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
                                 .build(),
                         (e) -> {
-                            if(e.getItem() == null)
+                            if (e.getItem() == null)
                                 return false;
                             e.getItem().setAmount(this.getAttacker().getAvailableNPCCount(BunkerNPCType.values()[selectedNPC.get()]));
                             if (e.getClickedBlock() != null) {

@@ -72,7 +72,7 @@ public class UnsafeUtils {
         }
         List<Integer> referenceOffsets = new ArrayList<>();
         instanceFields.forEach(f -> {
-            if(!f.getType().isPrimitive()) {
+            if (!f.getType().isPrimitive()) {
                 referenceOffsets.add((int) getUnsafe().objectFieldOffset(f));
             }
         });
@@ -86,20 +86,20 @@ public class UnsafeUtils {
         int nextReference = refIterator.hasNext() ? refIterator.next() : size;
         int referenceSize = Unsafe.ARRAY_OBJECT_INDEX_SCALE;
         int passed = Unsafe.ADDRESS_SIZE + referenceSize; //Skip object header (mark and pointer)
-        while(passed < size) {
-            while(nextReference - passed >> 3 != 0) {
+        while (passed < size) {
+            while (nextReference - passed >> 3 != 0) {
                 getUnsafe().putLong(newObject, passed, getUnsafe().getLong(object, passed));
                 passed += 8;
             }
-            while(nextReference - passed >> 2 != 0) {
+            while (nextReference - passed >> 2 != 0) {
                 getUnsafe().putInt(newObject, passed, getUnsafe().getInt(object, passed));
                 passed += 4;
             }
-            while(nextReference - passed != 0) {
+            while (nextReference - passed != 0) {
                 getUnsafe().putByte(newObject, passed, getUnsafe().getByte(object, passed));
                 passed++;
             }
-            if(passed >= size)
+            if (passed >= size)
                 break;
             getUnsafe().putObject(newObject, passed, getUnsafe().getObject(object, passed));
             nextReference = refIterator.hasNext() ? refIterator.next() : size;
@@ -142,7 +142,7 @@ public class UnsafeUtils {
         }
         List<Integer> referenceOffsets = new ArrayList<>();
         instanceFields.forEach(f -> {
-            if(!f.getType().isPrimitive()) {
+            if (!f.getType().isPrimitive()) {
                 referenceOffsets.add((int) getUnsafe().objectFieldOffset(f));
             }
         });
@@ -159,20 +159,20 @@ public class UnsafeUtils {
         int nextReference = refIterator.hasNext() ? refIterator.next() : size;
         int referenceSize = Unsafe.ARRAY_OBJECT_INDEX_SCALE;
         int passed = Unsafe.ADDRESS_SIZE + referenceSize; //Skip object header (mark and pointer)
-        while(passed < size) {
-            while(nextReference - passed >> 3 != 0) {
+        while (passed < size) {
+            while (nextReference - passed >> 3 != 0) {
                 getUnsafe().putLong(newObject, passed, getUnsafe().getLong(object, passed));
                 passed += 8;
             }
-            while(nextReference - passed >> 2 != 0) {
+            while (nextReference - passed >> 2 != 0) {
                 getUnsafe().putInt(newObject, passed, getUnsafe().getInt(object, passed));
                 passed += 4;
             }
-            while(nextReference - passed != 0) {
+            while (nextReference - passed != 0) {
                 getUnsafe().putByte(newObject, passed, getUnsafe().getByte(object, passed));
                 passed++;
             }
-            if(passed >= size)
+            if (passed >= size)
                 break;
 
             //After this, the next thing to copy is an object

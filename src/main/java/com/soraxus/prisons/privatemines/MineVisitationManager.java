@@ -79,6 +79,17 @@ public class MineVisitationManager implements GravSerializable {
         });
     }
 
+    public VisitationType tryAddVisitor(UUID visitor) {
+        if (!this.parent.getGang().isMember(visitor)) {
+            if (this.addVisitor(visitor, VisitationType.RENTAL)) {
+                return VisitationType.RENTAL;
+            }
+        } else if (this.addVisitor(visitor, VisitationType.FREE)) {
+            return VisitationType.FREE;
+        }
+        return null;
+    }
+
     /**
      * Add a visitor to the visitor list
      *
@@ -128,6 +139,9 @@ public class MineVisitationManager implements GravSerializable {
         long oldPrice = this.rentalPrice.getAndSet(price);
         this.visitorLock.perform(() -> {
             for (MineVisitor visitor : visitors) {
+                if (visitor.getVisitationType().equals(VisitationType.FREE))
+                    continue;
+
                 Player player = Bukkit.getPlayer(visitor.getVisitor());
                 AtomicInteger session = visitor.getCurrentSessionTicks();
                 int sessionTicks = session.get();

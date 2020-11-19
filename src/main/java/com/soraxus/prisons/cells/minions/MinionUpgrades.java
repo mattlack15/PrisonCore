@@ -5,6 +5,7 @@ import java.util.List;
 
 public class MinionUpgrades {
     private static final List<Long> prices = new ArrayList<>();
+
     static {
         prices.add(1000L);
         prices.add(10000L);
@@ -20,7 +21,7 @@ public class MinionUpgrades {
 
     public static long getPrice(int currentLevel) {
         currentLevel--;
-        if(prices.size() <= currentLevel) {
+        if (prices.size() <= currentLevel) {
             return -1L;
         }
         return prices.get(currentLevel);

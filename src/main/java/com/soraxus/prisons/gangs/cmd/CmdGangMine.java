@@ -17,10 +17,10 @@ public class CmdGangMine extends GangCommand {
 
     @Override
     protected void perform() {
-        if(this.getArgument(0) != null) {
+        if (this.getArgument(0) != null) {
             new MenuBrowseMines(null).open(getPlayer());
         } else {
-            if (getGang().getLevel() >= 0) { //TODO change
+            if (getGang().getLevel() >= 5) {
                 PrivateMine m = getGang().getMine();
                 if (m == null) {
                     getAsyncExecutor().submit(() -> {

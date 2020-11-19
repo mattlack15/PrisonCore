@@ -34,6 +34,7 @@ public class BunkerWorld extends SpigotCustomWorld {
 
     public void generate() {
         super.create((asyncWorld) -> {
+            System.out.println("Generating world (lambda)");
 
             Schematic mapSchematic = bunker.getMapSchematic();
 
@@ -47,6 +48,8 @@ public class BunkerWorld extends SpigotCustomWorld {
                 e.printStackTrace();
                 System.out.println("Unable to paste map schematic for bunker!");
             }
+
+            System.out.println("Generation marker 1 (lambda)");
 
             bunker.setBunkerLocation(new IntVector3D(borderChunks * 16, 70, borderChunks * 16));
 
@@ -93,6 +96,7 @@ public class BunkerWorld extends SpigotCustomWorld {
                     totalElementTime += ms;
                 }
             }
+            System.out.println("Generation finished (lambda)");
         });
         this.getBukkitWorld().getWorldBorder().setSize(sizeTiles * tileSize + borderChunks * 16 * 2);
         this.getBukkitWorld().getWorldBorder().setCenter((sizeTiles * tileSize + borderChunks * 16 * 2) / 2D, (sizeTiles * tileSize + borderChunks * 16 * 2) / 2D);

@@ -45,7 +45,7 @@ public class SavedPlayerState implements Player {
     private ArrayList<PotionEffect> effects;
     private float fall;
 
-    public SavedPlayerState(Player p){
+    public SavedPlayerState(Player p) {
         this.inventory = new SavedInventory(p.getInventory());
         this.location = p.getLocation().clone();
         this.health = p.getHealth();
@@ -64,10 +64,11 @@ public class SavedPlayerState implements Player {
 
     /**
      * Restores this state to the given player
+     *
      * @param p The player to restore to
      * @return The player's current player state
      */
-    public SavedPlayerState restore(Player p){
+    public SavedPlayerState restore(Player p) {
         SavedPlayerState state = new SavedPlayerState(p);
         this.inventory.restore(p.getInventory());
         p.teleport(location, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
@@ -75,7 +76,7 @@ public class SavedPlayerState implements Player {
         p.setHealth(this.health);
         p.setGameMode(this.gameMode);
         p.setAllowFlight(this.canFly);
-        if(this.canFly){
+        if (this.canFly) {
             p.setFlying(this.isFlying);
         } else {
             p.setFlying(false);
@@ -1254,7 +1255,9 @@ public class SavedPlayerState implements Player {
         this.inventory = inventory;
     }
 
-    public void setLocation(Location location) { this.location = location; }
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     @Override
     public Map<String, Object> serialize() {

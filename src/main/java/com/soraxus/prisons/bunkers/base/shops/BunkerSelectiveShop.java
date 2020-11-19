@@ -6,7 +6,7 @@ import com.soraxus.prisons.bunkers.base.elements.type.TypeShopInfo;
 import com.soraxus.prisons.bunkers.shop.BunkerShop;
 import com.soraxus.prisons.bunkers.shop.BunkerShopItem;
 import com.soraxus.prisons.bunkers.shop.BunkerShopSection;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -75,15 +75,15 @@ public class BunkerSelectiveShop extends BunkerShop {
         this.addSection(sectionEntertainment);
         this.addSection(sectionDecoration);
 
-        for(BunkerElementType type : BunkerElementType.values()) {
-            if(type.getInfo() == null)
+        for (BunkerElementType type : BunkerElementType.values()) {
+            if (type.getInfo() == null)
                 return;
             TypeShopInfo info = type.getInfo().getShopInfo();
-            if(info == null)
+            if (info == null)
                 continue;
 
-            for(BunkerShopSection section : this.getSectionList()) {
-                if(section.getName().equalsIgnoreCase(info.getSection())) {
+            for (BunkerShopSection section : this.getSectionList()) {
+                if (section.getName().equalsIgnoreCase(info.getSection())) {
                     section.addItem(createItem(new ItemBuilder(info.getItem()).addLore("")
                                     .addLore("&6&lNOTE: &fThis is a selective menu,")
                                     .addLore("&fselecting this and left clicking an empty")

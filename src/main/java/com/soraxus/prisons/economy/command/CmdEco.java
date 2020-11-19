@@ -11,8 +11,8 @@ public class CmdEco extends UltraCommand {
     public static final String PREFIX = "&a&lEconomy > &7";
 
     public CmdEco() {
-        this.addAlias("economy");
         this.addAlias("eco");
+        this.addAlias("economy");
 
         this.addParameter(EconomyProvider.getInstance());
         this.addParameter(StringProvider.getInstance(), "action");

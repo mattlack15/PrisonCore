@@ -102,8 +102,9 @@ public class EventSubscriptions implements Listener {
             if (object == null)
                 return;
             s.getCallers().forEach(c -> {
-                if (c.getPriority().equals(priority))
+                if (c.getPriority().equals(priority)) {
                     c.getAction().accept(object, e);
+                }
             });
         });
 
@@ -192,13 +193,17 @@ public class EventSubscriptions implements Listener {
                     }
                     try {
                         EventSubscription annotation = methods.getAnnotation(EventSubscription.class);
+                        String name = c.getName();
                         MethodCaller caller = new MethodCaller((o, e) -> {
                             if (inType.isInstance(e) || inType.isAssignableFrom(e.getClass())) {
                                 methods.setAccessible(true);
                                 try {
                                     methods.invoke(o, e);
-                                } catch (IllegalAccessException | InvocationTargetException e1) {
+                                } catch (IllegalAccessException e1) {
                                     e1.printStackTrace();
+                                } catch (InvocationTargetException e1) {
+                                    System.out.println("ERROR while handling event for " + name);
+                                    e1.getTargetException().printStackTrace();
                                 }
                                 methods.setAccessible(false);
                             }

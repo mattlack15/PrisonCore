@@ -16,7 +16,7 @@ public class NPCTypeArcher implements BunkerNPCTypeInfo {
 
     @Override
     public Storage[] getCost(int level) {
-        return new Storage[] {
+        return new Storage[]{
                 new Storage(BunkerResource.TIMBER, 0, 0),
                 new Storage(BunkerResource.STONE, 0, 0),
         };
@@ -36,15 +36,15 @@ public class NPCTypeArcher implements BunkerNPCTypeInfo {
     public List<String> getUpgradePerks(int currentLevel) {
         List<String> l = new ArrayList<>();
         double health = getMaxHealth(currentLevel);
-        double nextHealth = getMaxHealth(currentLevel+1);
+        double nextHealth = getMaxHealth(currentLevel + 1);
         double dHealth = MathUtils.round(nextHealth - health, 1);
         l.add("&a+&f" + dHealth + " &chealth");
         l.add("&a+&f20% &9damage");
-        if(currentLevel == 1) {
+        if (currentLevel == 1) {
             l.add("&a+ &eArrow Barrage");
-        } else if(currentLevel == 2) {
+        } else if (currentLevel == 2) {
             l.add("&a+ &eExplosive Arrow");
-        } else if(currentLevel == 3) {
+        } else if (currentLevel == 3) {
             l.add("&a+ &ePoison Arrow");
         }
 

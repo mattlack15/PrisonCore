@@ -13,13 +13,13 @@ public class Line {
     private Vector3D pos2;
 
     public void draw() {
-        double dist = 1/parent.getParticleDensity();
+        double dist = 1 / parent.getParticleDensity();
         Vector3D diff = pos2.subtract(pos1);
         int count = (int) (diff.length() * parent.getParticleDensity());
         diff = diff.normalize().multiply(dist);
         Vector3D curr = pos1;
-        for (int i = 0; i < count; i ++) {
-            if(parent.getParticle().equals(Particle.REDSTONE)) {
+        for (int i = 0; i < count; i++) {
+            if (parent.getParticle().equals(Particle.REDSTONE)) {
                 parent.getWorld().spawnParticle(parent.getParticle(), curr.getX(), curr.getY(), curr.getZ(), 1, 255, 255, 255, 1);
             } else if (parent.getData() == null) {
                 parent.getWorld().spawnParticle(parent.getParticle(), curr.getX(), curr.getY(), curr.getZ(), 1);

@@ -21,7 +21,7 @@ public class TaskBuildAndEnable extends Task {
         return () -> {
             try {
                 getTarget().getParent().build();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             getTarget().getParent().enable();

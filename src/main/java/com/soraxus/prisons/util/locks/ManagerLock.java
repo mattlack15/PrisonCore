@@ -106,7 +106,8 @@ public class ManagerLock<T, K> {
         } finally {
             resultLock.unlock();
         }
-        future.complete(result); // Discord
+        if (future != null)
+            future.complete(result);
     }
 
     /**
@@ -273,12 +274,13 @@ public class ManagerLock<T, K> {
      * The difference between this method and loadLock is that this will block, and wait for other load/creation operations,
      * only returning when either all load/creation operations have returned null and the load lock was acquired, OR if
      * a load/creation operation has returned a NON-null instance of K
+     *
      * @return null if acquired, K if loaded by another thread
      */
     public K creationLock(T id, CompletableFuture<K> future) {
-        while(true) {
+        while (true) {
             CompletableFuture<K> currentFuture = loadLock(id, future);
-            if(currentFuture != null) {
+            if (currentFuture != null) {
                 K out = null;
                 try {
                     out = currentFuture.get();

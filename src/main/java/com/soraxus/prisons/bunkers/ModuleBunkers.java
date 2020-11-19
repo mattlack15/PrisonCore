@@ -19,9 +19,9 @@ import com.soraxus.prisons.bunkers.workers.Worker;
 import com.soraxus.prisons.core.CoreModule;
 import com.soraxus.prisons.event.bunkers.BunkerPlayerTeleportEvent;
 import com.soraxus.prisons.util.EventSubscription;
-import com.soraxus.prisons.util.ItemBuilder;
 import com.soraxus.prisons.util.Scheduler;
 import com.soraxus.prisons.util.Synchronizer;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.MenuElement;
 import com.soraxus.prisons.util.string.TextUtil;
 import lombok.Getter;
@@ -130,7 +130,7 @@ public class ModuleBunkers extends CoreModule {
     @EventSubscription
     public void onClick(PlayerInteractEvent e) {
         if (e.getClickedBlock() == null) {
-            if(!e.getAction().equals(Action.RIGHT_CLICK_AIR))
+            if (!e.getAction().equals(Action.RIGHT_CLICK_AIR))
                 return;
             if (e.getItem() != null && ToolUtils.isBuildTool(e.getItem())) {
                 BunkerShop shop = new BunkerSelectiveShop((t) -> selectedTypes.put(e.getPlayer().getUniqueId(), t));
@@ -155,6 +155,9 @@ public class ModuleBunkers extends CoreModule {
             }
 
             assert bunker != null;
+
+            e.setCancelled(true);
+
             IntVector2D pos = bunker.getWorld().getTileAt(loc);
             if (bunker.getTileMap().isWithin(pos)) {
 
@@ -166,10 +169,10 @@ public class ModuleBunkers extends CoreModule {
                     //Tile is empty
                     if (stack != null && ToolUtils.isDefaultTool(stack)) {
                         new MenuTileEmpty(bunker, pos).open(e.getPlayer());
-                    } else if(stack != null && ToolUtils.isBuildTool(stack)) {
+                    } else if (stack != null && ToolUtils.isBuildTool(stack)) {
                         BunkerElementType type = selectedTypes.get(e.getPlayer().getUniqueId());
 
-                        if(!bunker.hasResources(type.getBuildCost(1))) {
+                        if (!bunker.hasResources(type.getBuildCost(1))) {
                             bunker.messageMember(e.getPlayer(), "&cYou don't have enough resources to build this.");
                             return;
                         }
@@ -179,12 +182,12 @@ public class ModuleBunkers extends CoreModule {
 
                         Worker worker = bunker.getFreeWorker();
 
-                        if(worker == null) {
+                        if (worker == null) {
                             bunker.messageMember(e.getPlayer(), "&cNo available worker.");
                             return;
                         }
 
-                        if(!bunker.setElement(pos, element)) {
+                        if (!bunker.setElement(pos, element)) {
                             bunker.messageMember(e.getPlayer(), "&cNo room for this building. This building has a size of &f" +
                                     element.getShape().getX() + " by " + element.getShape().getY());
                         }
@@ -192,7 +195,7 @@ public class ModuleBunkers extends CoreModule {
                         tile = bunker.getTileMap().getTile(pos); //Tile is now non null
 
                         Task task = new TaskBuildAndEnable(tile, worker);
-                        if(!task.start()) {
+                        if (!task.start()) {
                             bunker.messageMember(e.getPlayer(), "&cNo available worker.");
                         }
                     }
@@ -200,8 +203,8 @@ public class ModuleBunkers extends CoreModule {
 
                     //Tile is not empty
                     //Check for protection
-                    if (tile.getParent().hasFlag(BunkerElementFlag.PROTECTED))
-                        e.setCancelled(true); //Cancel interaction
+                    if (!tile.getParent().hasFlag(BunkerElementFlag.PROTECTED))
+                        e.setCancelled(false);
 
                     //Call internal events
                     if (stack != null && ToolUtils.isDefaultTool(stack)) {

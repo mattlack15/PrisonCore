@@ -4,7 +4,7 @@ import net.ultragrav.command.UltraCommand;
 import org.bukkit.ChatColor;
 
 public class CmdGang extends UltraCommand {
-    public static final String PREFIX = ChatColor.translateAlternateColorCodes('&', "&d&lGangs > &f");
+    public static final String PREFIX = ChatColor.translateAlternateColorCodes('&', "&d&lGangs &8&l▶ &f");
 
     public CmdGang() {
         this.addAlias("gang");

@@ -11,6 +11,7 @@ public class BunkerDebugStats {
     }
 
     public static Map<DebugStat, AvgMeasure> measureMap = new HashMap<>();
+
     static {
         measureMap.put(DebugStat.BUNKER_LOAD_TOTAL, new AvgMeasure());
     }

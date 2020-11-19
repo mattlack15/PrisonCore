@@ -1,6 +1,5 @@
 package com.soraxus.prisons.pickaxe.crystals;
 
-import com.soraxus.prisons.util.CastUtil;
 import com.soraxus.prisons.util.list.ListUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,16 +16,17 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CrystalInfo implements GravSerializable {
-    private List<Crystal> crystals = new ArrayList<>(6);
+    private static final List<Crystal> emptyList = ListUtil.filledList(null, 6);
+
+    private List<Crystal> crystals = new ArrayList<>(emptyList);
 
     private void clearCrystals() {
-        crystals = new ArrayList<>(6);
-        for(int i = 0; i < 6; i++)
-            crystals.add(null); // Create empty slots
+        crystals = new ArrayList<>(emptyList);
     }
 
     public void read(GravSerializer s) {
         this.crystals = s.readObject();
+        ListUtil.fillList(this.crystals, null, 6);
     }
 
     public void write(GravSerializer s) {

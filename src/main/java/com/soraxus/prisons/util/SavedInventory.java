@@ -4,7 +4,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -18,11 +17,12 @@ public class SavedInventory implements PlayerInventory {
     private ItemStack[] armorContents;
     private ItemStack[] contents;
 
-    public SavedInventory(PlayerInventory inv){
+    public SavedInventory(PlayerInventory inv) {
         this.armorContents = inv.getArmorContents();
         this.contents = inv.getContents();
     }
-    public ItemStack[] getArmorContents(){
+
+    public ItemStack[] getArmorContents() {
         return this.armorContents;
     }
 
@@ -380,7 +380,7 @@ public class SavedInventory implements PlayerInventory {
         return null;
     }
 
-    public ItemStack[] getContents(){
+    public ItemStack[] getContents() {
         return this.contents;
     }
 
@@ -391,10 +391,11 @@ public class SavedInventory implements PlayerInventory {
 
     /**
      * Restores this inventory to the given player and returns their current inventory
+     *
      * @param p The player to restore to
      * @return The player's current inventory
      */
-    public SavedInventory restore(@NotNull PlayerInventory inv){
+    public SavedInventory restore(@NotNull PlayerInventory inv) {
         SavedInventory oldInv = new SavedInventory(inv);
         inv.setContents(this.contents);
         inv.setArmorContents(armorContents);

@@ -16,7 +16,7 @@ public class ReflectionUtil {
             for (ClassPath.ClassInfo classInfo : classpath.getTopLevelClassesRecursive(packageName)) {
                 classes.add(classInfo.load());
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             Bukkit.getLogger().info("Could not get classes in package " + packageName);
         }
         return classes;

@@ -5,29 +5,29 @@ import com.soraxus.prisons.event.PrisonPreSellEvent;
 import com.soraxus.prisons.selling.ModuleSelling;
 import com.soraxus.prisons.selling.mutlipliers.MultiplierInfo;
 import com.soraxus.prisons.util.NumberUtils;
-import com.soraxus.prisons.util.Scheduler;
-import com.soraxus.prisons.util.UltraCollectors;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.math.BigInteger;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class AutoSellManager {
     private ModuleSelling parent;
+
     public AutoSellManager(ModuleSelling parent) {
         this.parent = parent;
     }
 
     private Map<UUID, com.soraxus.prisons.selling.autosell.AutoSellInfo> infos = new HashMap<>();
-    private static final long sellInterval = 30*1000;
+    private static final long sellInterval = 30 * 1000;
 
     public AutoSellInfo getInfo(Player player) {
         return getInfo(player.getUniqueId());
     }
+
     public AutoSellInfo getInfo(UUID id) {
         if (!infos.containsKey(id)) {
             infos.put(id, new AutoSellInfo());
@@ -46,7 +46,7 @@ public class AutoSellManager {
 
     public long autosellNow(Player player, ItemStack item) {
         com.soraxus.prisons.selling.autosell.AutoSellInfo info = getInfo(player.getUniqueId());
-        if(item == null)
+        if (item == null)
             return 0;
 
         long tot = parent.getPrice(item);

@@ -7,8 +7,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -43,7 +41,7 @@ public class GangRelationsManager {
     public void load() {
         Map<RelationKey, GangRelation> relations = new ConcurrentSkipListMap<>((o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.getGang1().toString(), o2.getGang1().toString()));
         ioLock.lock();
-        for(String key : config.getKeys(false)) {
+        for (String key : config.getKeys(false)) {
             ConfigurationSection section = config.getConfigurationSection(key);
             UUID gang1 = UUID.fromString(section.getString("gang1"));
             UUID gang2 = UUID.fromString(section.getString("gang2"));
@@ -86,7 +84,7 @@ public class GangRelationsManager {
 
     private void markDirty() {
         ioLock.lock();
-        if(dirty) {
+        if (dirty) {
             ioLock.unlock();
             return;
         }

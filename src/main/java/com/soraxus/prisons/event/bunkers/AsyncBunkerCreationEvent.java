@@ -17,13 +17,15 @@ public class AsyncBunkerCreationEvent extends Event {
     }
 
     private final Bunker bunker;
-    public AsyncBunkerCreationEvent (Bunker bunker) {
+
+    public AsyncBunkerCreationEvent(Bunker bunker) {
         super(true);
         this.bunker = bunker;
     }
 
     /**
      * Gets th bunker that has been created asynchronously
+     *
      * @return The created bunker
      */
     public Bunker getBunker() {

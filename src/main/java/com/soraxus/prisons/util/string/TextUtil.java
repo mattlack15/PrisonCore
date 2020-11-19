@@ -16,31 +16,33 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TextUtil {
-    public static String[] splitIntoLines(String str, String regexWordSeperator, String lineBeginning, int maxLineSize){
-        if(str.length() <= maxLineSize){
-            return new String[]{str};
+    public static String[] splitIntoLines(String str, String regexWordSeperator, String lineBeginning, int maxLineSize) {
+        if (str.length() <= maxLineSize) {
+            return new String[]{lineBeginning + str};
         }
         ArrayList<String> out = new ArrayList<>();
-        String words[] = str.split( " ");
-        String holder = lineBeginning + "";
-        for(String word : words){
-            if(holder.length() + word.length() >= maxLineSize){
-                out.add(holder);
-                holder = lineBeginning + word + " ";
+        String[] words = str.split(" ");
+        StringBuilder holder = new StringBuilder(lineBeginning + "");
+        for (String word : words) {
+            if (holder.length() + word.length() >= maxLineSize) {
+                out.add(holder.toString());
+                holder = new StringBuilder(lineBeginning + word + " ");
             } else {
-                holder += word + " ";
+                holder.append(word).append(" ");
             }
         }
-        out.add(holder);
+        out.add(holder.toString());
         return out.toArray(new String[0]);
     }
-    public static String[] splitIntoLines(String str, int maxLineSize){
+
+    public static String[] splitIntoLines(String str, int maxLineSize) {
         return TextUtil.splitIntoLines(str, " ", "", maxLineSize);
     }
 
     public static String color(String str) {
         return ChatColor.translateAlternateColorCodes('&', str);
     }
+
     public static List<String> color(List<String> in) {
         return in.stream()
                 .map(TextUtil::color)
@@ -128,6 +130,7 @@ public class TextUtil {
     public static String join(String[] in, int start) {
         return join(in, start, in.length);
     }
+
     public static String join(String[] in, int start, int end) {
         String[] newIn = new String[end - start];
         System.arraycopy(in, start, newIn, 0, end - start);

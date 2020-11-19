@@ -26,7 +26,7 @@ public class TaskBreak extends Task {
 
     @Override
     public synchronized boolean start() throws IllegalStateException {
-        if(super.start()) {
+        if (super.start()) {
             health = getTarget().getParent().getHealth();
             getTarget().getParent().disable();
             return true;

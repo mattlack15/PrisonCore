@@ -8,11 +8,9 @@ import com.soraxus.prisons.bunkers.npc.AvailableTarget;
 import com.soraxus.prisons.bunkers.npc.ElementDrop;
 import com.soraxus.prisons.util.EventSubscription;
 import com.soraxus.prisons.util.EventSubscriptions;
-import com.soraxus.prisons.util.math.MathUtils;
 import net.ultragrav.serializer.GravSerializer;
 import net.ultragrav.utils.IntVector2D;
 import net.ultragrav.utils.Vector3D;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -43,53 +41,59 @@ public class ElementMortar extends ActiveDefenseElement {
     }
 
     private static Vector calculateVelocity(Location start, Location target, double ang) {
-        double dy = 0.03999999910593033D;
+        final double gr = 0.03999999910593033D;
+        final double fr = 0.9800000190734863D;
 
-        double fdd = 0.9800000190734863D;
+        Vector3D st = Vector3D.fromBukkitVector(start.toVector());
+        Vector3D tg = Vector3D.fromBukkitVector(target.toVector());
 
-        Vector3D stv = Vector3D.fromBukkitVector(start.toVector());
-        Vector3D tv = Vector3D.fromBukkitVector(target.toVector());
-        Vector3D gstv = stv.setY(tv.getY());
+        Vector3D fst = st.setY(tg.getY());
 
-        Vector3D dd = tv.subtract(gstv);
-        double ax;
-        if (dd.getZ() == 0) {
-            ax = Math.PI / 2;
-        } else {
-            ax = Math.atan(dd.getX() / dd.getZ());
-        }
-        if (dd.getZ() < 0) {
-            ax += Math.PI;
-        }
+        double dx = fst.distance(tg);
 
-        double h = stv.subtract(gstv).length();
-        double d = dd.length();
-        Bukkit.broadcastMessage("h: " + h + ", d: " + d);
+        /*
+        vx(t)=vx_0 * fr^t
 
-        double lfdd = Math.log(fdd);
+		dx = sum(0, t) { vx(t) }
+		dx = vx_0 * (1-fr^t)/(1-fr)
 
-        double fdd1r = fdd / (fdd - 1);
+		vx_0 = dx * (1-fr)/(1-fr^t)
 
-        double k = h - d * Math.tan(ang);
-        k *= lfdd / dy;
-        k /= fdd1r;
+		vy_0 = v_0 sin(ang)
+		vx_0 = v_0 cos(ang)
 
-        double wi = Math.pow(fdd, k / Math.log(fdd));
-        double w = MathUtils.lw(wi);
+		vy_0 = dx * ((1-fr)/(1-fr^t)) * tan(ang)
 
-        double t = (k - w) / lfdd;
+		y_0 is defined as the height the starting point is above the end point
 
-        Bukkit.broadcastMessage("t: " + t);
+		vy(t) = vy(t-1) * fr - gr
 
-        double fddpt = Math.pow(fdd, t);
+		vy(t) = vy_0 * fr^t - sumGeo(gr, fr, t)
 
-        double vy = (h * lfdd - dy * fdd1r * (1 - fddpt - t * lfdd)) / (fddpt - 1);
-        double vd = d * lfdd / (fddpt - 1);
-        double vx = vd * Math.sin(ax);
-        double vz = vd * Math.cos(ax);
-        Bukkit.broadcastMessage("v: (" + vx + ", " + vy + ", " + vz + ")");
+        dy = vy_0 * fr^t * t - sumSumGeo(gr, fr, t)
+        vy_0 = (dy + gr * (n - fr*((1-fr^t)/(1-fr))) / (1 - fr)) / (fr^t * t)
 
-        return new Vector(vx, -vy, vz);
+        (dy + gr * (n - fr*((1-fr^t)/(1-fr))) / (1 - fr)) = dx * (fr^t * t) * ((1-fr)/(1-fr^t)) * tan(ang)
+
+        dy = a
+        gr = b
+        fr = c
+        dx = d
+        ang = e
+
+
+        g = tan(e)
+        h = 1 - c
+
+        k = c^t
+
+
+        a + b * (n - c*((1-k)/h)) / h = d * g * (k * ln(k)/ln(c)) * (h/(1-k))
+
+
+         */
+
+        return null;
     }
 
     @Override
@@ -125,6 +129,7 @@ public class ElementMortar extends ActiveDefenseElement {
     @Override
     public void onTick() {
         super.onTick();
+
         if (!this.isDefendingMatchActive())
             return;
 

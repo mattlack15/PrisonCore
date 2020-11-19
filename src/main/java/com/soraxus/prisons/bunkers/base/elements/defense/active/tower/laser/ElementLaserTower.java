@@ -30,6 +30,11 @@ public class ElementLaserTower extends ActiveDefenseElement {
     }
 
     @Override
+    public void onTick() {
+
+    }
+
+    @Override
     public BunkerElementType getType() {
         return null;
     }

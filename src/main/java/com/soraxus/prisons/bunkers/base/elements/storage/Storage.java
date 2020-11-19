@@ -42,12 +42,13 @@ public class Storage implements GravSerializable {
     }
 
     public synchronized void setAmount(double amount) {
-        this.amount = amount;
+        this.amount = Math.max(0, amount);
     }
 
     public synchronized void decrementAmount(double amount) {
         this.amount = Math.max(0, amount);
     }
+
     public synchronized double incrementAmount(double amount) {
         double toAdd = Math.min(this.getCap() - this.getAmount(), amount);
         this.amount += toAdd;

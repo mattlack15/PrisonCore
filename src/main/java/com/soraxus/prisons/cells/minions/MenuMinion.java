@@ -1,8 +1,8 @@
 package com.soraxus.prisons.cells.minions;
 
 import com.soraxus.prisons.economy.Economy;
-import com.soraxus.prisons.util.ItemBuilder;
 import com.soraxus.prisons.util.NumberUtils;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
 import com.soraxus.prisons.util.menus.MenuManager;
@@ -21,13 +21,16 @@ public class MenuMinion extends Menu {
     }
 
     public void setup() {
+        long p = MinionUpgrades.getPrice((int) minion.getSpeed());
         MenuElement upgradeSpeed = new MenuElement(new ItemBuilder(Material.FEATHER).setName("&6&lUpgrade Speed")
                 .addLore("&fCurrent: &7" + Math.round(minion.getSpeed()))
-                .addLore("&fUpgrade Cost: &e$" + NumberUtils.toReadableNumber(MinionUpgrades.getPrice((int) minion.getSpeed())))
+                .addLore(p != -1 ? "&fUpgrade Cost: &e$" + NumberUtils.toReadableNumber(p) : "&cMax speed reached")
                 .addLore("", "&8Click to upgrade").build())
                 .setClickHandler((e, i) -> {
                     double current = minion.getSpeed();
                     long price = MinionUpgrades.getPrice((int) current);
+                    if(price == -1)
+                        return;
                     if (!Economy.money.hasBalance(e.getWhoClicked().getUniqueId(), price)) {
                         this.getElement(e.getSlot()).addTempLore(this, "&cYou're too poor :.(", 60);
                         return;
@@ -39,7 +42,7 @@ public class MenuMinion extends Menu {
 
         MenuElement collect = new MenuElement(new ItemBuilder(Material.EXP_BOTTLE)
                 .setName("&6&lCollect")
-                .addLore("&fStored: &a" + minion.getStored().get())
+                .addLore("&fStored Tokens: &a" + minion.getStored().get())
                 .addLore("", "&8Click to collect").build()).setClickHandler((e, i) -> {
 
             if (!e.getWhoClicked().getUniqueId().equals(minion.getCreator()))
@@ -54,10 +57,10 @@ public class MenuMinion extends Menu {
                 .addLore("", "&8Click to collect").build()));
 
         MenuElement pickup = new MenuElement(new ItemBuilder(Material.REDSTONE_BLOCK)
-        .setName("&cPickup").addLore("&7Click this to remove and pickup this minion").build()).setClickHandler((e, i) -> {
+                .setName("&cPickup").addLore("&7Click this to remove and pickup this minion").build()).setClickHandler((e, i) -> {
             this.minion.remove();
             e.getWhoClicked().getInventory().addItem(this.minion.asItemStack());
-            ((Player)e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.ENTITY_ITEM_PICKUP, 1f, 1f);
+            ((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.ENTITY_ITEM_PICKUP, 1f, 1f);
             e.getWhoClicked().closeInventory();
         });
 

@@ -9,7 +9,7 @@ import com.soraxus.prisons.bunkers.npc.combat.sorcerer.NPCSorcerer;
 import com.soraxus.prisons.bunkers.npc.info.types.NPCTypeArcher;
 import com.soraxus.prisons.bunkers.npc.info.types.NPCTypeBomber;
 import com.soraxus.prisons.bunkers.npc.info.types.NPCTypeSorcerer;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.Material;
@@ -35,7 +35,7 @@ public enum BunkerNPCType {
             new NPCTypeBomber()),
 
     SORCERER("Sorcerer",
-            new ItemBuilder(Material.BLAZE_ROD,1).setName("&eSorcerer").build(),
+            new ItemBuilder(Material.BLAZE_ROD, 1).setName("&eSorcerer").build(),
             "I do magic trickz",
             1,
             NPCSorcerer::new,

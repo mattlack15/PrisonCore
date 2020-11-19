@@ -12,26 +12,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
 public class ActionBar {
-
-    private static class ActionBarInfo {
-        private long sentTime;
-        private int priority;
-
-        ActionBarInfo(long sentTime, int priority) {
-            this.sentTime = sentTime;
-            this.priority = priority;
-        }
-
-        public int getPriority() {
-            return priority;
-        }
-
-        public long getSentTime() {
-            return sentTime;
-        }
-    }
-
     private static Map<UUID, ActionBarInfo> lastActionBars = new HashMap<>();
 
     /**
@@ -86,6 +68,7 @@ public class ActionBar {
 
             Method handle = craftPlayerClass.getDeclaredMethod("getHandle");
             Object iCraftPlayer = handle.invoke(craftPlayer);
+
             Field playerConnectionField = iCraftPlayer.getClass().getDeclaredField("playerConnection");
             Object playerConnection = playerConnectionField.get(iCraftPlayer);
             Method sendPacket = playerConnection.getClass().getDeclaredMethod("sendPacket", packet);
@@ -111,5 +94,23 @@ public class ActionBar {
      */
     public static void sendAll(String message, int priority) {
         Bukkit.getOnlinePlayers().forEach(p -> send(p, message, priority));
+    }
+
+    private static class ActionBarInfo {
+        private long sentTime;
+        private int priority;
+
+        ActionBarInfo(long sentTime, int priority) {
+            this.sentTime = sentTime;
+            this.priority = priority;
+        }
+
+        public int getPriority() {
+            return priority;
+        }
+
+        public long getSentTime() {
+            return sentTime;
+        }
     }
 }

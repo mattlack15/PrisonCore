@@ -7,20 +7,26 @@ import java.util.concurrent.locks.LockSupport;
 
 //This one is slightly faster on average than the spinning lock
 public class CustomReentrantLockLooper {
-
-    public static class Node {
-        public final AtomicReference<Node> next = new AtomicReference<>(); //I realize now this doesn't have to be atomic
-        public final Thread thread;
-
-        public Node(Thread thread, Node next) {
-            this.next.set(next);
-            this.thread = thread;
-        }
-    }
-
     private final AtomicReference<Thread> owner = new AtomicReference<>();
     private final Node waitList = new Node(null, null);
     private final AtomicInteger lockCount = new AtomicInteger();
+
+    public static void main(String[] args) throws InterruptedException {
+        final int[] counter = {0};
+        CustomReentrantLockLooper lock = new CustomReentrantLockLooper();
+        AtomicLong ns = new AtomicLong(0L);
+        for (int i = 0; i < 1000; i++) {
+            new Thread(() -> {
+                long n = System.nanoTime();
+                lock.lock();
+                counter[0]++;
+                lock.unlock();
+                ns.getAndAdd(System.nanoTime() - n);
+            }).start();
+        }
+        Thread.sleep(1000);
+        System.out.println("Average: " + (ns.get() / 1000) + "ns completed: " + counter[0]);
+    }
 
     public void lock() {
         if (!owner.compareAndSet(null, Thread.currentThread())) {
@@ -87,20 +93,13 @@ public class CustomReentrantLockLooper {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        final int[] counter = {0};
-        CustomReentrantLockLooper lock = new CustomReentrantLockLooper();
-        AtomicLong ns = new AtomicLong(0L);
-        for (int i = 0; i < 1000; i++) {
-            new Thread(() -> {
-                long n = System.nanoTime();
-                lock.lock();
-                counter[0]++;
-                lock.unlock();
-                ns.getAndAdd(System.nanoTime() - n);
-            }).start();
+    public static class Node {
+        public final AtomicReference<Node> next = new AtomicReference<>(); //I realize now this doesn't have to be atomic
+        public final Thread thread;
+
+        public Node(Thread thread, Node next) {
+            this.next.set(next);
+            this.thread = thread;
         }
-        Thread.sleep(1000);
-        System.out.println("Average: " + (ns.get() / 1000) + "ns completed: " + counter[0]);
     }
 }

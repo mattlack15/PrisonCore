@@ -3,6 +3,7 @@ package com.soraxus.prisons.cells.cmd;
 import com.soraxus.prisons.cells.Cell;
 import com.soraxus.prisons.util.Synchronizer;
 import org.bukkit.Location;
+import org.bukkit.util.Vector;
 
 public class CmdCellTp extends CellCommand {
     public CmdCellTp() {
@@ -15,7 +16,7 @@ public class CmdCellTp extends CellCommand {
     protected void perform() {
         getAsyncExecutor().submit(() -> {
             Cell cell = getOrLoadCell();
-            Location loc = cell.getBoundingRegion().getCenter().toBukkitVector().setY(61.1D).toLocation(cell.getWorld().getBukkitWorld());
+            Location loc = new Vector(33.5, 61.1D, 28.5).toLocation(cell.getWorld().getBukkitWorld());
             Synchronizer.synchronize(() -> getPlayer().teleport(loc));
         });
     }

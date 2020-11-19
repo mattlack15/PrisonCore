@@ -18,8 +18,9 @@ public class CmdGangJoin extends GangCommand {
         getAsyncExecutor().submit(() -> {
             Gang gang = getArgument(0);
             if (!sender.hasPermission("gang.admin") && !gang.addMemberWithCondition(getGangMember(), () -> {
-                if(gang.isInvited(getGangMember().getMember())) {
+                if (gang.isInvited(getGangMember().getMember())) {
                     gang.unInvite(getGangMember().getMember());
+                    gang.addMember(getGangMember());
                     return true;
                 }
                 return false;

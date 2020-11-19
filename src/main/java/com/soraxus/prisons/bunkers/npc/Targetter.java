@@ -43,7 +43,7 @@ public class Targetter {
 
     public void setTarget(AbstractBunkerNPCController other) {
         NPC npc = parent.getNpc();
-        if(!other.isSpawned())
+        if (!other.isSpawned())
             return;
         NavigatorParameters params = npc.getNavigator().getLocalParameters();
         params.range((float) npc.getEntity().getLocation().toVector().distance(other.getNpc().getEntity().getLocation().toVector()) + 5);

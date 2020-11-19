@@ -4,12 +4,14 @@ import com.soraxus.prisons.bunkers.base.elements.storage.Storage;
 import lombok.Getter;
 import net.ultragrav.serializer.GravSerializable;
 import net.ultragrav.serializer.GravSerializer;
+import net.ultragrav.serializer.Meta;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Getter
 public class MatchStats implements GravSerializable {
@@ -20,6 +22,7 @@ public class MatchStats implements GravSerializable {
     private final AtomicInteger kills = new AtomicInteger();
     private final AtomicInteger matchDurationSeconds = new AtomicInteger();
     private final AtomicBoolean attackerSuccess = new AtomicBoolean(false);
+    private final AtomicLong startTime = new AtomicLong();
 
     public void recordCollectedResource(Storage storage) {
         collectedResources.add(storage);
@@ -57,26 +60,35 @@ public class MatchStats implements GravSerializable {
         return this.attackerSuccess.get();
     }
 
-    public MatchStats() {}
+    public MatchStats() {
+    }
 
     public MatchStats(GravSerializer serializer) {
-        this.collectedResources = serializer.readObject();
-        this.deaths.set(serializer.readInt());
-        this.spawns.set(serializer.readInt());
-        this.destroyedBuildings.set(serializer.readInt());
-        this.kills.set(serializer.readInt());
-        this.matchDurationSeconds.set(serializer.readInt());
-        this.attackerSuccess.set(serializer.readBoolean());
+        Meta meta = new Meta(serializer);
+
+        this.collectedResources = Collections.synchronizedList(meta.get("collectedResources"));
+        this.deaths.set(meta.get("deaths"));
+        this.spawns.set(meta.get("spawns"));
+        this.destroyedBuildings.set(meta.get("destroyedBuildings"));
+        this.kills.set(meta.get("kills"));
+        this.matchDurationSeconds.set(meta.get("matchDurationSeconds"));
+        this.attackerSuccess.set(meta.get("attackerSuccess"));
+        this.startTime.set(meta.get("startTime"));
     }
 
     @Override
     public void serialize(GravSerializer gravSerializer) {
-        gravSerializer.writeObject(collectedResources);
-        gravSerializer.writeInt(deaths.get());
-        gravSerializer.writeInt(spawns.get());
-        gravSerializer.writeInt(destroyedBuildings.get());
-        gravSerializer.writeInt(kills.get());
-        gravSerializer.writeInt(matchDurationSeconds.get());
-        gravSerializer.writeBoolean(this.attackerSuccess.get());
+        Meta meta = new Meta();
+
+        meta.set("collectedResources", collectedResources);
+        meta.set("deaths", deaths.get());
+        meta.set("spawns", spawns.get());
+        meta.set("destroyedBuildings", destroyedBuildings.get());
+        meta.set("kills", kills.get());
+        meta.set("matchDurationSeconds", matchDurationSeconds.get());
+        meta.set("attackerSuccess", attackerSuccess.get());
+        meta.set("startTime", startTime.get());
+
+        meta.serialize(gravSerializer);
     }
 }

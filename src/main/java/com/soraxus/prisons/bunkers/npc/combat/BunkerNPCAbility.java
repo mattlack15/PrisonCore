@@ -13,6 +13,7 @@ public abstract class BunkerNPCAbility {
     private final AtomicInteger cooldown = new AtomicInteger(cooldownTicks());
     @Getter
     private final String name;
+
     public BunkerNPCAbility(String name, AbstractBunkerNPCController parent) {
         this.parent = parent;
         this.name = name;
@@ -30,7 +31,10 @@ public abstract class BunkerNPCAbility {
 
     public abstract int cooldownTicks();
 
-    public void tick() {};
+    public void tick() {
+    }
+
+    ;
 
     public Location getTargetImmediateLocation() {
         return this.parent.getCurrentTarget().getTarget().getImmediateLocation();

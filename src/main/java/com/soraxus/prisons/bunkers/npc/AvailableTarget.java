@@ -5,7 +5,10 @@ import org.jetbrains.annotations.NotNull;
 
 public interface AvailableTarget<T> {
     void apply(Targetter controller);
+
     @NotNull T get();
+
     @NotNull Location getImmediateLocation();
+
     boolean exists();
 }

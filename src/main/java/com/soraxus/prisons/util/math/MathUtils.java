@@ -8,16 +8,40 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MathUtils {
+    /**
+     * Random instance used for all random utility methods in this class
+     */
     private static Random rand = ThreadLocalRandom.current();
 
+    /**
+     * Generate a random integer between min and max
+     *
+     * @param min Minimum value
+     * @param max Maxmimum value
+     * @return Random integer between min and max
+     */
     public static int random(int min, int max) {
         return rand.nextInt((max - min) + 1) + min;
     }
 
+
+    /**
+     * Generate a random double between min and max
+     *
+     * @param min Minimum value
+     * @param max Maxmimum value
+     * @return Random double between min and max
+     */
     public static double random(double min, double max) {
         return rand.nextDouble() * (max - min) + min;
     }
 
+    /**
+     * Round a number randomly, probability of rounding up is the decimal of the number
+     *
+     * @param i Number
+     * @return Rounded number
+     */
     public static int roundRand(double i) {
         int am = (int) Math.floor(i);
         double ret = i - am;
@@ -27,6 +51,13 @@ public class MathUtils {
         return am;
     }
 
+    /**
+     * Check whether a random number [0, max] is within range [0, i]
+     *
+     * @param i   Value
+     * @param max Maximum
+     * @return {@code true} if the condition is satisfied
+     */
     public static boolean isRandom(double i, double max) {
         return (i >= random(0.0, max));
     }
@@ -83,14 +114,36 @@ public class MathUtils {
         return i;
     }
 
+    /**
+     * Generate a low-weighted random integer between min and max
+     *
+     * @param min    Minimum
+     * @param max    Maximum
+     * @param weight Weight
+     * @return Low-weighted random integer
+     */
     public static int lowWeightedInt(int min, int max, double weight) {
         return (int) (weightedDoubleInternal(weight) * (max - min) + min);
     }
 
+    /**
+     * Generate a high-weighted random integer between min and max
+     *
+     * @param min    Minimum
+     * @param max    Maximum
+     * @param weight Weight
+     * @return High-weighted random integer
+     */
     public static int highWeightedInt(int min, int max, double weight) {
         return (int) ((1 - weightedDoubleInternal(weight)) * (max - min) + min);
     }
 
+    /**
+     * Generate a weighted double
+     *
+     * @param weight Weight
+     * @return Weighted double
+     */
     private static double weightedDoubleInternal(double weight) {
         double d = rand.nextDouble();
         return Math.pow(d, weight + 1);
@@ -115,5 +168,46 @@ public class MathUtils {
             S -= (Se - z) / (S1e - (S + 2) * (Se - z) / (2 * S + 2));
         }
         return S;
+    }
+
+    public static double sumGeo(double a, double r, int n) {
+        return a * (1 - Math.pow(r, n)) / (1 - r);
+    }
+
+    public static double sumSumGeo(double a, double r, int n) {
+        return a * (n - sumGeo(r, r, n)) / (1 - r);
+    }
+
+    public static double avg(double[] nums) {
+        int size = nums.length;
+        double avg = 0;
+        for(int i = 0; i < size; i++) {
+            avg += (nums[i] - avg) / (i+1);
+        }
+        return avg;
+    }
+
+    public static double avg(int[] nums) {
+        int size = nums.length;
+        double avg = 0;
+        for(int i = 0; i < size; i++) {
+            avg += (nums[i] - avg) / (i+1);
+        }
+        return avg;
+    }
+
+    public static double stdDev(double[] nums) {
+        double avg = avg(nums);
+        double[] dev = new double[nums.length];
+        for(int i = 0; i < nums.length; i++) {
+            double d = nums[i] - avg;
+            dev[i] = d * d;
+        }
+        return Math.sqrt(avg(dev));
+    }
+
+    public static void main(String[] args) {
+        double[] arr = new double[] {0, 1, 1, 10};
+        System.out.println("Avg: " + avg(arr) + " dev: " + stdDev(arr));
     }
 }

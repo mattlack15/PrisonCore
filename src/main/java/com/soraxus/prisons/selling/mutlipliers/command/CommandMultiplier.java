@@ -6,5 +6,6 @@ public class CommandMultiplier extends UltraCommand {
     public CommandMultiplier() {
         addAlias("multiplier");
         addAlias("multi");
+        this.addChildren(new CommandMultiplierGive());
     }
 }

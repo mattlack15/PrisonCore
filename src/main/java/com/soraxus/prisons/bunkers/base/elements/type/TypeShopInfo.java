@@ -12,6 +12,7 @@ public class TypeShopInfo {
     public TypeShopInfo(String section) {
         this.section = section;
     }
+
     public TypeShopInfo setItem(ItemStack stack) {
         this.item = stack;
         return this;

@@ -10,12 +10,17 @@ import com.soraxus.prisons.bunkers.shop.BunkerShopItem;
 import com.soraxus.prisons.bunkers.shop.BunkerShopSection;
 import com.soraxus.prisons.bunkers.workers.TaskBuildAndEnable;
 import com.soraxus.prisons.bunkers.workers.Worker;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.display.chat.ChatBuilder;
+import com.soraxus.prisons.util.display.chat.HoverUtil;
+import com.soraxus.prisons.util.items.ItemBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 import net.ultragrav.utils.IntVector2D;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -61,13 +66,13 @@ public class BunkerElementShop extends BunkerShop {
         //Entertainment
         BunkerShopSection sectionEntertainment = new BunkerShopSection("Entertainment",
                 new ItemBuilder(Material.WOOL, 1, (byte) 3)
-        .setName("&bEntertainment")
-        .addLore("&7Entertain Yourself").build());
+                        .setName("&bEntertainment")
+                        .addLore("&7Entertain Yourself").build());
 
         //Decoration
         BunkerShopSection sectionDecoration = new BunkerShopSection("Decoration", new ItemBuilder(Material.REDSTONE_LAMP_OFF, 1)
-        .setName("&6&lDecoration")
-        .addLore("&7Decorate your bunker!").build());
+                .setName("&6&lDecoration")
+                .addLore("&7Decorate your bunker!").build());
 
         this.addSection(sectionGenerator);
         this.addSection(sectionStorage);
@@ -77,15 +82,15 @@ public class BunkerElementShop extends BunkerShop {
         this.addSection(sectionEntertainment);
         this.addSection(sectionDecoration);
 
-        for(BunkerElementType type : BunkerElementType.values()) {
-            if(type.getInfo() == null)
+        for (BunkerElementType type : BunkerElementType.values()) {
+            if (type.getInfo() == null)
                 return;
             TypeShopInfo info = type.getInfo().getShopInfo();
-            if(info == null)
+            if (info == null)
                 continue;
 
-            for(BunkerShopSection section : this.getSectionList()) {
-                if(section.getName().equalsIgnoreCase(info.getSection())) {
+            for (BunkerShopSection section : this.getSectionList()) {
+                if (section.getName().equalsIgnoreCase(info.getSection())) {
                     section.addItem(createItem(bunker, new ItemBuilder(info.getItem()).addLore("").addLore(getIntermediateMessages(bunker, tile, type)).build(),
                             getSetElementCallback(bunker, type, tile),
                             type.getBuildCost(1)));
@@ -113,7 +118,22 @@ public class BunkerElementShop extends BunkerShop {
 
             Storage[] buildCost = elementType.getBuildCost(0);
             if (!bunker.hasResources(buildCost)) {
-                // TODO: Message?
+                List<String> strs = new ArrayList<>();
+                for (Storage storage : buildCost) {
+                    String str = "";
+                    Storage owned = bunker.getCombinedStorages().get(storage.getResource());
+                    if (owned.getAmount() < storage.getAmount()) {
+                        str += "&c";
+                    } else {
+                        str += "&a";
+                    }
+                    str += owned.getAmount() + " / " + storage.getAmount();
+                    strs.add(str);
+                }
+                HoverEvent hover = HoverUtil.text(String.join("\n", strs));
+                new ChatBuilder()
+                        .addText("&cYou do not have enough resources to build that! (Hover for details)", hover)
+                        .send(p);
                 return;
             }
             bunker.removeResources(buildCost);

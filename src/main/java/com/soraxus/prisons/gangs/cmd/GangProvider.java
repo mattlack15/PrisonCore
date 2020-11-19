@@ -16,7 +16,8 @@ public class GangProvider extends UltraProvider<Gang> {
     @Getter
     private static final GangProvider instance = new GangProvider();
 
-    private GangProvider() {}
+    private GangProvider() {
+    }
 
     @Override
     public Gang convert(@NonNull String s) throws CommandException {

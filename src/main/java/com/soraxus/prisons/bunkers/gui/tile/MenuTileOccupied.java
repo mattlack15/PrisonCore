@@ -6,7 +6,7 @@ import com.soraxus.prisons.bunkers.base.elements.storage.Storage;
 import com.soraxus.prisons.bunkers.workers.TaskBreak;
 import com.soraxus.prisons.bunkers.workers.TaskUpgrade;
 import com.soraxus.prisons.bunkers.workers.Worker;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.math.MathUtils;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;

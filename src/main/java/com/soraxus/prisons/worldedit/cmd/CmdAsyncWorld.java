@@ -12,7 +12,9 @@ public class CmdAsyncWorld extends UltraCommand {
                 new CmdPaste(),
                 new CmdWand(),
                 new CmdSaveSchematic(),
-                new CmdRotate()
+                new CmdRotate(),
+                new CmdSet(),
+                new CmdReplace()
         );
     }
 }

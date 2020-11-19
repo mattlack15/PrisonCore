@@ -90,7 +90,11 @@ public abstract class CoreModule {
             return;
         System.out.println("[SPC] Enabling module: " + getName());
         EventSubscriptions.instance.subscribe(this);
-        this.onEnable();
+        try {
+            this.onEnable();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         this.enabled = true;
     }
 
@@ -98,7 +102,11 @@ public abstract class CoreModule {
         if (!this.isEnabled())
             return;
         EventSubscriptions.instance.unSubscribe(this);
-        this.onDisable();
+        try {
+            this.onDisable();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         this.enabled = false;
     }
 
@@ -116,11 +124,13 @@ public abstract class CoreModule {
                     if (f.getAnnotation(PluginFile.class) != null) {
                         try {
                             Object fil = f.get(null);
-                            if(!(fil instanceof File))
+                            if (!(fil instanceof File))
                                 continue;
                             File file = (File) fil;
+                            PluginFile ann = f.getAnnotation(PluginFile.class);
                             if (!file.exists()) {
-                                InputStream stream = getClass().getClassLoader().getResourceAsStream(file.getName());
+                                InputStream stream = getClass().getClassLoader().getResourceAsStream(ann.resourcePath() +
+                                        (ann.resourcePath().endsWith(File.separator) ? ann.resourcePath() : (ann.resourcePath().isEmpty() ? "" : ann.resourcePath() + File.separator)) + file.getName());
                                 if (stream != null) {
                                     try {
                                         OutputStream outputStream = new FileOutputStream(file);
@@ -154,7 +164,7 @@ public abstract class CoreModule {
             }
         }
     }
-    
+
     protected ExecutorService getAsyncExecutor() {
         return parent.getAsyncExecutor();
     }

@@ -1,1 +1,4 @@
 description: "Boom"
+display-name: "&cExplosive"
+max-level: 100
+percent-increase-per-level: 0.65

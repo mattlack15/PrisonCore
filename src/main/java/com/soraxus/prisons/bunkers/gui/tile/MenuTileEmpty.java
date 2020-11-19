@@ -2,7 +2,7 @@ package com.soraxus.prisons.bunkers.gui.tile;
 
 import com.soraxus.prisons.bunkers.base.Bunker;
 import com.soraxus.prisons.bunkers.workers.Worker;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
 import net.ultragrav.utils.IntVector2D;
@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemFlag;
 public class MenuTileEmpty extends Menu {
     private final IntVector2D tile;
     private final Bunker bunker;
+
     public MenuTileEmpty(Bunker bunker, IntVector2D tile) {
         super("Empty Tile", 3);
         this.tile = tile;
@@ -30,7 +31,7 @@ public class MenuTileEmpty extends Menu {
         //Build element
         Worker availableWorker = bunker.getFreeWorker(); //Null if none
         ItemBuilder builder = new ItemBuilder(Material.IRON_AXE, 1).addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        if(availableWorker != null) {
+        if (availableWorker != null) {
             builder.setName("&6&lBuild");
             builder.addLore("&7Click to build something");
             builder.addLore("&7new and exciting!");
@@ -43,7 +44,7 @@ public class MenuTileEmpty extends Menu {
         builder.addLore("&fAvailable Workers: " + (int) bunker.getWorkers().stream().filter((w) -> !w.isWorking()).count());
         MenuElement build = new MenuElement(builder.build()).setClickHandler((e, i) -> {
             Worker worker = bunker.getFreeWorker();
-            if(worker == null) {
+            if (worker == null) {
                 setup();
                 getElement(e.getSlot()).addTempLore(this, "&cInsufficient Workers!", 60);
                 return;

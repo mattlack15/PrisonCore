@@ -17,10 +17,12 @@ public class BunkerMatchEndEvent extends Event {
     }
 
     private final Match match;
+
     public BunkerMatchEndEvent(Match match) {
         this.match = match;
     }
 
     public Match getMatch() {
         return match;
-    }}
+    }
+}

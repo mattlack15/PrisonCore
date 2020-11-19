@@ -1,5 +1,6 @@
 package com.soraxus.prisons.privatemines.gui;
 
+import com.soraxus.prisons.SpigotPrisonCore;
 import com.soraxus.prisons.gangs.Gang;
 import com.soraxus.prisons.gangs.GangManager;
 import com.soraxus.prisons.mines.ModuleMines;
@@ -7,14 +8,15 @@ import com.soraxus.prisons.privatemines.CachedMineInfo;
 import com.soraxus.prisons.privatemines.PrivateMine;
 import com.soraxus.prisons.privatemines.PrivateMineManager;
 import com.soraxus.prisons.privatemines.VisitationType;
-import com.soraxus.prisons.util.ItemBuilder;
 import com.soraxus.prisons.util.NumberUtils;
 import com.soraxus.prisons.util.Synchronizer;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -54,13 +56,21 @@ public class MenuBrowseMines extends Menu {
                 }
                 service.submit(() -> {
                     try {
-                        Gang gang = GangManager.instance.loadGang(infoContainer.getKey());
+                        Gang gang = GangManager.instance.loadGang(infoContainer.getKey(), false);
                         PrivateMine mine1 = PrivateMineManager.instance.loadPrivateMineAsync(gang).join();
-                        Synchronizer.synchronize(() -> {
-                            mine1.getVisitationManager().addVisitor(e.getWhoClicked().getUniqueId(), VisitationType.RENTAL);
-                            mine1.teleport((Player) e.getWhoClicked());
-                            e.getWhoClicked().sendMessage(ModuleMines.instance.getPrefix() + "You are now paying " + mine1.getVisitationManager().getRentalPrice() + " per minute");
-                        });
+                        new BukkitRunnable() {
+                            public void run() {
+                                VisitationType type = mine1.getVisitationManager().tryAddVisitor(e.getWhoClicked().getUniqueId());
+                                if (type == null) {
+                                    e.getWhoClicked().sendMessage(ModuleMines.instance.getPrefix() + "There was no room for you! Sorry :(");
+                                    return;
+                                }
+                                mine1.teleport((Player) e.getWhoClicked());
+                                if (type == VisitationType.RENTAL)
+                                    e.getWhoClicked().sendMessage(ModuleMines.instance.getPrefix() + "You are now paying " + NumberUtils.toReadableNumber(mine1.getVisitationManager().getRentalPrice()) + " per minute");
+                                setup();
+                            }
+                        }.runTaskLater(SpigotPrisonCore.instance, 0);
                     } catch (Throwable t) {
                         Synchronizer.synchronize(() -> getElement(e.getSlot()).addTempLore(this, "&cError...", 60));
                         t.printStackTrace();

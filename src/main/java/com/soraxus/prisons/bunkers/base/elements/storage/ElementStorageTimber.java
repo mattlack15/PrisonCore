@@ -40,7 +40,7 @@ public class ElementStorageTimber extends StorageElement {
 
     @Override
     public void onClick(PlayerInteractEvent e) {
-        if(e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+        if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
             e.setCancelled(true);
             new MenuStorageElement(this).open(e.getPlayer());
         }

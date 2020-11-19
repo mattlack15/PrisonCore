@@ -7,6 +7,7 @@ import net.ultragrav.command.provider.impl.StringProvider;
 public class AutoSellCmd extends UltraCommand {
     public AutoSellCmd() {
         this.addAlias("autosell");
+        this.addAlias("as");
 
         this.setAllowConsole(false);
         this.setRequirePermission(false);

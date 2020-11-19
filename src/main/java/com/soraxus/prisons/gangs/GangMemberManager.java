@@ -51,6 +51,10 @@ public class GangMemberManager {
     }
 
     public GangMember load(UUID member) {
+        return load(member, true);
+    }
+
+    public GangMember load(UUID member, boolean loadBunker) {
         getIOLock(member).lock();
         GangMember member1;
         try {
@@ -65,7 +69,9 @@ public class GangMemberManager {
         accessorLock.lock();
         this.members.put(member1.getMember().toString(), member1);
         accessorLock.unlock();
-        GangManager.instance.loadGang(member1.getGang());
+
+        GangManager.instance.loadGang(member1.getGang(), loadBunker);
+
         return member1;
     }
 
@@ -114,15 +120,22 @@ public class GangMemberManager {
                 accessorLock.unlock();
             }
         }
+        if (member.getGang() != null) {
+            GangManager.instance.loadGang(member.getGang()); //Make sure it's loaded and the bunker is also loaded
+        }
         return member;
     }
 
     public GangMember getOrLoadMember(UUID id) {
+        return getOrLoadMember(id, true);
+    }
+
+    public GangMember getOrLoadMember(UUID id, boolean loadBunker) {
         try {
             accessorLock.lock();
             GangMember member = getMember(id);
             if (member == null) {
-                return load(id);
+                return load(id, loadBunker);
             }
             return member;
         } finally {

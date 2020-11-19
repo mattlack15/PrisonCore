@@ -3,11 +3,12 @@ package com.soraxus.prisons.luckyblocks;
 import com.soraxus.prisons.core.CoreModule;
 import com.soraxus.prisons.economy.Economy;
 import com.soraxus.prisons.enchants.api.enchant.AbstractCE;
+import com.soraxus.prisons.enchants.customenchants.Favored;
 import com.soraxus.prisons.enchants.manager.EnchantManager;
 import com.soraxus.prisons.event.PrisonBlockBreakEvent;
 import com.soraxus.prisons.util.EventSubscription;
-import com.soraxus.prisons.util.math.MathUtils;
 import com.soraxus.prisons.util.NumberUtils;
+import com.soraxus.prisons.util.math.MathUtils;
 import com.soraxus.prisons.util.menus.MenuElement;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -17,7 +18,7 @@ public class ModuleLuckyBlocks extends CoreModule {
     public void runLuckyBlock(Player player) {
         ItemStack pick = player.getInventory().getItemInMainHand();
 
-        AbstractCE favored = EnchantManager.instance.getCE("favored");
+        AbstractCE favored = EnchantManager.instance.getCE(Favored.class);
         int level = favored.getLevel(pick);
 
         double rand = MathUtils.random(0, 100D);
@@ -27,9 +28,9 @@ public class ModuleLuckyBlocks extends CoreModule {
             player.sendMessage("§eLucky Blocks > §7You have received §e$" + NumberUtils.formatFull(money) + "§7.");
             return;
         }
-        long tokens = (long) Math.floor(5 * ((level / 25D) + 1)); // Large tokens
+        long tokens = favored.getCost(level) / 50;
         if (rand <= 65) { // Small tokens
-            tokens = (long) Math.floor(3 * ((level / 25D) + 1));
+            tokens = favored.getCost(level) / 60;
         }
         player.sendMessage("§eLucky Blocks > §7You have received §e" + NumberUtils.formatFull(tokens) + " Tokens§7.");
         Economy.tokens.addBalance(player.getUniqueId(), tokens);

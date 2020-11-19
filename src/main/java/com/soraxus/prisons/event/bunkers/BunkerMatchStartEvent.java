@@ -17,6 +17,7 @@ public class BunkerMatchStartEvent extends Event {
     }
 
     private final Match match;
+
     public BunkerMatchStartEvent(Match match) {
         this.match = match;
     }

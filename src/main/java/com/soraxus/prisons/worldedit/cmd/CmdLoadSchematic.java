@@ -40,7 +40,7 @@ public class CmdLoadSchematic extends UltraCommand {
             Schematic schem = new Schematic(f);
             state.setClipboard(schem);
             tell("§aSchematic loaded successfully!");
-        } catch(IOException e) {
+        } catch (IOException e) {
             tell("§cThe schematic could not be loaded:");
             for (StackTraceElement stackTraceElement : e.getStackTrace()) {
                 tell("§c" + stackTraceElement.toString());

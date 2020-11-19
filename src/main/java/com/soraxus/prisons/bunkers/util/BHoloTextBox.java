@@ -110,9 +110,9 @@ public class BHoloTextBox implements GravSerializable {
     }
 
     public void setOrMake(int line, String text) {
-        if(isChunkUnloaded())
+        if (isChunkUnloaded())
             return;
-        while(this.getLines().size() <= line) {
+        while (this.getLines().size() <= line) {
             addLine(text);
         }
         setLine(line, text);

@@ -15,7 +15,8 @@ public abstract class NaturalElement extends BunkerElement {
     }
 
     @Override
-    public void onTick() {}
+    public void onTick() {
+    }
 
     @Override
     public boolean onDestroy() {

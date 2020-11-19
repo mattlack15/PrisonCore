@@ -9,8 +9,8 @@ import com.soraxus.prisons.enchants.manager.CooldownUtils;
 import com.soraxus.prisons.gangs.Gang;
 import com.soraxus.prisons.gangs.GangMember;
 import com.soraxus.prisons.gangs.GangRole;
-import com.soraxus.prisons.util.ItemBuilder;
 import com.soraxus.prisons.util.Synchronizer;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
 import com.soraxus.prisons.util.time.DateUtils;
@@ -24,6 +24,7 @@ import org.bukkit.entity.Player;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 import static com.soraxus.prisons.gangs.cmd.CmdGang.PREFIX;
@@ -66,9 +67,9 @@ public class MenuBunker extends Menu {
                 ).build()
         ).setClickHandler((e, i) -> {
             Player pl = (Player) e.getWhoClicked();
-            getAsyncExecutor().execute(() -> {
+            ForkJoinPool.commonPool().execute(() -> {
                 Bunker bunker = gang.getBunker();
-                if (inBunker && bunker != null) {
+                if (inBunker && bunker != null && e.getWhoClicked().getWorld().equals(bunker.getWorld().getBukkitWorld())) {
                     e.getWhoClicked().sendMessage(PREFIX + "Teleporting...");
                     Bunker finalBunker1 = bunker;
                     Synchronizer.synchronize(() -> finalBunker1.teleportBack((Player) e.getWhoClicked()));
@@ -116,53 +117,57 @@ public class MenuBunker extends Menu {
                 .setName("&c&lRegenerate Bunker")
                 .addLore("&7This will reload your bunker")
                 .addLore("&7You will be removed from the bunker during this process")
-                .build()).setClickHandler((e, i) -> getAsyncExecutor().execute(() -> {
-            if (!CooldownUtils.isCooldown(e.getWhoClicked(), "reloadBunker")) {
-                String wait = DateUtils.convertTimeM(CooldownUtils.getCooldownTime(e.getWhoClicked(), "reloadBunker"));
-                this.getElement(e.getSlot()).addTempLore(this, "§cPlease wait " + wait + " before doing that again", 60);
-                return;
-            }
+                .build()).setClickHandler((e, i) -> ForkJoinPool.commonPool().execute(() -> {
+                    try {
+                        if (!CooldownUtils.isCooldown(e.getWhoClicked(), "reloadBunker")) {
+                            String wait = DateUtils.convertTimeM(CooldownUtils.getCooldownTime(e.getWhoClicked(), "reloadBunker"));
+                            this.getElement(e.getSlot()).addTempLore(this, "§cPlease wait " + wait + " before doing that again", 60);
+                            return;
+                        }
 
-            Timer timer = new Timer();
-            if (!e.getWhoClicked().hasPermission("bunkers.reload.bypasscooldown"))
-                CooldownUtils.setCooldown(e.getWhoClicked(), "reloadBunker", 5);
-            Bunker bunker = gang.getBunker();
-            if (bunker == null) {
-                try {
-                    BunkerManager.instance.createOrLoadBunker(gang).get();
-                } catch (InterruptedException | ExecutionException ex) {
-                    ex.printStackTrace();
-                }
-            } else {
-                List<UUID> previouslyThere = bunker.getWorld().getBukkitWorld().getPlayers().stream()
-                        .map(Player::getUniqueId)
-                        .collect(Collectors.toList());
-                try {
-                    bunker.unload().get();
-                } catch (InterruptedException | ExecutionException interruptedException) {
-                    interruptedException.printStackTrace();
-                }
-                try {
-                    bunker = BunkerManager.instance.createOrLoadBunker(gang).get();
-                } catch (InterruptedException | ExecutionException ex) {
-                    ex.printStackTrace();
-                }
-                Bunker finalBunker = bunker;
-                previouslyThere.forEach(p -> {
-                    Player pl = Bukkit.getPlayer(p);
-                    if (pl != null) {
-                        Synchronizer.synchronize(() -> {
-                            if (finalBunker == null) {
-                                Bukkit.broadcastMessage("finalBunker is NULL Approx. ln 156");
-                                return;
+                        Timer timer = new Timer();
+                        if (!e.getWhoClicked().hasPermission("bunkers.reload.bypasscooldown"))
+                            CooldownUtils.setCooldown(e.getWhoClicked(), "reloadBunker", 5);
+                        Bunker bunker = gang.getBunker();
+                        if (bunker == null) {
+                            try {
+                                BunkerManager.instance.createOrLoadBunker(gang).get();
+                            } catch (InterruptedException | ExecutionException ex) {
+                                ex.printStackTrace();
                             }
-                            finalBunker.teleport(pl);
-                        });
+                        } else {
+                            List<UUID> previouslyThere = bunker.getWorld().getBukkitWorld().getPlayers().stream()
+                                    .map(Player::getUniqueId)
+                                    .collect(Collectors.toList());
+                            try {
+                                bunker.unload().get();
+                            } catch (InterruptedException | ExecutionException interruptedException) {
+                                interruptedException.printStackTrace();
+                            }
+                            try {
+                                bunker = BunkerManager.instance.createOrLoadBunker(gang).get();
+                            } catch (InterruptedException | ExecutionException ex) {
+                                ex.printStackTrace();
+                            }
+                            Bunker finalBunker = bunker;
+                            previouslyThere.forEach(p -> {
+                                Player pl = Bukkit.getPlayer(p);
+                                if (pl != null) {
+                                    Synchronizer.synchronize(() -> {
+                                        if (finalBunker == null) {
+                                            Bukkit.broadcastMessage("finalBunker is NULL Approx. ln 156");
+                                            return;
+                                        }
+                                        finalBunker.teleport(pl);
+                                    });
+                                }
+                            });
+                        }
+                        timer.stop();
+                        this.getElement(e.getSlot()).addTempLore(this, "&aCompleted in &f" + (timer.getTimeMillis() / 1000f) + "s&a!", 60);
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
                     }
-                });
-            }
-            timer.stop();
-            this.getElement(e.getSlot()).addTempLore(this, "&aCompleted in &f" + (timer.getTimeMillis() / 1000f) + "s&a!", 60);
         }));
 
         MenuElement findMatch = new MenuElement(new ItemBuilder(Material.DIAMOND_SWORD, 1).setName("&cAttack").addLore("&7Click to search for a bunker to attack!").build())
@@ -187,7 +192,7 @@ public class MenuBunker extends Menu {
                         }
                     }
                     boolean hasBunker;
-                    if(hasBunker = (gang.getBunker() != null))
+                    if (hasBunker = (gang.getBunker() != null))
                         e.getWhoClicked().closeInventory();
                     BunkerManager.instance.deleteBunkerAsync(gang.getId()).thenAccept((unused) -> {
                         if (hasBunker)

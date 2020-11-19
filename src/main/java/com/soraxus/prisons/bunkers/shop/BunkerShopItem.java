@@ -1,6 +1,6 @@
 package com.soraxus.prisons.bunkers.shop;
 
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -23,7 +23,7 @@ public class BunkerShopItem {
         this.giver = giver;
         ItemBuilder builder = new ItemBuilder(item.clone());
         builder.addLore("");
-        for(String cost : displayCost) {
+        for (String cost : displayCost) {
             builder.addLore(cost);
         }
         this.itemStack = builder.build();

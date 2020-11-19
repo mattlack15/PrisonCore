@@ -3,6 +3,9 @@ package com.soraxus.prisons.util.locks;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
+/**
+ * Extension of ReentrantLock with a method to perform a Runnable
+ */
 public class CustomLock extends ReentrantLock {
     public CustomLock() {
         super();

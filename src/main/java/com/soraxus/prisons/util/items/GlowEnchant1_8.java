@@ -1,10 +1,6 @@
 package com.soraxus.prisons.util.items;
 
 
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.inventory.ItemStack;
-
 //public class GlowEnchant1_8 extends Enchantment{
 //
 //    public GlowEnchant1_8() {

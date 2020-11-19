@@ -1,7 +1,7 @@
 package com.soraxus.prisons.crate;
 
 import com.soraxus.prisons.util.CastUtil;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

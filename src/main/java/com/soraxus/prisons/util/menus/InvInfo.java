@@ -7,18 +7,19 @@ public class InvInfo {
     private Menu currentMenu;
     private Object[] data;
 
-    public InvInfo(Inventory cInv, Menu cMenu){
+    public InvInfo(Inventory cInv, Menu cMenu) {
         this.data = new Object[0];
         this.currentMenu = cMenu;
         this.currentInv = cInv;
     }
-    public InvInfo(Inventory cInv, Menu cMenu, Object... data){
+
+    public InvInfo(Inventory cInv, Menu cMenu, Object... data) {
         this.currentInv = cInv;
         this.currentMenu = cMenu;
         this.data = data;
     }
 
-    public Menu getCurrentMenu(){
+    public Menu getCurrentMenu() {
         return this.currentMenu;
     }
 
@@ -33,7 +34,8 @@ public class InvInfo {
     public void setCurrentInv(Inventory currentInv) {
         this.currentInv = currentInv;
     }
-    public Inventory getCurrentInv(){
+
+    public Inventory getCurrentInv() {
         return this.currentInv;
     }
 

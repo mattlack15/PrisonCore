@@ -7,11 +7,12 @@ import org.bukkit.entity.EntityType;
 public class ArmorStandFactory {
     /**
      * Create a hidden armor stand at
+     *
      * @param l Location
      * @return ArmorStand
      */
-    public static ArmorStand createHidden(Location l){
-        if(!l.getChunk().isLoaded()){
+    public static ArmorStand createHidden(Location l) {
+        if (!l.getChunk().isLoaded()) {
             l.getChunk().load();
         }
         ArmorStand stand = (ArmorStand) l.getWorld().spawnEntity(l, EntityType.ARMOR_STAND);
@@ -26,11 +27,12 @@ public class ArmorStandFactory {
     /**
      * Create an invisible armor stand
      * with a name
-     * @param l Location
+     *
+     * @param l    Location
      * @param text Name
      * @return ArmorStand
      */
-    public static ArmorStand createText(Location l, String text){
+    public static ArmorStand createText(Location l, String text) {
         ArmorStand stand = ArmorStandFactory.createHidden(l);
         stand.setVisible(false);
         stand.setCustomName(text);
@@ -41,11 +43,12 @@ public class ArmorStandFactory {
     /**
      * Create a big invisible armor stand
      * with a name
-     * @param l Location
+     *
+     * @param l    Location
      * @param text Name
      * @return ArmorStand
      */
-    public static ArmorStand createTextAdultSize(Location l, String text){
+    public static ArmorStand createTextAdultSize(Location l, String text) {
         ArmorStand stand = ArmorStandFactory.createHidden(l);
         stand.setSmall(false);
         stand.setVisible(false);

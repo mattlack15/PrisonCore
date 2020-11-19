@@ -9,10 +9,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 
 public class FileUtils {
+    /**
+     * Load the contents of a file into a string
+     *
+     * @param f File
+     * @return File contents as string
+     */
     @Nullable
     public static String loadFile(@NotNull File f) {
         if (!f.exists()) {
@@ -42,15 +49,42 @@ public class FileUtils {
     }
 
     /**
+     * Write the contents of a String into a file
+     *
+     * @param f    File
+     * @param data Data
+     * @return File contents as string
+     */
+    @Nullable
+    public static void writeFile(@NotNull File f, String data) {
+        if (!f.exists()) {
+            try {
+                if (f.getParentFile().mkdirs()) {
+                    f.createNewFile();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            FileOutputStream stream = new FileOutputStream(f);
+            byte[] dat = data.getBytes();
+            for (byte ch : dat) {
+                stream.write(ch);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Will move the source File to the destination File.
      * The Method will backup the dest File, copy source to
      * dest, and then will delete the source and the backup.
      *
-     * @param source
-     *            File to be moved
-     * @param dest
-     *            File to be overwritten (does not matter if
-     *            non existent)
+     * @param source File to be moved
+     * @param dest   File to be overwritten (does not matter if
+     *               non existent)
      * @throws IOException
      */
     public static void moveAndOverwrite(File source, File dest) throws IOException {
@@ -71,8 +105,7 @@ public class FileUtils {
      * Folder as the {@code inputFile}, that is not existing
      * and ends with {@code _temp}.
      *
-     * @param inputFile
-     *            The FileBase to generate a Tempfile
+     * @param inputFile The FileBase to generate a Tempfile
      * @return A non existing File
      */
     public static File getNonExistingTempFile(File inputFile) {

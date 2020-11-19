@@ -4,7 +4,10 @@
 
 package com.soraxus.prisons.util;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -17,8 +20,9 @@ public class UltraCollectors {
      * Create a LinkedHashMap from a stream of entries
      * Note: Only use when an ordered map is necessary
      * Otherwise it is wiser to use toMap
-     *
+     * <p>
      * All arguments are inferred from the stream
+     *
      * @param <K> Key
      * @param <V> Value
      * @return LinkedHashMap<Key, Value>
@@ -57,6 +61,7 @@ public class UltraCollectors {
 
     /**
      * Create a Map from a stream of entries
+     *
      * @param <K> Key
      * @param <V> Value
      * @return Map<Key, Value>

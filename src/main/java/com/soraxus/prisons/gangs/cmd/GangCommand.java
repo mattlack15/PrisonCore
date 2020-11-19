@@ -39,7 +39,7 @@ public abstract class GangCommand extends UltraCommand {
         if (requiresGang && (getGang() == null || getGangMember() == null)) {
             throw new CommandException("§cThis command requires you to be in a gang!");
         }
-        if(minimumRole.ordinal() > getGangMember().getGangRole().ordinal()) {
+        if (minimumRole.ordinal() > getGangMember().getGangRole().ordinal()) {
             throw new CommandException("&cYou are not a high enough role to use this!");
         }
     }

@@ -13,7 +13,8 @@ public class EconomyProvider extends UltraProvider<Economy> {
     @Getter
     private static final EconomyProvider instance = new EconomyProvider();
 
-    private EconomyProvider() {}
+    private EconomyProvider() {
+    }
 
     @Override
     public Economy convert(@NonNull String s) throws CommandException {

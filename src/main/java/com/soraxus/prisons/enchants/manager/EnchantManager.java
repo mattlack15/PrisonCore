@@ -2,8 +2,10 @@ package com.soraxus.prisons.enchants.manager;
 
 import com.soraxus.prisons.enchants.ModuleEnchants;
 import com.soraxus.prisons.enchants.api.enchant.AbstractCE;
+import com.soraxus.prisons.util.items.NBTUtils;
 import com.soraxus.prisons.util.reflection.ReflectionUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,21 +16,9 @@ public class EnchantManager {
 
     private List<AbstractCE> enchantments = new ArrayList<>();
 
-    private int id = 200;
 
     public EnchantManager() {
         instance = this;
-    }
-
-    /**
-     * Get the current id and increment it
-     * Used to generate a unique id for each enchantment
-     * Initial id is set to 69420 to avoid conflicts with existing enchantments
-     *
-     * @return ID before incrementing
-     */
-    public synchronized int getAndIncrementId() {
-        return id++;
     }
 
     /**
@@ -81,6 +71,18 @@ public class EnchantManager {
         return null;
     }
 
+    public AbstractCE byBook(ItemStack stack) {
+        if (!NBTUtils.instance.hasTag(stack, "ce.book.type"))
+            return null;
+        return getCE(NBTUtils.instance.getString(stack, "ce.book.type"));
+    }
+
+    public int getLevelByBook(ItemStack stack) {
+        if (!NBTUtils.instance.hasTag(stack, "ce.book.type"))
+            return 0;
+        return NBTUtils.instance.getInt(stack, "ce.book.level");
+    }
+
 
     /**
      * Loads custom enchants from a package
@@ -93,6 +95,7 @@ public class EnchantManager {
             }
             loadEnchant(clazz.asSubclass(AbstractCE.class));
         }
+        this.enchantments.sort((e, e1) -> String.CASE_INSENSITIVE_ORDER.compare(e.getIdentifier(), e1.getIdentifier()));
     }
 
     public synchronized AbstractCE loadEnchant(Class<? extends AbstractCE> clazz) {

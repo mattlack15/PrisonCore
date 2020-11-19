@@ -51,16 +51,16 @@ public class AbilityArrowBarrage extends BunkerNPCAbility {
 
     @Override
     public void use() {
-        for(int i = 0; i < getParent().getParent().getLevel() * 3 + 4; i++)
+        for (int i = 0; i < getParent().getParent().getLevel() * 3 + 4; i++)
             Bukkit.getScheduler().scheduleSyncDelayedTask(SpigotPrisonCore.instance, this::shoot, i * 4);
     }
 
     private void shoot() {
-        if(!getParent().isSpawned())
+        if (!getParent().isSpawned())
             return;
-        if(getParent().getNpc() == null)
+        if (getParent().getNpc() == null)
             return;
-        if(!canUse())
+        if (!canUse())
             return;
         LivingEntity ent = (LivingEntity) getParent().getNpc().getEntity();
         Location loc = ent.getEyeLocation();
@@ -78,7 +78,7 @@ public class AbilityArrowBarrage extends BunkerNPCAbility {
                 if (block == null) {
                     //Hit an entity
                     BunkerNPC npc = getParent().getManager().getNpc(e.getHitEntity());
-                    if(npc != null) {
+                    if (npc != null) {
                         double damage = 3.141592653589 * getParent().getParent().getLevel() * 0.6;
                         npc.damage(damage);
                     }
@@ -100,15 +100,14 @@ public class AbilityArrowBarrage extends BunkerNPCAbility {
                             return;
                         }
                         double damage = 3.141592653589 * getParent().getParent().getLevel();
-                        ElementDrop drop = element.getDropForDamage(damage);
+                        ElementDrop drop = element.damage(damage);
                         if (drop != null) {
                             drop.apply(bunker.getDefendingMatch().getAttacker());
                         }
-                        element.damage(damage);
                     }
                 }
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             ModuleBunkers.messageDevs("Shit went wrong... " + ex.getMessage());
             ex.printStackTrace();
         } finally {

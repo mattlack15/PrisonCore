@@ -44,7 +44,7 @@ public class NPCManager {
             try {
                 if (n.getController() != null)
                     n.getController().remove();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         });

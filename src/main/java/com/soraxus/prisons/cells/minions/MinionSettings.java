@@ -9,14 +9,14 @@ import net.ultragrav.serializer.Meta;
 @Getter
 @Setter
 public class MinionSettings implements GravSerializable {
-    private String skullName = "omega_warrior"; // TODO: Change default skull
+    private String skullName;
 
-    public MinionSettings() {}
+    public MinionSettings() {
+    }
 
     public MinionSettings(GravSerializer serializer) {
         Meta stored = serializer.readObject();
         this.skullName = stored.getOrSet("skullName", "omega_warrior");
-
     }
 
     public void serialize(GravSerializer serializer) {

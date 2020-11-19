@@ -193,7 +193,7 @@ public class TileMap implements GravSerializable {
     public Tile setOrMakeTile(int x, int y, BunkerElement element, IntVector2D internalPosition) {
         if (x < 0 || y < 0 || x >= tileMap.length || y >= tileMap[x].length)
             throw new IllegalArgumentException("Tile location out of bounds! (" + x + ", " + y + ")");
-        if(internalPosition.equals(IntVector2D.ZERO)) {
+        if (internalPosition.equals(IntVector2D.ZERO)) {
             element.setPosition(new IntVector2D(x, y));
         }
         addElement(element);
@@ -280,7 +280,7 @@ public class TileMap implements GravSerializable {
                 return;
             }
             elements.add(el);
-            if(!deserializing.get()) {
+            if (!deserializing.get()) {
                 try {
                     el.onPlacement();
                 } catch (Exception e) {

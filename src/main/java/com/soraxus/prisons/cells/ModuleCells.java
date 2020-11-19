@@ -118,7 +118,7 @@ public class ModuleCells extends CoreModule {
                 event.setCancelled(true);
                 return;
             }
-            if(!cell.getPlayer().equals(event.getPlayer().getUniqueId())) {
+            if (!cell.getPlayer().equals(event.getPlayer().getUniqueId())) {
                 event.setCancelled(true);
                 return;
             }
@@ -129,20 +129,22 @@ public class ModuleCells extends CoreModule {
             Minion minion = cell.getMinionManager().createMinion(IntVector3D.fromBukkitVector(event.getBlock().getLocation().toVector()));
             MinionItems.MinionItemData data = MinionItems.getData(event.getItemInHand());
 
-            if(data == null)
+            if (data == null)
                 return;
 
             minion.setMiningBlock(data.getType());
             minion.setName(data.getName());
             minion.setSpeed(data.getSpeed());
             minion.setCreator(event.getPlayer().getUniqueId());
+            minion.setSettings(data.getSettings());
+            minion.getSettings().setSkullName(event.getPlayer().getName());
             minion.spawn();
             event.setCancelled(true);
             ItemStack s = event.getPlayer().getInventory().getItemInMainHand();
-            if(s == null)
+            if (s == null)
                 return;
             int amount = s.getAmount();
-            if(amount == 0)
+            if (amount == 0)
                 return;
             amount--;
             s.setAmount(amount);

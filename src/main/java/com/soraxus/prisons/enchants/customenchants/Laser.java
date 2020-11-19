@@ -59,9 +59,9 @@ public class Laser extends AbstractCE {
     List<Vector3D> rayTrace(Vector3D start, Vector3D direction, CuboidRegion bounds) {
         List<Vector3D> vectors = new ArrayList<>();
         direction = direction.normalize();
-        for(double i = 0; i < 100; i += 0.2) {
+        for (double i = 0; i < 100; i += 0.2) {
             Vector3D pos = start.add(direction.multiply(i));
-            if(!bounds.contains(pos))
+            if (!bounds.contains(pos))
                 break;
             vectors.add(pos);
         }
@@ -70,11 +70,15 @@ public class Laser extends AbstractCE {
 
     @EventSubscription
     private void onBreak(BlockBreakEvent event) {
+
+        if(event.isCancelled())
+            return;
+
         if (event.getPlayer().getInventory().getItemInMainHand() == null || !hasEnchant(event.getPlayer().getItemInHand()))
             return;
 
         EnchantInfo info = getInfo(event.getPlayer().getInventory().getItemInMainHand());
-        if(rand.nextDouble() > info.getEnchants().get(this) * percentIncrease)
+        if (rand.nextDouble() > info.getEnchants().get(this) * percentIncrease)
             return;
 
         Mine mine = MineManager.instance.getMineOf(event.getBlock().getLocation());
@@ -83,14 +87,14 @@ public class Laser extends AbstractCE {
             List<Vector3D> vecs = rayTrace(Vector3D.fromBukkitVector(event.getPlayer().getEyeLocation().toVector()), Vector3D.fromBukkitVector(event.getPlayer().getLocation().getDirection()), mine.getRegion());
             AtomicInteger broken = new AtomicInteger();
             vecs.forEach(b -> {
-                int block = world.syncGetBlock(b.getBlockX(), b.getBlockY (), b.getBlockZ());
+                int block = world.syncGetBlock(b.getBlockX(), b.getBlockY(), b.getBlockZ());
                 ModuleBreak.instance.onBreak(event.getPlayer(), b, block);
                 world.setBlock(b.getBlockX(), b.getBlockY(), b.getBlockZ(), 0, (byte) 0);
                 broken.getAndIncrement();
             });
             world.flush();
             event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 0.6f, 1f);
-            mine.incrementBlocksMined(broken.get() - 1);
+            mine.incrementBlocksMined(broken.get());
             PickaxeLevelManager.addXp(event.getPlayer(), broken.get() - 1);
         }
     }

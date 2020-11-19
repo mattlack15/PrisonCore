@@ -4,7 +4,7 @@ import com.soraxus.prisons.economy.Economy;
 import com.soraxus.prisons.enchants.api.enchant.AbstractCE;
 import com.soraxus.prisons.event.PrisonBlockBreakEvent;
 import com.soraxus.prisons.util.EventSubscription;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.math.MathUtils;
 import net.ultragrav.utils.Vector3D;
 import org.bukkit.Location;
@@ -62,7 +62,7 @@ public class TokenRain extends AbstractCE {
             if (MathUtils.isRandom(chance, 100.0)) {
                 long amount = level * 10;
                 Economy.tokens.addBalance(event.getPlayer().getUniqueId(), amount);
-                for (int i = 0; i < 10; i ++) {
+                for (int i = 0; i < 10; i++) {
                     ItemStack it = new ItemBuilder(Material.DOUBLE_PLANT, 1)
                             .setName("displayItem" + i)
                             .build();

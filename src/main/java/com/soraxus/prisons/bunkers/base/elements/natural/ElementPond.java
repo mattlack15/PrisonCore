@@ -4,12 +4,9 @@ import com.soraxus.prisons.bunkers.base.Bunker;
 import com.soraxus.prisons.bunkers.base.NaturalElement;
 import com.soraxus.prisons.bunkers.base.elements.type.BunkerElementType;
 import com.soraxus.prisons.bunkers.npc.ElementDrop;
-import com.soraxus.prisons.bunkers.util.BunkerSchematics;
 import com.soraxus.prisons.util.math.MathUtils;
-import net.ultragrav.asyncworld.schematics.Schematic;
 import net.ultragrav.serializer.GravSerializer;
 import net.ultragrav.utils.IntVector2D;
-import org.jetbrains.annotations.NotNull;
 
 public class ElementPond extends NaturalElement {
     /**

@@ -53,6 +53,6 @@ public class Unbreaking extends AbstractCE {
         ItemMeta meta = stack.getItemMeta();
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         stack.setItemMeta(meta);
-        stack.addUnsafeEnchantment(Enchantment.DIG_SPEED, level);
+        stack.addUnsafeEnchantment(Enchantment.DURABILITY, level);
     }
 }

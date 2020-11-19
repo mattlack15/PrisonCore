@@ -1,12 +1,13 @@
 package com.soraxus.prisons.gangs.cmd;
 
-import com.soraxus.prisons.gangs.Gang;
-import com.soraxus.prisons.gangs.GangLevelUtil;
-import com.soraxus.prisons.gangs.GangRole;
+import com.soraxus.prisons.gangs.*;
 import com.soraxus.prisons.util.display.chat.ChatBuilder;
 import com.soraxus.prisons.util.display.chat.HoverUtil;
 import com.soraxus.prisons.util.string.TextUtil;
+import net.ultragrav.command.provider.impl.StringProvider;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
 import java.util.stream.Collectors;
 
@@ -15,15 +16,28 @@ import static com.soraxus.prisons.gangs.cmd.CmdGang.PREFIX;
 public class CmdGangInfo extends GangCommand {
     public CmdGangInfo() {
         this.addAlias("info");
-        this.addParameter(null, GangProvider.getInstance(), "gang");
+        this.addParameter(null, StringProvider.getInstance(), "gang/player");
     }
 
     public void perform() {
-        Gang gang = getArgument(0);
+        String gangName = getArgument(0);
+        Gang gang = GangManager.instance.getLoadedGang(gangName);
         if (gang == null) {
+            Player player = Bukkit.getPlayer(gangName != null ? gangName : "");
+            if (player == null) {
+                tell(PREFIX + "&cCould not find player!");
+                return;
+            }
+            gang = GangManager.instance.getLoadedGang(GangMemberManager.instance.getMember(player.getUniqueId()).getGang());
+            if (gang == null) {
+                tell(PREFIX + "&cPlayer isn't in a gang!");
+                return;
+            }
+        }
+        if (gangName == null) {
             gang = getGang();
             if (gang == null) {
-                returnTell(PREFIX + "§cYou are not in a gang, try /gang info <Gang>");
+                returnTell(PREFIX + "§cYou are not in a gang, try /gang info <gang/player>");
             }
         }
         Gang finalGang = gang;

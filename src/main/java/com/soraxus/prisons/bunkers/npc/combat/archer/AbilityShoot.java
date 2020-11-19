@@ -74,7 +74,7 @@ public class AbilityShoot extends BunkerNPCAbility {
                 if (block == null) {
                     //Hit an entity
                     BunkerNPC npc = getParent().getManager().getNpc(e.getHitEntity());
-                    if(npc != null) {
+                    if (npc != null) {
                         double damage = 3.141592653589 * getParent().getParent().getLevel();
                         npc.damage(damage);
                     }
@@ -96,15 +96,14 @@ public class AbilityShoot extends BunkerNPCAbility {
                             return;
                         }
                         double damage = 3.141592653589 * getParent().getParent().getLevel();
-                        ElementDrop drop = element.getDropForDamage(damage);
+                        ElementDrop drop = element.damage(damage);
                         if (drop != null) {
                             drop.apply(bunker.getDefendingMatch().getAttacker());
                         }
-                        element.damage(damage);
                     }
                 }
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             ModuleBunkers.messageDevs("Shit went wrong... " + ex.getMessage());
             ex.printStackTrace();
         } finally {

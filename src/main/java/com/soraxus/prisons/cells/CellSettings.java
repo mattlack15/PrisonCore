@@ -15,6 +15,7 @@ public class CellSettings {
     }
 
     private final Cell parent;
+
     public CellSettings(Cell parent) {
         this.parent = parent;
     }
@@ -31,6 +32,7 @@ public class CellSettings {
     public OpenSetting getOpenSetting() {
         return getSetting("open_setting", OpenSetting.OPEN);
     }
+
     public void setOpenSetting(OpenSetting setting) {
         setSetting("open_setting", setting);
     }
@@ -39,6 +41,7 @@ public class CellSettings {
     public int getWorldTime() {
         return getSetting("world_time", 0);
     }
+
     public void setWorldTime(int time) {
         setSetting("world_time", time);
     }
@@ -47,6 +50,7 @@ public class CellSettings {
     public ProtectionSetting getProtectionSetting() {
         return getSetting("protection_setting", ProtectionSetting.TRUSTED);
     }
+
     public void setProtectionSetting(ProtectionSetting setting) {
         setSetting("protection_setting", setting);
     }

@@ -5,10 +5,10 @@ import lombok.Getter;
 
 @Getter
 public enum WallType {
-    ZERO(new int[] {0, 0, 0, 0}),
-    ONE(new int[] {0, 1, 0, 0}),
-    CORNER(new int[] {0, 1, 1, 0}),
-    LINE(new int[] {0, 1, 0, 1}),
+    ZERO(new int[]{0, 0, 0, 0}),
+    ONE(new int[]{0, 1, 0, 0}),
+    CORNER(new int[]{0, 1, 1, 0}),
+    LINE(new int[]{0, 1, 0, 1}),
     T(new int[]{1, 1, 1, 0}),
     CROSS(new int[]{1, 1, 1, 1});
 

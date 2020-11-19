@@ -5,7 +5,7 @@ import com.soraxus.prisons.cells.ModuleCells;
 import com.soraxus.prisons.cells.TrustedPlayer;
 import net.ultragrav.command.provider.impl.StringProvider;
 
-public class CmdCellTrustedRemove extends CellCommand{
+public class CmdCellTrustedRemove extends CellCommand {
     public CmdCellTrustedRemove() {
         this.addAlias("remove");
         this.addParameter(StringProvider.getInstance(), "player");
@@ -20,13 +20,13 @@ public class CmdCellTrustedRemove extends CellCommand{
             TrustedPlayer trustedPlayer = null;
 
             for (TrustedPlayer cellTrustedPlayer : cell.getTrustedPlayers()) {
-                if(cellTrustedPlayer.getName().equalsIgnoreCase(player)) {
+                if (cellTrustedPlayer.getName().equalsIgnoreCase(player)) {
                     trustedPlayer = cellTrustedPlayer;
                     break;
                 }
             }
 
-            if(trustedPlayer == null) {
+            if (trustedPlayer == null) {
                 tell(ModuleCells.PREFIX + "&cYou have not trusted that player");
                 return;
             }

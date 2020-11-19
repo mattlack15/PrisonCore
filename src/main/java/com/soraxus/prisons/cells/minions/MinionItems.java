@@ -1,6 +1,6 @@
 package com.soraxus.prisons.cells.minions;
 
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.items.NBTUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,11 +16,13 @@ public class MinionItems {
         private String name;
         private ItemType type;
         private double speed;
+        private MinionSettings settings;
 
         public MinionItemData(GravSerializer serializer) {
             this.name = serializer.readString();
             this.type = new ItemType(serializer);
             this.speed = serializer.readDouble();
+            this.settings = new MinionSettings(serializer);
         }
 
         @Override
@@ -28,14 +30,20 @@ public class MinionItems {
             serializer.writeString(name);
             type.serialize(serializer);
             serializer.writeDouble(speed);
+            settings.serialize(serializer);
         }
     }
 
     public static ItemStack getMinionItem(String name, ItemType type, double speed) {
+        return getMinionItem(name, type, speed, new MinionSettings());
+    }
+
+    public static ItemStack getMinionItem(String name, ItemType type, double speed, MinionSettings settings) {
         ItemStack stack = new ItemBuilder(Material.SKULL_ITEM).setupAsSkull("Stone")
-                .setName("&eMinion").build(); //TODO change
+                .setName("&eMinion")
+                .addLore("&7Place this down to spawn your very own minion!").build();
         GravSerializer serializer = new GravSerializer();
-        new MinionItemData(name, type, speed).serialize(serializer);
+        new MinionItemData(name, type, speed, settings).serialize(serializer);
         stack = NBTUtils.instance.setByteArray(stack, "minion_data", serializer.toByteArray());
         return stack;
     }

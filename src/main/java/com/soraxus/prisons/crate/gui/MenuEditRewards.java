@@ -5,7 +5,7 @@ import com.soraxus.prisons.crate.CrateManager;
 import com.soraxus.prisons.crate.Reward;
 import com.soraxus.prisons.util.EventSubscription;
 import com.soraxus.prisons.util.EventSubscriptions;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.InvInfo;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
@@ -66,7 +66,7 @@ public class MenuEditRewards extends Menu {
 
     @EventSubscription
     private void onChat(AsyncPlayerChatEvent event) {
-        if(chatConsumer != null && event.getPlayer().getUniqueId().equals(chatConsumerPlayer)) {
+        if (chatConsumer != null && event.getPlayer().getUniqueId().equals(chatConsumerPlayer)) {
             event.setCancelled(true);
             chatConsumer.accept(event.getMessage());
             chatConsumer = null;
@@ -81,9 +81,9 @@ public class MenuEditRewards extends Menu {
         this.setElement(6, new MenuElement(new ItemBuilder(Material.ANVIL, 1).setName("&a&lAdd")
                 .addLore("&fClick to add a Reward").addLore("&fOr click on an item in your inventory")
                 .build()).setClickHandler((e, i) -> {
-                Reward reward = new Reward("&b4x &eNo description", new ArrayList<>(), new ArrayList<>(), new ItemBuilder(Material.PAPER, 1).setName("&aReward").build(), 0.5);
-                crate.getRewards().add(reward);
-                setup();
+            Reward reward = new Reward("&b4x &eNo description", new ArrayList<>(), new ArrayList<>(), new ItemBuilder(Material.PAPER, 1).setName("&aReward").build(), 0.5);
+            crate.getRewards().add(reward);
+            setup();
         }));
 
         this.setElement(4, backElement);
@@ -96,7 +96,7 @@ public class MenuEditRewards extends Menu {
             builder.setName(reward.getDescription());
             builder.addLore("&fItems: &7" + reward.getRewardItems().size());
             builder.addLore("&fCommands: ");
-            for(String cmd : reward.getCommands())
+            for (String cmd : reward.getCommands())
                 builder.addLore("&7 - " + cmd);
             builder.addLore("");
             builder.addLore("&fChance: &a" + (reward.getChance() * 100d) + "%");
@@ -105,18 +105,19 @@ public class MenuEditRewards extends Menu {
             builder.addLore("&bShift-Left Click to set chance");
             builder.addLore("&cShift-Right Click to Remove");
             return new MenuElement(builder.build()).setClickHandler((e, i) -> {
-                if(e.getClick().isShiftClick() && e.getClick().isRightClick()) {
+                if (e.getClick().isShiftClick() && e.getClick().isRightClick()) {
                     crate.getRewards().remove(reward);
                     CrateManager.instance.saveCrate(crate);
                     this.setup();
-                } else if(e.getClick().isShiftClick() && e.getClick().isLeftClick()) {
+                } else if (e.getClick().isShiftClick() && e.getClick().isLeftClick()) {
                     this.chatConsumer = (s) -> {
                         try {
                             double chance = Double.parseDouble(s);
                             reward.setChance(chance / 100d);
-                        } catch(Exception ignored) {}
+                        } catch (Exception ignored) {
+                        }
                         this.setup();
-                        this.open((Player)e.getWhoClicked());
+                        this.open((Player) e.getWhoClicked());
                         MenuCrates.noGC.remove(this);
                     };
                     MenuCrates.noGC.add(this);
@@ -126,8 +127,8 @@ public class MenuEditRewards extends Menu {
                 } else {
                     new MenuEditReward(crate, reward, getBackButton((e1, i1) -> {
                         setup();
-                        open((Player)e1.getWhoClicked());
-                    })).open((Player)e.getWhoClicked());
+                        open((Player) e1.getWhoClicked());
+                    })).open((Player) e.getWhoClicked());
                 }
             });
         }, 0);

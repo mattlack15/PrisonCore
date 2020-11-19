@@ -23,14 +23,13 @@ public class AbilityLightningStrike extends BunkerNPCAbility {
 
         double damage = 10 * getParent().getParent().getLevel();
         Object target = getParent().getCurrentTarget().getTarget().get();
-        if(target instanceof BunkerElement) {
+        if (target instanceof BunkerElement) {
             BunkerElement targetElement = (BunkerElement) target;
-            ElementDrop drop = targetElement.getDropForDamage(damage);
-            if(drop != null) {
+            ElementDrop drop = targetElement.damage(damage);
+            if (drop != null) {
                 drop.apply(getParent().getBunker());
             }
-            targetElement.damage(damage);
-        } else if(target instanceof AbstractBunkerNPCController) {
+        } else if (target instanceof AbstractBunkerNPCController) {
             ((AbstractBunkerNPCController) target).damage(damage);
         }
     }

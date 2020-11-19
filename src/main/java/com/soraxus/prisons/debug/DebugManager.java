@@ -1,6 +1,5 @@
 package com.soraxus.prisons.debug;
 
-import com.soraxus.prisons.bunkers.BunkerDebugStats.DebugStat;
 import lombok.Getter;
 
 import java.util.HashMap;

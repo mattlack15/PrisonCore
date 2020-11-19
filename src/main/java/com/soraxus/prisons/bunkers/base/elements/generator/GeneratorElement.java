@@ -37,7 +37,8 @@ public abstract class GeneratorElement extends BunkerElement {
 
     @Override
     protected void onDisable() {
-        this.textBox.clear();
+        if (textBox != null)
+            this.textBox.clear();
     }
 
     private void updateTextBox() {
@@ -58,7 +59,7 @@ public abstract class GeneratorElement extends BunkerElement {
 
     public boolean collect() {
         Storage curr = getBunker().getCombinedStorages().get(generatingType);
-        if(curr == null)
+        if (curr == null)
             return false;
         double amount; //Avoiding possible deadlocks here
         double amountCollected;

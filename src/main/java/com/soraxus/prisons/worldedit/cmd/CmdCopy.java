@@ -31,7 +31,7 @@ public class CmdCopy extends UltraCommand {
 
         WorldEditPlayerState state = WorldEditPlayerManager.instance.getPlayerState(((Player) sender).getUniqueId());
 
-        if(state.getPos1() == null || state.getPos2() == null) {
+        if (state.getPos1() == null || state.getPos2() == null) {
             returnTell(SpigotPrisonCore.PREFIX + "Please make a valid selection!");
         }
 

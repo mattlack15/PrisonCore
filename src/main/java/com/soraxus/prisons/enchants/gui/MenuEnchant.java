@@ -4,8 +4,8 @@ import com.soraxus.prisons.economy.Economy;
 import com.soraxus.prisons.enchants.api.enchant.AbstractCE;
 import com.soraxus.prisons.enchants.api.enchant.EnchantInfo;
 import com.soraxus.prisons.pickaxe.crystals.gui.MenuCrystals;
-import com.soraxus.prisons.util.ItemBuilder;
 import com.soraxus.prisons.util.NumberUtils;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
 import com.soraxus.prisons.util.menus.MenuManager;
@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 public class MenuEnchant extends Menu {
@@ -30,10 +31,10 @@ public class MenuEnchant extends Menu {
         this.player = player;
         this.toEnchant = toEnchant;
         this.enchantments = enchantments;
-        this.setup();
+        this.setup(new AtomicInteger(0));
     }
 
-    public void setup() {
+    public void setup(AtomicInteger page) {
         this.setAll(null);
 
         this.setElement(0, new MenuElement(new ItemBuilder(Material.DOUBLE_PLANT, 1)
@@ -57,14 +58,14 @@ public class MenuEnchant extends Menu {
                     } else {
                         return;
                     }
-                    this.setup();
+                    this.setup(page);
                     ((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.BLOCK_NOTE_HAT, 0.5f, 0.6f);
                 }));
 
         this.setElement(6, new MenuElement(new ItemBuilder(Material.ANVIL, 1).setName("&e&lRepair")
                 .addLore("&7Click to Repair").build()).setClickHandler((e, i) -> {
             toEnchant.setDurability((short) 0);
-            this.setup();
+            this.setup(page);
             ((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.BLOCK_NOTE_HAT, 0.5f, 0.6f);
         }));
 
@@ -76,7 +77,7 @@ public class MenuEnchant extends Menu {
             MenuCrystals menuCrystals = new MenuCrystals(this);
             menuCrystals.setup();
             menuCrystals.open(player);
-            this.setup();
+            this.setup(page);
         }));
 
         EnchantInfo info = AbstractCE.getInfo(toEnchant);
@@ -108,7 +109,7 @@ public class MenuEnchant extends Menu {
                 builder.addLore("&cMax Level Reached");
             }
 
-            if(!ce.isEnabled()) {
+            if (!ce.isEnabled()) {
                 builder.addLore("",
                         "&c&lWARNING: &7This enchant is currently",
                         "&7disabled, you can still purchase it, however",
@@ -139,14 +140,14 @@ public class MenuEnchant extends Menu {
                         enchLevel++;
                     }
                     if (in == buyAmount - 1) {
-                        this.setup();
+                        this.setup(page);
                         Player p = (Player) e.getWhoClicked();
                         p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1f);
                     }
                 }
             });
 
-        }), 0);
+        }), page);
 
         this.fillElement(new MenuElement(new ItemBuilder(Material.STAINED_GLASS_PANE, 1, (byte) 7).setName(" ").build()));
 

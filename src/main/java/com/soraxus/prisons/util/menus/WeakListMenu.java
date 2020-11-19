@@ -10,7 +10,9 @@ import java.util.Iterator;
 public class WeakListMenu<T> extends ArrayList<T> {
     private ArrayList<WeakReference<T>> items;
 
-    /** Creates new WeakList */
+    /**
+     * Creates new WeakList
+     */
     public WeakListMenu() {
         items = new ArrayList<>();
     }
@@ -20,15 +22,15 @@ public class WeakListMenu<T> extends ArrayList<T> {
         addAll(0, c);
     }
 
-    public boolean add(T element){
-        if (this.contains(element)){
+    public boolean add(T element) {
+        if (this.contains(element)) {
             return false;
         }
         return items.add(new WeakReference<T>(element));
     }
 
     public void add(int index, T element) {
-        if(this.contains(element)){
+        if (this.contains(element)) {
             return;
         }
         items.add(index, new WeakReference<T>(element));
@@ -41,10 +43,10 @@ public class WeakListMenu<T> extends ArrayList<T> {
     }
 
     @Override
-    public boolean contains(Object item){
+    public boolean contains(Object item) {
         removeReleased();
-        for(WeakReference<T> references : this.items){
-            if((references.get() == null ? item == null : item.equals(references.get()))){
+        for (WeakReference<T> references : this.items) {
+            if ((references.get() == null ? item == null : item.equals(references.get()))) {
                 return true;
             }
         }
@@ -61,7 +63,7 @@ public class WeakListMenu<T> extends ArrayList<T> {
     }
 
     private void removeReleased() {
-        for(int i = 0; i < items.size(); i++){
+        for (int i = 0; i < items.size(); i++) {
             WeakReference<T> ref = items.get(i);
             if (ref.get() == null) {
                 items.remove(i);

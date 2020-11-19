@@ -11,6 +11,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+/**
+ * Extension of HashMap that uses a lock to prevent concurrent access
+ *
+ * @param <K> Key
+ * @param <V> Value
+ */
 public class LockingMap<K, V> extends HashMap<K, V> {
     @Getter
     private CustomLock lock = new CustomLock(true);

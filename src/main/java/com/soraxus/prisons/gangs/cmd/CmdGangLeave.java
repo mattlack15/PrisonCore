@@ -1,6 +1,8 @@
 package com.soraxus.prisons.gangs.cmd;
 
-import com.soraxus.prisons.gangs.*;
+import com.soraxus.prisons.gangs.Gang;
+import com.soraxus.prisons.gangs.GangMember;
+import com.soraxus.prisons.gangs.GangMemberManager;
 
 import static com.soraxus.prisons.gangs.cmd.CmdGang.PREFIX;
 

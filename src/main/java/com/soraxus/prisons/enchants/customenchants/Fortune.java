@@ -44,7 +44,7 @@ public class Fortune extends AbstractCE {
 
     @EventSubscription
     private void onBreak(PrisonBlockBreakEvent event) {
-        if(hasEnchant(event.getPlayer().getInventory().getItemInMainHand())) {
+        if (hasEnchant(event.getPlayer().getInventory().getItemInMainHand())) {
             event.setAmount(event.getAmount() * (getInfo(event.getPlayer().getInventory().getItemInMainHand()).getEnchants().get(this) + 1));
         }
     }

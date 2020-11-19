@@ -58,7 +58,7 @@ public class ModuleSelling extends CoreModule {
         multiplierManager.startLoop();
         reloadPrices();
         new AutoSellCmd().register();
-        new CommandMultiplier();
+        new CommandMultiplier().register();
     }
 
     public void reloadPrices() {

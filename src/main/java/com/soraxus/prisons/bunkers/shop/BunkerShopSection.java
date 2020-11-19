@@ -1,6 +1,6 @@
 package com.soraxus.prisons.bunkers.shop;
 
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 

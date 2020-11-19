@@ -18,12 +18,25 @@ public class CmdGangCreate extends GangCommand {
     }
 
     public void perform() {
+        if (getGang() != null) {
+            returnTell(PREFIX + ChatColor.RED + "You are already in a gang!");
+        }
         Player player = getPlayer();
 
         String name = getArgument(0);
 
         if (GangManager.instance.getLoadedGang(name) != null)
-            returnTell(PREFIX + ChatColor.RED + "Gang already exists! Maybe try fighting them for it?");
+            returnTell(PREFIX + "&cGang already exists! Maybe try fighting them for it?");
+
+        char[] chs = name.toCharArray();
+        if (chs.length > 26) {
+            returnTell(PREFIX + "&cGang name is too long!");
+        }
+        for (char ch : chs) {
+            if (!Character.isAlphabetic(ch) && !Character.isDigit(ch)) {
+                returnTell(PREFIX + "&cGang name must be alphanumeric!");
+            }
+        }
 
         Gang gang = GangManager.instance.createGang(name);
         GangMember member = GangMemberManager.instance.getOrMakeMember(player);

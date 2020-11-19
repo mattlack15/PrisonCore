@@ -2,7 +2,7 @@ package com.soraxus.prisons.crate.gui;
 
 import com.soraxus.prisons.crate.Crate;
 import com.soraxus.prisons.crate.Reward;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
 import org.bukkit.Material;
@@ -45,7 +45,7 @@ public class MenuOpenCrate extends Menu {
             populate();
             return false; // Cannot iterate anymore
         }
-        counter ++;
+        counter++;
         if (counter > getShrinkItt()) {
             counter = 0;
             itt++;

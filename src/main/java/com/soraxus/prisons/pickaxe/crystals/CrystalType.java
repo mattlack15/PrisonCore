@@ -7,10 +7,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public enum CrystalType {
-    TOKEN("Token Booster"),
-    SELL("Sell Booster"),
-    XP("XP Booster"),
-    STAR("Star Booster");
+    TOKEN("Token Booster", new String[]{"Get more tokens from mining!"}),
+    SELL("Sell Booster", new String[]{"Sell your blocks at a higher price!"}),
+    XP("XP Booster", new String[]{"Level up your pickaxe faster!"}),
+    STAR("Star Booster", new String[]{"Get more stars from mining!"});
 
     private String displayName;
+    private String[] description;
 }

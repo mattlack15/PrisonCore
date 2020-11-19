@@ -28,7 +28,7 @@ public class DamageAnimationHandler {
     /**
      * The instance of BunkerElement this damage animation handler belongs to
      */
-    private BunkerElement parent;
+    private final BunkerElement parent;
     /**
      * The amount of time until I die
      */
@@ -42,13 +42,13 @@ public class DamageAnimationHandler {
     /**
      * The height of the element
      */
-    private double elementHeight;
+    private final double elementHeight;
     /**
      * idfk
      */
-    private int liveTicks;
+    private final int liveTicks;
     private double prevHealth = 0;
-    private Random random = new Random(System.currentTimeMillis());
+    private final Random random = new Random(System.currentTimeMillis());
 
     /**
      * A constructor
@@ -104,10 +104,10 @@ public class DamageAnimationHandler {
      * @param damage Amount of damage
      */
     public synchronized void animate(double damage) {
-        if(cleaned)
+        if (cleaned)
             return;
         keepAliveTicks = liveTicks;
-        if(keepAliveTicksDamage == 0) {
+        if (keepAliveTicksDamage == 0) {
             keepAliveTicksDamage = liveTicks / 6;
             currentDamage = 0D;
         }

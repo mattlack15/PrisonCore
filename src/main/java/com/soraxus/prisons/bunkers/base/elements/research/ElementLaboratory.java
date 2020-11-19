@@ -81,7 +81,7 @@ public class ElementLaboratory extends BunkerElement {
     }
 
     public void makeScientistSayNear(String message) {
-        if(getBunker().getWorld() != null) {
+        if (getBunker().getWorld() != null) {
             List<Player> players = getBunker().getWorld().getBukkitWorld().getPlayers();
             CuboidRegion region = getBoundingRegion(20);
             for (Player player : players) {
@@ -93,7 +93,7 @@ public class ElementLaboratory extends BunkerElement {
     }
 
     public void makeScientistSayNear(String message, double distance) {
-        if(getBunker().getWorld() != null) {
+        if (getBunker().getWorld() != null) {
             List<Player> players = getBunker().getWorld().getBukkitWorld().getPlayers();
             CuboidRegion region = getBoundingRegion(20);
             for (Player player : players) {
@@ -107,7 +107,7 @@ public class ElementLaboratory extends BunkerElement {
     public void makeScientistSayGang(String message) {
         List<Player> players = getBunker().getGang().getMembers().stream().map((m) -> Bukkit.getPlayer(m.getMember())).collect(Collectors.toList());
         for (Player player : players) {
-            if(player == null)
+            if (player == null)
                 return;
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bMad Scientist &f&l> &7" + message));
         }
@@ -115,7 +115,7 @@ public class ElementLaboratory extends BunkerElement {
 
     @EventSubscription
     private void onLeaderClick(NPCRightClickEvent event) {
-        if(event.getNPC() != madScientist || madScientist == null)
+        if (event.getNPC() != madScientist || madScientist == null)
             return;
         new MenuLaboratory(this).open(event.getClicker());
     }

@@ -15,10 +15,13 @@ import java.util.concurrent.locks.ReentrantLock;
 @Getter
 public abstract class StorageElement extends BunkerElement {
     private final List<Storage> storageList;
-    private final ReentrantLock storageLock = new ReentrantLock(true);
+    private final ReentrantLock storageLock;
 
     public StorageElement(Bunker bunker, Storage... resources) {
         super(null, bunker);
+
+        storageLock = bunker.getResourceLock();
+
         storageLock.lock();
         try {
             storageList = Arrays.asList(resources);
@@ -30,6 +33,9 @@ public abstract class StorageElement extends BunkerElement {
 
     public StorageElement(GravSerializer serializer, Bunker bunker) {
         super(serializer, bunker);
+
+        storageLock = bunker.getResourceLock();
+
         storageLock.lock();
         try {
             if (serializer == null) {

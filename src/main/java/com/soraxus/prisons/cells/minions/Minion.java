@@ -40,6 +40,7 @@ public class Minion implements GravSerializable {
     @Getter
     private String name = "Minion";
     @Getter
+    @Setter
     private MinionSettings settings;
     @Getter
     @Setter
@@ -67,10 +68,20 @@ public class Minion implements GravSerializable {
         this.parent = parent;
         this.location = serializer.readObject();
         this.name = serializer.readString();
+
+        try {
+            serializer.mark();
+            this.miningBlock = serializer.readObject();
+        } catch (Exception e) {
+            serializer.reset();
+            e.printStackTrace();
+        }
+
         this.settings = serializer.readObject();
         this.speed = serializer.readDouble();
         this.stored.set(serializer.readInt());
         this.creator = serializer.readObject();
+        this.direction = serializer.readInt();
         this.standController = new MinionArmorStand(this);
     }
 
@@ -147,10 +158,12 @@ public class Minion implements GravSerializable {
     public void serialize(GravSerializer serializer) {
         serializer.writeObject(location);
         serializer.writeString(name);
+        serializer.writeObject(getMiningBlock());
         serializer.writeObject(settings);
         serializer.writeDouble(speed);
         serializer.writeInt(stored.get());
         serializer.writeObject(creator);
+        serializer.writeInt(direction);
     }
 
     public void update() {
@@ -198,7 +211,7 @@ public class Minion implements GravSerializable {
     }
 
     public ItemStack asItemStack() {
-        return MinionItems.getMinionItem(this.name, this.miningBlock, this.speed);
+        return MinionItems.getMinionItem(this.name, this.miningBlock, this.speed, this.settings);
     }
 
     private void sendBlockBreakUpdate(double progress) {

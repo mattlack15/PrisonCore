@@ -1,6 +1,7 @@
 package com.soraxus.prisons.bunkers.npc;
 
 import com.soraxus.prisons.bunkers.base.Bunker;
+import com.soraxus.prisons.util.Scheduler;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -122,9 +123,9 @@ public abstract class AbstractBunkerNPCController {
      * Kill the NPC, playing any death animations
      */
     public void die() {
-        Entity ent = this.npc.getEntity();
-        // TODO: Death animation
-        remove();
+        LivingEntity ent = (LivingEntity) this.npc.getEntity();
+        ent.damage(Double.MAX_VALUE);
+        Scheduler.scheduleSyncDelayedTask(this::remove, 1);
     }
 
     public void damage(double damage) {

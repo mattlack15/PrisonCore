@@ -2,6 +2,7 @@ package com.soraxus.prisons.bunkers.base.elements.defense.nonactive;
 
 import com.soraxus.prisons.bunkers.base.Bunker;
 import com.soraxus.prisons.bunkers.base.BunkerElement;
+import com.soraxus.prisons.bunkers.base.ConnectingElement;
 import com.soraxus.prisons.bunkers.base.elements.defense.nonactive.wall.WallParameter;
 import com.soraxus.prisons.bunkers.base.elements.defense.nonactive.wall.WallType;
 import com.soraxus.prisons.bunkers.base.elements.type.BunkerElementType;
@@ -18,7 +19,7 @@ import java.util.*;
 /**
  * A mine that blows up your enemies
  */
-public class ElementWall extends BunkerElement {
+public class ElementWall extends ConnectingElement {
     private final List<UUID> fb = new ArrayList<>();
     private final Random random = new Random(System.currentTimeMillis());
     /**

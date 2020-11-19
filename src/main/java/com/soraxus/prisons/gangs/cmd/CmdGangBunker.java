@@ -14,7 +14,7 @@ public class CmdGangBunker extends GangCommand {
         Gang gang = getGang();
         try {
             new MenuBunker(gang).open((Player) sender);
-        } catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             returnTell("&cCould not setup GUI for you :( sorry!");
         }

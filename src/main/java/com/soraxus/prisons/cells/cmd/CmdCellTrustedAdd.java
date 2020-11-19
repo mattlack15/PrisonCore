@@ -21,7 +21,7 @@ public class CmdCellTrustedAdd extends CellCommand {
             Cell cell = getOrLoadCell();
             String player = getArgument(0);
             List<Player> matches = Bukkit.matchPlayer(player);
-            if(matches.size() == 0) {
+            if (matches.size() == 0) {
                 tell(ModuleCells.PREFIX + "&cCould not find that player");
                 return;
             }
@@ -29,7 +29,7 @@ public class CmdCellTrustedAdd extends CellCommand {
             Player p = matches.get(0);
             TrustedPlayer trustedPlayer = new TrustedPlayer(p.getName(), p.getUniqueId());
 
-            if(cell.getTrustedPlayers().contains(trustedPlayer)) {
+            if (cell.getTrustedPlayers().contains(trustedPlayer)) {
                 tell(ModuleCells.PREFIX + "You have already trusted that player...?");
                 return;
             }

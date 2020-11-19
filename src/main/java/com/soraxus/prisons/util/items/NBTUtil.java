@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public abstract class NBTUtil {
-
     @NotNull
     public abstract ItemStack setInt(ItemStack item, String key, int value);
 

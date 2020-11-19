@@ -17,7 +17,6 @@ import net.ultragrav.utils.IntVector2D;
 import net.ultragrav.utils.Vector3D;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
@@ -48,30 +47,27 @@ public class ElementMageTower extends ActiveDefenseElement {
 
     @Override
     protected void onEnable() {
-
         //Search for mage positions
         List<Vector3D> npcPositions = new ArrayList<>();
 
         Schematic schematic = getSchematic();
         schematic.getTiles().forEach((p, t) -> {
-            if((schematic.getBlockAt(p.getX(), p.getY(), p.getZ()) & 0xFFF) == Material.SIGN_POST.getId()) {
+            if ((schematic.getBlockAt(p.getX(), p.getY(), p.getZ()) & 0xFFF) == Material.SIGN_POST.getId()) {
                 Tag textTag = t.getData().get("Text1");
-                if(textTag instanceof TagString) {
-                    String text = ((TagString)textTag).getData();
-                    if(text.contains("[NPC]"))
+                if (textTag instanceof TagString) {
+                    String text = ((TagString) textTag).getData();
+                    if (text.contains("[NPC]"))
                         npcPositions.add(new Vector3D(p.getX() + 0.5D, p.getY(), p.getZ() + 0.5D));
                 }
             }
         });
 
-
-
         Synchronizer.synchronize(() -> {
-            if(!mages.isEmpty()) {
+            if (!mages.isEmpty()) {
                 mages.forEach(NPC::destroy);
                 mages.clear();
             }
-            for(int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++) {
                 Vector3D position = npcPositions.get(i);
 
                 position.floor().toBukkitVector().toLocation(this.getBunker().getWorld().getBukkitWorld())
@@ -84,6 +80,7 @@ public class ElementMageTower extends ActiveDefenseElement {
             }
         });
     }
+
     @Override
     protected void onDisable() {
         Synchronizer.synchronize(() -> {
@@ -116,9 +113,9 @@ public class ElementMageTower extends ActiveDefenseElement {
 
     @Override
     public void onTick() {
-        if(!isDefendingMatchActive())
+        if (!isDefendingMatchActive())
             return;
-        if(++ticks >= 8) {
+        if (++ticks >= 8) {
             ticks = 0;
 
             //Pick target
@@ -128,13 +125,13 @@ public class ElementMageTower extends ActiveDefenseElement {
             Location ourLocation = getLocation().add(3.5, 0, 3.5);
             for (AvailableTarget<?> availableTarget : targetList) {
                 Location location = availableTarget.getImmediateLocation();
-                if(location.distanceSquared(ourLocation) <= range * range) {
+                if (location.distanceSquared(ourLocation) <= range * range) {
                     target = availableTarget;
                     break;
                 }
             }
 
-            if(target == null)
+            if (target == null)
                 return; //Could not find a target
 
             //Pick mage
@@ -143,7 +140,7 @@ public class ElementMageTower extends ActiveDefenseElement {
             Location targetLocation = target.getImmediateLocation();
 
             for (NPC npc : mages) {
-                if(npc.getStoredLocation().distanceSquared(targetLocation) <= archerDistance || archerDistance == -1) {
+                if (npc.getStoredLocation().distanceSquared(targetLocation) <= archerDistance || archerDistance == -1) {
                     mage = npc;
                     archerDistance = npc.getStoredLocation().distanceSquared(targetLocation);
                 }
@@ -152,7 +149,7 @@ public class ElementMageTower extends ActiveDefenseElement {
             assert mage != null;
 
             //Fire arrow
-            Location fireLocation = ((LivingEntity)mage.getEntity()).getEyeLocation();
+            Location fireLocation = ((LivingEntity) mage.getEntity()).getEyeLocation();
             Vector dir = targetLocation.toVector().subtract(fireLocation.toVector()).add(new Vector(0, 1.8, 0));
             dir = dir.normalize();
             Fireball fireball = mage.getStoredLocation().getWorld().spawn(fireLocation.add(dir.normalize().multiply(2.5)), Fireball.class);

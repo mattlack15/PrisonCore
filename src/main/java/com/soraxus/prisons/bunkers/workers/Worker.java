@@ -32,7 +32,7 @@ public class Worker implements GravSerializable {
     public synchronized boolean setTask(Task task) {
         if (task.isFinished())
             return false;
-        if(this.isWorking()) {
+        if (this.isWorking()) {
             return false;
         }
         this.task = task;

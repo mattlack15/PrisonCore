@@ -11,6 +11,7 @@ import com.soraxus.prisons.bunkers.util.BunkerSchematics;
 import com.soraxus.prisons.util.EventSubscription;
 import com.soraxus.prisons.util.EventSubscriptions;
 import com.soraxus.prisons.util.Synchronizer;
+import com.soraxus.prisons.util.display.chat.ChatBuilder;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
@@ -25,18 +26,14 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * Element for
  */
 public class ElementBarracks extends ActiveDefenseElement {
-
-    private NPC umer = null;
+    private NPC npc = null;
 
     /**
      * All non-abstract BunkerElement child classes must have an exact matching constructor
@@ -120,7 +117,7 @@ public class ElementBarracks extends ActiveDefenseElement {
         for (ElementArmyCamp camps : getBunker().getTileMap().byClass(ElementArmyCamp.class)) {
             if (amount <= 0 || !it.hasNext())
                 break;
-            if(!camps.isEnabled())
+            if (!camps.isEnabled())
                 continue;
             if (camps.getNPCs().size() < camps.getCapacity()) {
                 int toAdd = Math.min(camps.getCapacity() - camps.getNPCs().size(), amount);
@@ -149,65 +146,57 @@ public class ElementBarracks extends ActiveDefenseElement {
 
     @Override
     protected void onEnable() {
-        //Create sergeant umer
         EventSubscriptions.instance.subscribe(this);
         Synchronizer.synchronize(() -> {
-            umer = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ChatColor.YELLOW + "Sergeant " + ChatColor.WHITE + "Umer");
-            umer.spawn(getBoundingRegion(1).getCenter().toBukkitVector().toLocation(getBunker().getWorld().getBukkitWorld()));
+            npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ChatColor.YELLOW + "Sergeant " + ChatColor.WHITE + "Umer");
+            npc.spawn(getBoundingRegion(1).getCenter().toBukkitVector().toLocation(getBunker().getWorld().getBukkitWorld()));
         });
     }
 
     @Override
     protected void onDisable() {
-        //Remove sergeant umer
         EventSubscriptions.instance.unSubscribe(this);
         Synchronizer.synchronize(() -> {
-            umer.despawn();
-            umer.destroy();
+            npc.despawn();
+            npc.destroy();
         });
     }
 
-    public void makeSergeantUmerSayNear(String message) {
-        if(getBunker().getWorld() != null) {
-            List<Player> players = getBunker().getWorld().getBukkitWorld().getPlayers();
-            CuboidRegion region = getBoundingRegion(20);
-            for (Player player : players) {
-                if (region.contains(Vector3D.fromBukkitVector(player.getLocation().toVector()))) {
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e&lSergeant &fUmer &l> &7" + message));
-                }
-            }
-        }
+    public void makeNPCSayNear(String message) {
+        makeNPCSayNear(message, 0);
     }
 
-    public void makeSergeantUmerSayNear(String message, double distance) {
-        if(getBunker().getWorld() != null) {
-            List<Player> players = getBunker().getWorld().getBukkitWorld().getPlayers();
-            CuboidRegion region = getBoundingRegion(20);
-            for (Player player : players) {
-                if (region.smallestDistance(Vector3D.fromBukkitVector(player.getLocation().toVector())) <= distance) {
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e&lSergeant &fUmer &l> &7" + message));
-                }
-            }
+    public void makeNPCSayNear(String message, double distance) {
+        if (getBunker().getWorld() == null) {
+            return;
         }
+        List<Player> players = getBunker().getWorld().getBukkitWorld().getPlayers();
+        CuboidRegion region = getBoundingRegion(20);
+        ChatBuilder chat = ChatBuilder.prefix("&e&lSergeant &fUmer &l> &7")
+                .addText(message);
+        players.stream()
+                .filter(player -> region.smallestDistance(Vector3D.fromBukkitVector(player.getLocation().toVector())) <= distance)
+                .collect(Collectors.toList())
+                .forEach(chat::send);
     }
 
-    public void makeSergeantUmerSayGang(String message) {
-        List<Player> players = getBunker().getGang().getMembers().stream().map((m) -> Bukkit.getPlayer(m.getMember())).collect(Collectors.toList());
-        for (Player player : players) {
-            if(player == null)
-                return;
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&e&lSergeant &fUmer &l> &7" + message));
-        }
+    public void makeNPCSayGang(String message) {
+        ChatBuilder chat = ChatBuilder.prefix("&e&lSergeant &fUmer &l> &7")
+                .addText(message);
+        getBunker().getGang().getMembers().stream()
+                .map((m) -> Bukkit.getPlayer(m.getMember()))
+                .filter(Objects::nonNull)
+                .forEach(chat::send);
     }
 
     @Override
     protected void onPlacement() {
-        makeSergeantUmerSayNear("Sergeant Umer ready for duty sir!", 28);
+        makeNPCSayNear("Sergeant Umer ready for duty sir!", 28);
     }
 
     @EventSubscription
-    private void onUmerClick(NPCRightClickEvent event) {
-        if(event.getNPC() != umer || umer == null)
+    private void onNPCClick(NPCRightClickEvent event) {
+        if (event.getNPC() != npc || npc == null)
             return;
         new MenuBarracks(this).open(event.getClicker());
     }

@@ -1,8 +1,7 @@
 package com.soraxus.prisons.util.menus;
 
-import com.soraxus.prisons.util.ItemBuilder;
 import com.soraxus.prisons.util.Synchronizer;
-import lombok.Getter;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -12,26 +11,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 public abstract class Menu {
 
     public static final Material BACK_BUTTON_ITEM = Material.BED;
     public static final Material PAGE_CONTROL_ITEM = Material.ARROW;
     //
-
-    @Getter
-    private ExecutorService asyncExecutor = Executors.newCachedThreadPool();
-
-    //Value vars
-    private String title;
-
-    private com.soraxus.prisons.util.menus.MenuElement.ClickHandler defaultClickHandler = null;
-
     //Storage vars
     private final Map<Integer, MenuElement> elements = new HashMap<>();
+    //Value vars
+    private String title;
+    private com.soraxus.prisons.util.menus.MenuElement.ClickHandler defaultClickHandler = null;
 
     //Construction
     public Menu(String title, int rows) {
@@ -83,6 +75,8 @@ public abstract class Menu {
 
     //open
     public void open(HumanEntity p, Object... data) {
+        if (p == null)
+            return;
         Inventory inv = this.buildInventory();
         InvInfo info = new InvInfo(inv, this, data);
 
@@ -203,11 +197,11 @@ public abstract class Menu {
         return elements;
     }
 
-    public AtomicInteger setupActionableList(int startPos, int endPos, int backPos, int nextPos, MenuElementSupplier elementSupplier, int page) {
+    public AtomicInteger setupActionableList(int startPos, int endPos, int backPos, int nextPos, Function<Integer, MenuElement> elementSupplier, int page) {
         return setupActionableList(startPos, endPos, backPos, nextPos, elementSupplier, new AtomicInteger(page));
     }
 
-    public AtomicInteger setupActionableList(int startPos, int endPos, int backPos, int nextPos, MenuElementSupplier elementSupplier, AtomicInteger pageHandler) {
+    public AtomicInteger setupActionableList(int startPos, int endPos, int backPos, int nextPos, Function<Integer, MenuElement> elementSupplier, AtomicInteger pageHandler) {
         //Pageable list
         int page = pageHandler.get();
 
@@ -219,7 +213,7 @@ public abstract class Menu {
         for (int slot = startPos; slot <= endPos; slot++) {
 
             if (placing) {
-                MenuElement element = elementSupplier.getElement(elementIndex);
+                MenuElement element = elementSupplier.apply(elementIndex);
                 if (element == null) {
                     placing = false;
                     this.setElement(slot, null);
@@ -253,7 +247,7 @@ public abstract class Menu {
         } else {
             this.setElement(backPos, null);
         }
-        if (elementSupplier.getElement(elementIndex + 1) != null) {
+        if (elementSupplier.apply(elementIndex) != null) {
             this.setElement(nextPos, next);
         } else {
             this.setElement(nextPos, null);
@@ -270,11 +264,4 @@ public abstract class Menu {
         ).setClickHandler(Handlers.noop);
     }
 
-    public interface Func {
-        void execute();
-    }
-
-    public interface MenuElementSupplier {
-        MenuElement getElement(int index);
-    }
 }

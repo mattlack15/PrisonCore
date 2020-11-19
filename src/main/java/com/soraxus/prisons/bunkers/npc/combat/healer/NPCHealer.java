@@ -10,10 +10,11 @@ import org.bukkit.inventory.ItemStack;
 import java.util.List;
 
 public class NPCHealer extends CombatNPCController {
-
     public NPCHealer(BunkerNPC parent) {
         super(parent);
-        this.setTargetingType(TargetType.FRIENDLY); //This npc will target friendlies
+        this.setTargetingType(TargetType.FRIENDLY);
+        this.addAbility(new AbilityHealSingle(this));
+        this.addAbility(new AbilityHealGroup(this));
     }
 
     @Override

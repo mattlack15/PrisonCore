@@ -21,13 +21,13 @@ public abstract class CellCommand extends UltraCommand {
     private final ExecutorService asyncExecutor = Executors.newFixedThreadPool(2);
 
     public Cell getOrLoadCell() {
-        if(!isPlayer())
+        if (!isPlayer())
             return null;
         Cell cell = CellManager.instance.getLoadedCell(getPlayer().getUniqueId());
-        if(cell == null) {
+        if (cell == null) {
             try {
                 cell = CellManager.instance.loadCell(getPlayer().getUniqueId()).join();
-            } catch(Throwable t) {
+            } catch (Throwable t) {
                 t.printStackTrace();
                 tell(ModuleCells.PREFIX + "&cWe had trouble loading your cell!");
                 String errorId = ModuleErrors.instance.recordError(t);
@@ -40,8 +40,8 @@ public abstract class CellCommand extends UltraCommand {
 
     @Override
     protected void preConditions() {
-        if(requiresCell) {
-            if(!CellManager.instance.cellExists(getPlayer().getUniqueId())) {
+        if (requiresCell) {
+            if (!CellManager.instance.cellExists(getPlayer().getUniqueId())) {
                 throw new CommandException(ModuleCells.PREFIX + "You must have a cell to use this command. Create one first!");
             }
         }

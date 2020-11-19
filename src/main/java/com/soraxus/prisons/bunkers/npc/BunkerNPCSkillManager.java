@@ -27,7 +27,7 @@ public class BunkerNPCSkillManager implements GravSerializable {
 
     public int getLevel(BunkerNPCType type) {
         Integer result = levelMap.get(type);
-        if(result == null)
+        if (result == null)
             return 1;
         return result;
     }

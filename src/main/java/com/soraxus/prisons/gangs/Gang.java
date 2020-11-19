@@ -45,6 +45,7 @@ public class Gang {
 
     /**
      * Get the bunker associated with this gang if it is loaded.
+     *
      * @return The bunker, if it is loaded.
      */
     public synchronized Bunker getBunker() {
@@ -152,6 +153,7 @@ public class Gang {
 
     /**
      * Set the name of this gang
+     *
      * @param name the name to set to
      */
     public synchronized void setName(String name) {
@@ -164,6 +166,7 @@ public class Gang {
 
     /**
      * Get the description of this gang
+     *
      * @return the description of this gang
      */
     public synchronized String getDescription() {
@@ -172,6 +175,7 @@ public class Gang {
 
     /**
      * Set the description of this gang
+     *
      * @param description the new description of this gang
      */
     public synchronized void setDescription(String description) {
@@ -183,7 +187,8 @@ public class Gang {
 
     /**
      * Invite a player to this gang, requires a player name
-     * @param player The player's UUID
+     *
+     * @param player     The player's UUID
      * @param playerName The player's name
      */
     public synchronized void invite(UUID player, String playerName) {
@@ -192,6 +197,7 @@ public class Gang {
 
     /**
      * Check if a player has been invited to this gang
+     *
      * @param player The player's UUID
      * @return whether or not the player has been invited to this gang
      */
@@ -201,6 +207,7 @@ public class Gang {
 
     /**
      * Check if a player has been invited to this gang
+     *
      * @param playerName The player's name
      * @return whether or not the player has been invited to this gang
      */
@@ -213,6 +220,7 @@ public class Gang {
 
     /**
      * Check if a player has been invited to this gang, returning the capitalization-fixed version of the name
+     *
      * @param playerName The player's name
      * @return null, if the player has not been invited to this gang, otherwise returns the capitalization-fixed version of the name
      */
@@ -225,6 +233,7 @@ public class Gang {
 
     /**
      * Uninvite a player from this gang
+     *
      * @param player The player
      */
     public synchronized void unInvite(UUID player) {
@@ -233,6 +242,7 @@ public class Gang {
 
     /**
      * Uninvite a player from this gang
+     *
      * @param playerName The player's name
      */
     public synchronized void unInvite(String playerName) {
@@ -245,6 +255,7 @@ public class Gang {
 
     /**
      * Get all the players that have been invited to this gang
+     *
      * @return All the players that have been invited to this gang
      */
     public synchronized Map<UUID, String> getInvitedPlayers() {
@@ -259,6 +270,7 @@ public class Gang {
 
     /**
      * Broadcast a message to all players in this gang
+     *
      * @param message The message to broadcast
      */
     public void broadcastMessage(String message) {
@@ -277,6 +289,7 @@ public class Gang {
 
     /**
      * Get the relation between this gang and another gang
+     *
      * @param gang The other gang
      * @return The relation
      */
@@ -286,7 +299,8 @@ public class Gang {
 
     /**
      * Set the relation between this gang and another gang
-     * @param gang The other gang
+     *
+     * @param gang     The other gang
      * @param relation The relation
      */
     public synchronized void setRelation(UUID gang, GangRelation relation) {
@@ -300,12 +314,13 @@ public class Gang {
 
     /**
      * Pretty much just a synchronization tool so that a member can't be added between checking isInvited and another thread adding a member
-     * @param member The member to try to add
+     *
+     * @param member     The member to try to add
      * @param conditions The conditions
      * @return True if the member was added, false otherwise
      */
     public synchronized boolean addMemberWithCondition(GangMember member, Supplier<Boolean> condition) {
-        if(!condition.get())
+        if (!condition.get())
             return false;
         this.addMember(member);
         return true;
@@ -314,6 +329,7 @@ public class Gang {
 
     /**
      * Add a member to this gang
+     *
      * @param member The member
      */
     public synchronized void addMember(GangMember member) {
@@ -330,6 +346,7 @@ public class Gang {
 
     /**
      * Remove a member from this gang
+     *
      * @param member The member
      */
     public synchronized void removeMember(GangMember member) {
@@ -369,12 +386,13 @@ public class Gang {
 
     /**
      * Check if a player is a member of this gang
+     *
      * @param player The player to check
      * @return Whether the player is a member of this gang
      */
     public synchronized boolean isMember(UUID player) {
-        for(GangMember member : this.getMembers())
-            if(member.getMember().equals(player))
+        for (GangMember member : this.getMembers())
+            if (member.getMember().equals(player))
                 return true;
         return false;
     }
@@ -399,13 +417,14 @@ public class Gang {
 
     /**
      * Add xp to this gang
+     *
      * @param amount the amount of xp to add
      */
     public void addXp(long amount) {
         xp += amount;
         while (xp > GangLevelUtil.getReqXp(level)) {
             xp -= GangLevelUtil.getReqXp(level);
-            level ++;
+            level++;
             this.broadcastMessage("§fYour gang leveled up to §5Level " + level + "§f!");
         }
     }

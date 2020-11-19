@@ -4,7 +4,7 @@ import com.soraxus.prisons.bunkers.npc.AvailableTarget;
 import com.soraxus.prisons.bunkers.npc.BunkerNPC;
 import com.soraxus.prisons.bunkers.npc.Target;
 import com.soraxus.prisons.bunkers.npc.combat.CombatNPCController;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Equipment;
 import org.bukkit.Material;

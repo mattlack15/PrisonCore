@@ -5,7 +5,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.inventory.ItemStack;
 
-public class GlowEnchant1_12 extends Enchantment{
+public class GlowEnchant1_12 extends Enchantment {
     public GlowEnchant1_12() {
         super(169);
     }

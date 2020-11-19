@@ -25,6 +25,7 @@ public class AsyncBunkerLoadEvent extends Event {
 
     /**
      * Gets the bunker that was loaded asynchronously
+     *
      * @return the loaded bunker
      */
     public Bunker getBunker() {

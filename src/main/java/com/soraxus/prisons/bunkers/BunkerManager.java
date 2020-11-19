@@ -23,6 +23,7 @@ import net.ultragrav.utils.IntVector2D;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.event.Event;
 
 import java.io.*;
 import java.util.*;
@@ -189,11 +190,11 @@ public class BunkerManager {
             loadingService.submit(() -> {
 
                 //Loop in order to acquire, in case the loading fails
-                while(true) {
+                while (true) {
                     CompletableFuture<Bunker> bunkerFuture = ioLock.loadLock(gang.getId(), future);
                     if (bunkerFuture != null) {
                         Bunker bunker = bunkerFuture.join();
-                        if(bunker == null) //Load failure - Try to create again
+                        if (bunker == null) //Load failure - Try to create again
                             continue;
                         future.complete(bunker);
                         return; //Load/Creation successful
@@ -213,7 +214,6 @@ public class BunkerManager {
                     //Concurrency
 
                     long now = System.currentTimeMillis();
-                    long temp = now;
 
                     //Create bunker
                     Bunker bunker = new Bunker(gang, "bunkertheme1");
@@ -222,7 +222,7 @@ public class BunkerManager {
                     initWorld(bunker);
 
                     //Enable
-                    bunker.enable();
+                    Synchronizer.synchronizeAndWait(bunker::enable);
 
                     //Add to loaded bunker list
                     lock.lock();
@@ -326,7 +326,7 @@ public class BunkerManager {
                     initWorld(bunker);
 
                     //Enable
-                    bunker.enable();
+                    Synchronizer.synchronizeAndWait(bunker::enable);
 
                     //Add to loaded bunker list
                     lock.lock();
@@ -342,7 +342,7 @@ public class BunkerManager {
                     long time = System.currentTimeMillis() - now;
                     Bukkit.broadcastMessage(ChatColor.RED + "STAT > " + ChatColor.WHITE + "Took " + ChatColor.YELLOW + time + ChatColor.WHITE + "ms to load bunker asynchronously!");
 
-                    if(!ignoreFirstAvg.compareAndSet(true, false))
+                    if (!ignoreFirstAvg.compareAndSet(true, false))
                         BunkerDebugStats.measureMap.get(BunkerDebugStats.DebugStat.BUNKER_LOAD_TOTAL).addEntry(time);
 
                     ioLock.loadUnlock(id, bunker);
@@ -385,7 +385,9 @@ public class BunkerManager {
     public void saveAndUnloadBunkerSync(Bunker bunker) {
         try {
             getSaveAndUnloadOp(bunker).call();
-            BunkerSaveEvent event = new BunkerSaveEvent(bunker, false);
+            Event event = new BunkerSaveEvent(bunker, false);
+            Bukkit.getPluginManager().callEvent(event);
+            event = new BunkerUnloadEvent(bunker, false);
             Bukkit.getPluginManager().callEvent(event);
         } catch (Exception e) {
             e.printStackTrace();
@@ -400,7 +402,6 @@ public class BunkerManager {
 
             try {
 
-                //Doesn't need to hold save lock because it's not writing to any files
                 CompletableFuture<Void> future = new CompletableFuture<>();
 
                 //Also it's pretty much all synchronous
@@ -414,6 +415,8 @@ public class BunkerManager {
                         if (bunker.getDefendingMatch() != null)
                             bunker.getDefendingMatch().end();
 
+                        bunker.disable();
+
                         //Unload world
                         if (bunker.getWorld().getBukkitWorld() != null) {
                             bunker.getWorld().getBukkitWorld().getPlayers().forEach(p -> {
@@ -421,10 +424,12 @@ public class BunkerManager {
                                     p.teleport(new Location(Bukkit.getWorld("world"), 0, 80, 0)); //TEMPORARILY WORLD
                             });
                         }
-                        bunker.disable();
                     } finally {
                         try {
+                            String name = bunker.getWorld().getBukkitWorld().getName();
                             bunker.getWorld().unload();
+                            if(Bukkit.getWorld(name) != null)
+                                ModuleBunkers.messageDevs("Could not unload bunker!");
                         } finally {
                             internalUnloadBunker(bunker);
                             future.complete(null);
@@ -453,7 +458,7 @@ public class BunkerManager {
         return () -> {
             ioLock.saveLock(bunker.getId()); //Lock
             try {
-                getBunkerSaveOp(bunker).call();
+                getBunkerSaveOp(bunker, false).call();
                 getUnloadOp(bunker).call();
                 return null;
             } catch (Exception e) {
@@ -469,14 +474,11 @@ public class BunkerManager {
      * Save and unload a bunker, unloading is synchronous, saving is async and completes the returned future
      */
     public Future<Void> saveAndUnloadBunker(Bunker bunker) {
-        try {
-            getUnloadOp(bunker).call();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return loadingService.submit(() -> {
-            getBunkerSaveOp(bunker).call();
-            BunkerSaveEvent event = new BunkerSaveEvent(bunker, true);
+            getSaveAndUnloadOp(bunker).call();
+            Event event = new BunkerSaveEvent(bunker, false);
+            Bukkit.getPluginManager().callEvent(event);
+            event = new BunkerUnloadEvent(bunker, false);
             Bukkit.getPluginManager().callEvent(event);
             return null;
         });
@@ -492,7 +494,7 @@ public class BunkerManager {
     /**
      * Get the operation to save a bunker
      */
-    public Callable<Void> getBunkerSaveOp(Bunker bunker) {
+    public Callable<Void> getBunkerSaveOp(Bunker bunker, boolean locked) {
         return () -> {
             long ms = System.currentTimeMillis();
             File file = getFile(bunker.getId());
@@ -502,7 +504,8 @@ public class BunkerManager {
             GravSerializer serializer = new GravSerializer();
             bunker.serialize(serializer);
 
-            ioLock.saveLock(bunker.getId());
+            if (locked)
+                ioLock.saveLock(bunker.getId());
 
             try (FileOutputStream stream = new FileOutputStream(file)) {
 
@@ -515,7 +518,8 @@ public class BunkerManager {
             } catch (Throwable e) {
                 e.printStackTrace();
             } finally {
-                ioLock.saveUnlock(bunker.getId());
+                if (locked)
+                    ioLock.saveUnlock(bunker.getId());
             }
             return null;
         };
@@ -526,7 +530,7 @@ public class BunkerManager {
      */
     public Future<Void> saveBunkerAsync(Bunker bunker) throws IllegalStateException {
         return loadingService.submit(() -> {
-            getBunkerSaveOp(bunker).call();
+            getBunkerSaveOp(bunker, true).call();
             BunkerSaveEvent event = new BunkerSaveEvent(bunker, true);
             Bukkit.getPluginManager().callEvent(event);
             return null;
@@ -581,13 +585,20 @@ public class BunkerManager {
     }
 
     public boolean tryUnload(Bunker loadedBunker) {
-        if(loadedBunker == null)
+        return tryUnload(loadedBunker, true);
+    }
+
+    public boolean tryUnload(Bunker loadedBunker, boolean save) {
+        if (loadedBunker == null)
             return false;
         if (GangManager.instance.getLoadedGang(loadedBunker.getId()) != null)
             return false;
         if (this.getLoadedBunker(loadedBunker.getId()) == null)
             return false;
-        this.saveAndUnloadBunker(loadedBunker);
+        if (save)
+            this.saveAndUnloadBunker(loadedBunker);
+        else
+            this.unloadBunker(loadedBunker);
         return true;
     }
 }

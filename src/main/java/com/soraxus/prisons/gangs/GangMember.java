@@ -20,7 +20,7 @@ public class GangMember {
 
     public static GangMember fromSection(ConfigurationSection section, GangMemberManager parent) {
         UUID gang = null;
-        if(section.getString("gang") != null)
+        if (section.getString("gang") != null)
             gang = UUID.fromString(section.getString("gang"));
         UUID member = UUID.fromString(section.getString("member"));
         String name = section.getString("name");

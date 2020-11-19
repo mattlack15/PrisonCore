@@ -10,7 +10,7 @@ public class CachedObject<T> {
     private final long timeOut;
     private long lastUpdate;
     private T cached;
-    private final Supplier<T> supplier;
+    private Supplier<T> supplier;
 
     public CachedObject(Supplier<T> supplier, long timeOut) {
         this.supplier = supplier;
@@ -28,5 +28,9 @@ public class CachedObject<T> {
             recache();
         }
         return this.cached;
+    }
+
+    public void setSource(Supplier<T> source) {
+        this.supplier = source;
     }
 }

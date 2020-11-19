@@ -3,7 +3,7 @@ package com.soraxus.prisons.enchants.api.enchant;
 import com.soraxus.prisons.enchants.manager.EnchantManager;
 import com.soraxus.prisons.util.CastUtil;
 import com.soraxus.prisons.util.EventSubscriptions;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.items.NBTUtils;
 import lombok.Getter;
 import net.ultragrav.serializer.GravSerializer;
@@ -11,14 +11,18 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class AbstractCE {
     private static String ENCHANTMENT_IDENTIFIER = "spc.ce";
@@ -46,6 +50,10 @@ public abstract class AbstractCE {
         displayName = getConfig().getString("display-name");
         maxLevel = getConfig().getInt("max-level");
         description = getConfig().getStringList("description");
+        if (description.isEmpty()) {
+            description.add(getConfig().getString("description", null));
+            description.removeIf(Objects::isNull);
+        }
         this.onEnable();
     }
 
@@ -79,7 +87,7 @@ public abstract class AbstractCE {
             EnchantManager.instance.getEnchantConfigFolder().mkdirs();
         File file = new File(EnchantManager.instance.getEnchantConfigFolder(), getName() + ".yml");
         if (!file.exists()) {
-            InputStream stream = getClass().getClassLoader().getResourceAsStream(file.getName());
+            InputStream stream = getClass().getClassLoader().getResourceAsStream("enchant-configs" + File.separator + file.getName());
             if (stream != null) {
                 try {
                     OutputStream outputStream = new FileOutputStream(file);
@@ -131,18 +139,22 @@ public abstract class AbstractCE {
     }
 
     public ItemStack enchant(ItemStack stack, int level) {
-        if(stack == null)
+        if (stack == null)
             return null;
         stack = unEnchant(stack);
         Map<String, Integer> enchants = getEnchantments(NBTUtils.instance.getByteArray(stack, ENCHANTMENT_IDENTIFIER));
         enchants.put(this.getName(), level);
         ItemStack out = new ItemBuilder(NBTUtils.instance.setByteArray(stack, ENCHANTMENT_IDENTIFIER, createByteArrayFromEnchantments(enchants))).addLore(0, this.getIdentifier() + " &f" + level).build();
+        ItemMeta meta = out.getItemMeta();
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        out.setItemMeta(meta);
+        out.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 1);
         onEnchant(out, level);
         return out;
     }
 
     public static ItemStack clearEnchant(ItemStack stack) {
-        if(stack == null)
+        if (stack == null)
             return null;
         for (AbstractCE enchs : getInfo(stack).getEnchants().keySet()) {
             stack = enchs.unEnchant(stack);
@@ -151,7 +163,7 @@ public abstract class AbstractCE {
     }
 
     public ItemStack unEnchant(ItemStack stack) {
-        if(stack == null)
+        if (stack == null)
             return null;
         Map<String, Integer> enchants = getEnchantments(NBTUtils.instance.getByteArray(stack, ENCHANTMENT_IDENTIFIER));
         int level = enchants.getOrDefault(this.getName(), 0);
@@ -165,11 +177,12 @@ public abstract class AbstractCE {
     }
 
     public String getIdentifier() {
-        return ChatColor.translateAlternateColorCodes('&', getDisplayName());
+        String str = ChatColor.translateAlternateColorCodes('&', getDisplayName());
+        return ChatColor.getLastColors(str) + "▎ " + str;
     }
 
     public int getLevel(ItemStack stack) {
-        if(stack == null)
+        if (stack == null)
             return 0;
         Map<String, Integer> enchants = getEnchantments(NBTUtils.instance.getByteArray(stack, ENCHANTMENT_IDENTIFIER));
         if (!enchants.containsKey(this.getName()))
@@ -178,10 +191,21 @@ public abstract class AbstractCE {
     }
 
     public boolean hasEnchant(ItemStack stack) {
-        if(stack == null)
+        if (stack == null)
             return false;
         Map<String, Integer> enchants = getEnchantments(NBTUtils.instance.getByteArray(stack, ENCHANTMENT_IDENTIFIER));
         return enchants.containsKey(this.getName());
+    }
+
+    public ItemStack getBook(int level) {
+        return new ItemBuilder(Material.ENCHANTED_BOOK)
+                .setName(this.getDisplayName())
+                .addLore("&8Level: &f" + level)
+                .addLore("", "&7Drag and drop this onto a compatible item",
+                        "&7to apply this enchantment book")
+                .addNBT("ce.book.type", this.getName())
+                .addNBT("ce.book.level", level)
+                .build();
     }
 
     public abstract String getName();
@@ -203,8 +227,8 @@ public abstract class AbstractCE {
     public static Map<String, Integer> getEnchantments(byte[] bytes) {
         GravSerializer serializer = new GravSerializer(bytes);
         try {
-            return CastUtil.cast((Map<?, ?>) serializer.readObject());
-        } catch(IllegalStateException e) {
+            return CastUtil.cast(serializer.readObject());
+        } catch (IllegalStateException e) {
             return new HashMap<>();
         }
     }

@@ -1,6 +1,6 @@
 package com.soraxus.prisons.pickaxe.crystals;
 
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.items.ItemUtils;
 import com.soraxus.prisons.util.items.NBTUtils;
 import lombok.AllArgsConstructor;
@@ -34,8 +34,10 @@ public class Crystal implements GravSerializable {
     public ItemStack getItem() {
         ItemStack item = new ItemBuilder(Material.NETHER_STAR)
                 .setName(type.getDisplayName())
+                .addLore(type.getDescription())
                 .addLore(
-                        "" // TODO: Create lore or make config
+                        "",
+                        "&dTier: &5" + tier
                 )
                 .build();
         item = ItemUtils.setType(item, "crystal");
@@ -48,6 +50,7 @@ public class Crystal implements GravSerializable {
     public static boolean isCrystalItem(ItemStack item) {
         return ItemUtils.isType(item, "crystal");
     }
+
     public static Crystal fromItem(ItemStack item) {
         return new Crystal(new GravSerializer(NBTUtils.instance.getByteArray(item, "crystal_data")));
     }

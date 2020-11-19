@@ -34,18 +34,18 @@ public class BunkerMatchStatistics implements GravSerializable {
         int wins = 0;
         for (MatchInfo info : previousMatches) {
             if (info.getMatchStats().getAttackerSuccess()) {
-                wins ++;
+                wins++;
             }
         }
         this.wins = wins;
+        this.totalMatches = previousMatches.size();
+        this.losses = totalMatches - wins;
     }
 
     public void recalculate() {
         if (previousMatches.isEmpty()) {
-            return; // No dividing by 0 here!
+            return;
         }
-        this.totalMatches = previousMatches.size();
-        this.losses = this.totalMatches - this.wins;
         this.winRate = (double) wins / totalMatches;
     }
 
@@ -56,13 +56,17 @@ public class BunkerMatchStatistics implements GravSerializable {
     }
 
     public void addMatch(MatchInfo newInfo) {
-        this.totalMatches ++;
+        this.totalMatches++;
         if (newInfo.getMatchStats().getAttackerSuccess()) {
-            this.wins ++;
+            this.wins++;
         } else {
-            this.losses ++;
+            this.losses++;
         }
         recalculate();
+    }
+
+    public MatchInfo getLastMatch() {
+        return this.previousMatches.get(this.previousMatches.size() - 1);
     }
 
     @Override

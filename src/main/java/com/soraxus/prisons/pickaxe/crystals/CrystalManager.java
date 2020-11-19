@@ -1,6 +1,5 @@
 package com.soraxus.prisons.pickaxe.crystals;
 
-import com.soraxus.prisons.util.EventSubscriptions;
 import com.soraxus.prisons.util.items.ItemUtils;
 import com.soraxus.prisons.util.items.NBTUtils;
 import net.ultragrav.serializer.GravSerializer;
@@ -11,7 +10,7 @@ public class CrystalManager {
     private static final String TAG_NAME = "spc.pickaxe.crystals";
 
     public static CrystalInfo getInfo(@NotNull ItemStack stack) {
-        if(NBTUtils.instance.hasTag(stack, TAG_NAME)) {
+        if (NBTUtils.instance.hasTag(stack, TAG_NAME)) {
             GravSerializer serializer = new GravSerializer(NBTUtils.instance.getByteArray(stack, TAG_NAME));
             CrystalInfo info = new CrystalInfo();
             info.read(serializer);

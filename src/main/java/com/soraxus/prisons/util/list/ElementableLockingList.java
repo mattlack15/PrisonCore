@@ -4,6 +4,14 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class ElementableLockingList<T> extends LockingList<T> {
+    /**
+     * Get a value from this list that matches value
+     *
+     * @param value   Value
+     * @param convert Function to convert from <T> to <B>
+     * @param <B>     Type of value
+     * @return Element for which convert returns value, {@code null} if none exists
+     */
     public <B> T byFunction(B value, Function<T, B> convert) {
         return getLock().perform(() -> {
             for (T t : this) {

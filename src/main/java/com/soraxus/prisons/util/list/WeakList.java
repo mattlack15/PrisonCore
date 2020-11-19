@@ -8,6 +8,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * List of weak references, allows elements to be garbage collected
+ *
+ * @param <T> Type of list
+ */
 public class WeakList<T> extends ArrayList<T> {
     private List<WeakReference<T>> items;
 

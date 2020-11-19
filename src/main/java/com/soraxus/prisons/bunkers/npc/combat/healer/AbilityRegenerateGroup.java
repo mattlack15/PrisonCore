@@ -29,9 +29,9 @@ public class AbilityRegenerateGroup extends BunkerNPCAbility {
         npcTarget.get().getEffectManager().addEffect(new NPCEffect(EffectType.REGEN, getParent().getParent().getLevel(), 20));
 
         Entity entity = npcTarget.get().getController().getNpc().getEntity();
-        for(Entity surrounding : entity.getNearbyEntities(5, 5, 5)) {
+        for (Entity surrounding : entity.getNearbyEntities(5, 5, 5)) {
             BunkerNPC npc = getParent().getManager().getNpc(surrounding);
-            if(npc != null) {
+            if (npc != null && npc.getController().getBunker().equals(this.getParent().getBunker())) {
                 npc.getEffectManager().addEffect(new NPCEffect(EffectType.REGEN, getParent().getParent().getLevel(), 20));
             }
         }

@@ -11,7 +11,7 @@ import com.soraxus.prisons.bunkers.base.resources.MenuSkills;
 import com.soraxus.prisons.bunkers.npc.ElementDrop;
 import com.soraxus.prisons.bunkers.util.BHoloTextBox;
 import com.soraxus.prisons.bunkers.util.BunkerSchematics;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.math.MathUtils;
 import com.soraxus.prisons.util.menus.MenuElement;
 import com.soraxus.prisons.util.menus.MenuManager;
@@ -107,10 +107,10 @@ public class ElementCore extends StorageElement {
     @Override
     public void onClick(PlayerInteractEvent e) {
         if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK) && e.getPlayer().isSneaking()) {
-            e.setCancelled(true);
             new MenuCoreElement(this).open(e.getPlayer());
+        } else if (e.getClickedBlock() != null && e.getClickedBlock().getType().name().contains("DOOR")) {
+            e.setCancelled(false);
         }
-        e.setCancelled(false);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class ElementCore extends StorageElement {
         public void setup() {
             super.setup();
             this.setElement(8, new MenuElement(new ItemBuilder(Material.DIAMOND_AXE, 1).setName("&e&lSkillz").addItemFlags(ItemFlag.HIDE_ATTRIBUTES).addLore("&7Click to view your bunker skills")
-            .build()).setClickHandler((e, i) -> new MenuSkills(getBunker(), getBackButton(this)).open(e.getWhoClicked())));
+                    .build()).setClickHandler((e, i) -> new MenuSkills(getBunker(), getBackButton(this)).open(e.getWhoClicked())));
             MenuManager.instance.invalidateInvsForMenu(this);
         }
     }

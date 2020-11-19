@@ -3,16 +3,14 @@ package com.soraxus.prisons;
 import com.soraxus.prisons.bunkers.BunkerManager;
 import com.soraxus.prisons.bunkers.ModuleBunkers;
 import com.soraxus.prisons.cells.ModuleCells;
+import com.soraxus.prisons.chatgames.ModuleChatGames;
 import com.soraxus.prisons.core.CmdPrisonCoreGUI;
 import com.soraxus.prisons.core.CmdThreadDump;
 import com.soraxus.prisons.core.CorePlugin;
 import com.soraxus.prisons.crate.ModuleCrates;
 import com.soraxus.prisons.debug.ModuleDebug;
 import com.soraxus.prisons.economy.ModuleEconomy;
-import com.soraxus.prisons.economy.command.CmdEco;
-import com.soraxus.prisons.economy.command.CmdMoney;
-import com.soraxus.prisons.economy.command.CmdStars;
-import com.soraxus.prisons.economy.command.CmdTokens;
+import com.soraxus.prisons.economy.command.*;
 import com.soraxus.prisons.enchants.ModuleEnchants;
 import com.soraxus.prisons.errors.ModuleErrors;
 import com.soraxus.prisons.gangs.ModuleGangs;
@@ -21,11 +19,17 @@ import com.soraxus.prisons.mines.ModuleMines;
 import com.soraxus.prisons.pickaxe.ModulePickaxe;
 import com.soraxus.prisons.pluginhooks.ModulePluginHooks;
 import com.soraxus.prisons.privatemines.ModulePrivateMines;
+import com.soraxus.prisons.profiles.ModuleProfiles;
+import com.soraxus.prisons.ranks.ModuleRanks;
+import com.soraxus.prisons.ranks.cmd.CmdPrestige;
+import com.soraxus.prisons.ranks.cmd.CmdRankup;
+import com.soraxus.prisons.ranks.cmd.CmdRankupMax;
+import com.soraxus.prisons.ranks.cmd.CmdSetRank;
 import com.soraxus.prisons.selling.ModuleSelling;
 import com.soraxus.prisons.util.EventSubscription;
 import com.soraxus.prisons.util.EventSubscriptions;
-import com.soraxus.prisons.util.FileUtils;
 import com.soraxus.prisons.util.Synchronizer;
+import com.soraxus.prisons.util.data.FileUtils;
 import com.soraxus.prisons.util.data.PlayerData;
 import com.soraxus.prisons.worldedit.ModuleWorldEdit;
 import net.ultragrav.asyncworld.GlobalChunkQueue;
@@ -33,6 +37,7 @@ import net.ultragrav.serializer.GravSerializable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -77,14 +82,24 @@ public class SpigotPrisonCore extends CorePlugin {
         this.addModule(new ModuleGangs());
         this.addModule(new ModuleWorldEdit());
         this.addModule(new ModuleCells());
+        this.addModule(new ModuleProfiles());
+        this.addModule(new ModuleRanks());
+        this.addModule(new ModuleChatGames());
         this.addModule(new ModuleDebug());
 
         new CmdThreadDump().register();
 
+        // \/ \/ These belong in their respective modules
         new CmdEco().register();
         new CmdMoney().register();
         new CmdStars().register();
         new CmdTokens().register();
+        new CmdBankNote().register();
+        new CmdRankup().register();
+        new CmdRankupMax().register();
+        new CmdPrestige().register();
+        new CmdSetRank().register();
+        // /\ /\ These belong in their respective modules
 
         this.spawn = getConfig().getString("spawn");
 
@@ -124,5 +139,10 @@ public class SpigotPrisonCore extends CorePlugin {
     @EventSubscription
     public void onLeave(PlayerQuitEvent e) {
         PlayerData.unloadPlayerData(e.getPlayer().getUniqueId());
+    }
+
+    @EventSubscription
+    private void onHunger(FoodLevelChangeEvent event) {
+        event.setFoodLevel(20);
     }
 }

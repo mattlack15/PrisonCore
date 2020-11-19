@@ -120,7 +120,7 @@ public class PrivateMineManager {
             //Commence creation
             PrivateMine halfCreatedMine = new PrivateMine(gang);
             halfCreatedMine.create(getRandomMineSchematic(), new CuboidRegion(null,
-                    new Vector3D(7, 5, 7), new Vector3D(80 - 8, 83, 80 - 8)));
+                    new Vector3D(7, 5, 7), new Vector3D(80 - 8, 79, 80 - 8)));
 
             mine = halfCreatedMine;
 
@@ -149,7 +149,7 @@ public class PrivateMineManager {
 
                 PrivateMine halfLoadedMine = PrivateMine.deserialize(serializer, gang);
                 halfLoadedMine.create(getRandomMineSchematic(), new CuboidRegion(null,
-                        new Vector3D(7, 5, 7), new Vector3D(80 - 8, 83, 80 - 8)));
+                        new Vector3D(7, 5, 7), new Vector3D(80 - 8, 79, 80 - 8)));
 
                 mine = halfLoadedMine;
 
@@ -163,8 +163,8 @@ public class PrivateMineManager {
                 return mine;
             } catch (Throwable t) {
                 t.printStackTrace();
+                return null;
             }
-            return null;
         };
     }
 
@@ -195,7 +195,16 @@ public class PrivateMineManager {
                     long ms = System.currentTimeMillis();
                     mine = getUnlockedLoadOp(gang).get();
                     ms = System.currentTimeMillis() - ms;
-                    System.out.println("Loaded mine in " + ms + "ms");
+
+                    if(mine == null) {
+                        ms = System.currentTimeMillis();
+                        mine = getUnlockedCreationOp(gang).get();
+                        ms = System.currentTimeMillis() - ms;
+                        System.out.println("Created mine in " + ms + "ms");
+                    } else {
+                        System.out.println("Loaded mine in " + ms + "ms");
+                    }
+
                 } else {
                     //Mine doesn't exist, complete a creation operation
                     long ms = System.currentTimeMillis();
@@ -203,10 +212,10 @@ public class PrivateMineManager {
                     ms = System.currentTimeMillis() - ms;
                     System.out.println("Created mine in " + ms + "ms");
                 }
+                ioLock.creationUnlock(gang.getId(), mine); //Works for both creation and loading
             } catch (Throwable t) {
                 t.printStackTrace();
-            } finally {
-                ioLock.creationUnlock(gang.getId(), mine); //Works for both creation and loading
+                ioLock.creationUnlock(gang.getId(), null); //Works for both creation and loading
             }
         });
 
@@ -304,6 +313,7 @@ public class PrivateMineManager {
         if (mine == null)
             return;
         this.getUnloadOp(mine).get();
+        this.cachedMineInfos.remove(mine.getGang().getId());
         getFile(mine.getGang().getId()).delete();
     }
 

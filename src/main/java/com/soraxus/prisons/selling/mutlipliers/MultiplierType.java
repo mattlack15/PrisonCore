@@ -12,7 +12,7 @@ public enum MultiplierType { // Everything that multiplies money from selling sh
     SELL(p -> MultiplierManager.instance.getMultiplier(p.getUniqueId())),
     CRYSTAL(p -> {
         CrystalInfo info = CrystalManager.getInfo(p.getInventory().getItemInMainHand());
-        if(info.totalPercent().containsKey(CrystalType.SELL)) {
+        if (info.totalPercent().containsKey(CrystalType.SELL)) {
             return info.totalPercent().get(CrystalType.SELL) / 100D;
         } else {
             return 1D;
@@ -20,6 +20,7 @@ public enum MultiplierType { // Everything that multiplies money from selling sh
     });
 
     private MultiplierProvider provider;
+
     MultiplierType(MultiplierProvider provider) {
         this.provider = provider;
     }
@@ -29,6 +30,7 @@ public enum MultiplierType { // Everything that multiplies money from selling sh
     }
 
     private static List<MultiplierType> values; // Avoids excessive calls to the values() method
+
     public static List<MultiplierType> getValues() {
         if (values == null) {
             values = Arrays.asList(values());

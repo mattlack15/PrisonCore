@@ -24,7 +24,7 @@ public abstract class EconomyCheckCommand extends UltraCommand {
                 return;
             }
         } else {
-            if (!getSender().hasPermission( "economy.other")) {
+            if (!getSender().hasPermission("economy.other")) {
                 returnTell("§cYou do not have permission to execute this command.");
             }
         }

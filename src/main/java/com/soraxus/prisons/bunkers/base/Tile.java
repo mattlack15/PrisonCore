@@ -28,14 +28,14 @@ public class Tile implements GravSerializable {
         this.bunker = bunker;
         try {
             this.parent = serializer.readObject(bunker);
-        } catch(ObjectDeserializationException e) {
-            if(e.getDeserializationCause() != ObjectDeserializationException.DeserializationExceptionCause.CLASS_NOT_FOUND)
+        } catch (ObjectDeserializationException e) {
+            if (e.getDeserializationCause() != ObjectDeserializationException.DeserializationExceptionCause.CLASS_NOT_FOUND)
                 throw e;
             this.parent = null;
         }
         this.internalPosition = serializer.readObject();
-        if(parent == null) //This is technically redundant depending on how its used but I just want to have it here
-            internalPosition = new IntVector2D(0,0);
+        if (parent == null) //This is technically redundant depending on how its used but I just want to have it here
+            internalPosition = new IntVector2D(0, 0);
     }
 
     /**
@@ -51,10 +51,10 @@ public class Tile implements GravSerializable {
                 long ms = System.currentTimeMillis();
                 serializer.writeObject(parent);
                 ms = System.currentTimeMillis() - ms;
-                if(ms > 10) {
+                if (ms > 10) {
                     ModuleBunkers.messageDevs("&cElement of type " + parent.getType().toString() + " took unusually long (&7" + ms + "ms&c) to serialize");
                 }
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 ModuleBunkers.messageDevs("Error while serializing element of type " + (parent != null ? parent.getType() : "null (non existent)") + " see console!");
                 ModuleBunkers.messageDevs("Element will be removed from the bunker as a precaution!");

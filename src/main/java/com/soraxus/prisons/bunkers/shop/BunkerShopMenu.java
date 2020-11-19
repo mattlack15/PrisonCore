@@ -1,6 +1,6 @@
 package com.soraxus.prisons.bunkers.shop;
 
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
 import com.soraxus.prisons.util.menus.MenuManager;
@@ -31,7 +31,7 @@ public class BunkerShopMenu extends Menu {
         BunkerShopSection currentSection = shop.getSections().get(sectionIndex);
 
         int i = 10;
-        for (int l = 0; l < shop.getSections().size(); l ++) {
+        for (int l = 0; l < shop.getSections().size(); l++) {
             BunkerShopSection section = shop.getSections().get(l);
             if (i % 9 == 8) {
                 i = (i - (i % 9)) + 9 + 1; //Make i = to next line but at the same col as starting position
@@ -47,7 +47,7 @@ public class BunkerShopMenu extends Menu {
             this.setElement(i, new MenuElement(stack)
                     .setClickHandler((event, invInfo) -> {
                         setup(finalL);
-                        ((Player)event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), Sound.UI_BUTTON_CLICK, 0.75f, 1.05f);
+                        ((Player) event.getWhoClicked()).playSound(event.getWhoClicked().getLocation(), Sound.UI_BUTTON_CLICK, 0.75f, 1.05f);
                     }));
             i++;
         }

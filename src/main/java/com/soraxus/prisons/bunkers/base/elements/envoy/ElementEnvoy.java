@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ElementEnvoy extends BunkerElement {
     /**
@@ -80,7 +81,7 @@ public class ElementEnvoy extends BunkerElement {
             this.remove();
             return null;
         }
-        BunkerResource res = resources[random.nextInt(resources.length)];
+        BunkerResource res = resources[ThreadLocalRandom.current().nextInt(resources.length)];
 
         int am = MathUtils.lowWeightedInt(
                 bunker.getCore().getLevel(),

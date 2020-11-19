@@ -8,7 +8,6 @@ import com.soraxus.prisons.util.list.ElementableList;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.IOException;
@@ -101,11 +100,18 @@ public class GangManager {
     }
 
     public Gang loadGang(UUID id) {
+        return loadGang(id, true);
+    }
+
+    public Gang loadGang(UUID id, boolean loadBunker) {
         if (id == null)
             return null;
 
-        if (this.getLoadedGang(id) != null)
+        if (this.getLoadedGang(id) != null) {
+            if (BunkerManager.instance.getLoadedBunker(id) == null && loadBunker)
+                BunkerManager.instance.loadBunkerAsync(id);
             return getLoadedGang(id);
+        }
         ReentrantLock ioLock = getIoLock(id);
         if (!ioLock.tryLock()) {
             return null;
@@ -121,7 +127,10 @@ public class GangManager {
             this.gangs.removeIf(g -> g.getId().equals(gang.getId()));
             this.gangs.add(gang);
         }
-        BunkerManager.instance.loadBunkerAsync(gang.getId());
+
+        if (loadBunker)
+            BunkerManager.instance.loadBunkerAsync(gang.getId());
+
         return gang;
     }
 
@@ -284,9 +293,13 @@ public class GangManager {
     }
 
     public Gang getOrLoadGang(UUID gangId) {
+        return getOrLoadGang(gangId, true);
+    }
+
+    public Gang getOrLoadGang(UUID gangId, boolean loadBunker) {
         Gang g = getLoadedGang(gangId);
         if (g == null) {
-            g = loadGang(gangId);
+            g = loadGang(gangId, loadBunker);
         }
         return g;
     }

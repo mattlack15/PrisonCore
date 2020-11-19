@@ -2,10 +2,10 @@ package com.soraxus.prisons.crate;
 
 import com.soraxus.prisons.SpigotPrisonCore;
 import com.soraxus.prisons.crate.gui.MenuOpenCrate;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
+import com.soraxus.prisons.util.items.NBTUtils;
 import com.soraxus.prisons.util.math.MathUtils;
 import com.soraxus.prisons.util.string.TextUtil;
-import com.soraxus.prisons.util.items.NBTUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,12 +33,15 @@ public class Crate {
     private Material itemMaterial;
     @Setter
     private byte itemData;
+    @Setter
+    private int order;
 
     public static Crate fromSection(ConfigurationSection section) {
         String name = section.getName();
         String displayName = section.getString("display-name");
         String description = section.getString("description");
         Material material = Material.matchMaterial(section.getString("material"));
+        int order = section.getInt("order", 0);
         byte matData = (byte) section.getInt("material-data");
         ConfigurationSection rewardSection = section.getConfigurationSection("rewards");
         List<Reward> rewards = new ArrayList<>();
@@ -46,7 +49,7 @@ public class Crate {
             ConfigurationSection current = rewardSection.getConfigurationSection(key);
             rewards.add(Reward.fromSection(current));
         }
-        return new Crate(name, displayName, description, rewards, material, matData);
+        return new Crate(name, displayName, description, rewards, material, matData, order);
     }
 
     public static Crate getCrate(ItemStack stack) {
@@ -118,6 +121,7 @@ public class Crate {
         section.set("description", this.description);
         section.set("material", this.getItemMaterial().toString());
         section.set("material-data", (int) this.getItemData());
+        section.set("order", this.order);
         ConfigurationSection rewardSection = section.createSection("rewards");
         int i = 0;
         for (Reward reward : rewards) {

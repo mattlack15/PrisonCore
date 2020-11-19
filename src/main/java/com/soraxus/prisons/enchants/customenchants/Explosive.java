@@ -11,6 +11,7 @@ import com.soraxus.prisons.util.EventSubscription;
 import net.ultragrav.asyncworld.AsyncWorld;
 import net.ultragrav.asyncworld.SpigotAsyncWorld;
 import net.ultragrav.utils.CuboidRegion;
+import net.ultragrav.utils.IntVector3D;
 import net.ultragrav.utils.Vector3D;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -70,7 +71,7 @@ public class Explosive extends AbstractCE {
 
     @EventSubscription
     private void onBlockFall(EntityChangeBlockEvent event) {
-        if(fb.contains(event.getEntity().getUniqueId())) {
+        if (fb.contains(event.getEntity().getUniqueId())) {
             event.setCancelled(true);
             fb.remove(event.getEntity().getUniqueId());
         }
@@ -78,6 +79,10 @@ public class Explosive extends AbstractCE {
 
     @EventSubscription
     private void onBreak(BlockBreakEvent event) {
+
+        if(event.isCancelled())
+            return;
+
         if (event.getPlayer().getInventory().getItemInMainHand() == null || !hasEnchant(event.getPlayer().getItemInHand()))
             return;
 
@@ -91,23 +96,23 @@ public class Explosive extends AbstractCE {
             Vector3D starting = Vector3D.fromBukkitVector(event.getBlock().getLocation().toVector());
             CuboidRegion region = new CuboidRegion(event.getPlayer().getWorld(), starting.add(radius, radius, radius), starting.add(-radius, -radius, -radius));
             AsyncWorld world = new SpigotAsyncWorld(event.getPlayer().getWorld());
-            Map<Vector3D, Integer> blocks = new ConcurrentHashMap<>();
+            Map<IntVector3D, Integer> blocks = new ConcurrentHashMap<>();
             AtomicInteger total = new AtomicInteger();
-            final double radSqrd = radius*radius;
+            final double radSqrd = radius * radius;
 
             Map<Integer, AtomicInteger> broken = new ConcurrentHashMap<>();
 
             world.syncForAllInRegion(region, (v, b) -> {
-                if (!(v.distanceSq(starting) > radSqrd) && mine.getRegion().contains(v)) {
-                    if(b == 0)
+                if (!(v.distanceSq(starting.asIntVector()) > radSqrd) && mine.getRegion().contains(new Vector3D(v))) {
+                    if (b == 0)
                         return;
 
                     broken.putIfAbsent(b, new AtomicInteger());
                     broken.get(b).incrementAndGet();
 
-                    world.setBlock((int) v.getX(), (int) v.getY(), (int) v.getZ(), 0, (byte) 0);
+                    world.setBlock(v.getX(), v.getY(), v.getZ(), 0, (byte) 0);
                     total.getAndIncrement();
-                    if(rand.nextInt(10) < 3)
+                    if (rand.nextInt(10) < 3)
                         blocks.put(v, b);
                 }
             }, true);
@@ -115,15 +120,15 @@ public class Explosive extends AbstractCE {
                 @Override
                 public void run() {
                     blocks.forEach((v, b) -> {
+                        Vector3D vel = new Vector3D(v).subtract(starting.subtract(0, 1.2, 0)).normalize().multiply(0.9);
                         Location location = new Location(event.getBlock().getWorld(), v.getX(), v.getY(), v.getZ());
-                        if(v.subtract(starting.subtract(0, 1.2, 0)).length() == 0)
+                        if (vel.lengthSq() == 0)
                             return;
                         FallingBlock block = event.getPlayer().getWorld().spawnFallingBlock(location, b & 4095, (byte) (b >> 12));
                         block.setDropItem(false);
                         block.setInvulnerable(true);
                         block.setHurtEntities(false);
                         fb.add(block.getUniqueId());
-                        Vector3D vel = v.subtract(starting.subtract(0, 1.2, 0)).normalize().multiply(0.9);
                         block.setVelocity(vel.toBukkitVector());
                     });
                 }

@@ -3,7 +3,7 @@ package com.soraxus.prisons.bunkers.base.elements.type.info;
 import com.soraxus.prisons.bunkers.base.elements.storage.Storage;
 import com.soraxus.prisons.bunkers.base.elements.type.BunkerElementTypeInfo;
 import com.soraxus.prisons.bunkers.base.elements.type.TypeShopInfo;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import org.bukkit.Material;
 
 public class InfoFarm implements BunkerElementTypeInfo {

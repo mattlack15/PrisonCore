@@ -10,7 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class ReflectionUtils2 {
-    private ReflectionUtils2() {}
+    private ReflectionUtils2() {
+    }
 
     /**
      * Returns the constructor of a given class with the given parameter types
@@ -436,6 +437,7 @@ public final class ReflectionUtils2 {
         BOOLEAN(boolean.class, Boolean.class);
 
         private static final Map<Class<?>, DataType> CLASS_MAP = new HashMap<Class<?>, DataType>();
+
         static {
             for (DataType type : values()) {
                 CLASS_MAP.put(type.primitive, type);

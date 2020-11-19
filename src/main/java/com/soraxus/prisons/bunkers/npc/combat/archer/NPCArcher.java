@@ -4,7 +4,7 @@ import com.soraxus.prisons.bunkers.npc.AvailableTarget;
 import com.soraxus.prisons.bunkers.npc.BunkerNPC;
 import com.soraxus.prisons.bunkers.npc.Target;
 import com.soraxus.prisons.bunkers.npc.combat.CombatNPCController;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Equipment;
 import org.bukkit.Material;
@@ -15,13 +15,13 @@ public class NPCArcher extends CombatNPCController {
     public NPCArcher(BunkerNPC parent) {
         super(parent);
         this.addAbility(new AbilityShoot(this));
-        if(this.getParent().getLevel() > 1) {
+        if (this.getParent().getLevel() > 1) {
             this.addAbility(new AbilityArrowBarrage(this));
         }
-        if(this.getParent().getLevel() > 2) {
+        if (this.getParent().getLevel() > 2) {
             this.addAbility(new AbilityExplosiveArrow(this));
         }
-        if(this.getParent().getLevel() > 3) {
+        if (this.getParent().getLevel() > 3) {
 
         }
     }

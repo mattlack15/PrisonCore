@@ -48,14 +48,14 @@ public class ElementTree extends NaturalElement {
 
     public int getTreeType() {
         Object o = this.getMeta().get("tree-type");
-        if(o == null)
+        if (o == null)
             return 1;
         return (int) o;
     }
 
     public int getTreeSize() {
         Object o = this.getMeta().get("tree-size");
-        if(o == null)
+        if (o == null)
             return 1;
         return (int) o;
     }

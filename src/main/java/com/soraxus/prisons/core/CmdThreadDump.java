@@ -35,14 +35,14 @@ public class CmdThreadDump extends UltraCommand {
                     for (StackTraceElement stackTraceElement : trace) {
                         writer.append("\tat ").append(String.valueOf(stackTraceElement)).append("\n");
                         System.out.println("\tat " + stackTraceElement);
-                        if(!relevant.equals("")) {
+                        if (!relevant.equals("")) {
                             toSend.add(stackTraceElement.toString());
-                            if(stackTraceElement.toString().contains(relevant)) {
+                            if (stackTraceElement.toString().contains(relevant)) {
                                 send = true;
                             }
                         }
                     }
-                    if(send) {
+                    if (send) {
                         getPlayer().sendMessage("");
                         getPlayer().sendMessage("Thread Name: " + key.getName());
                         getPlayer().sendMessage("Status: " + key.getState().toString());

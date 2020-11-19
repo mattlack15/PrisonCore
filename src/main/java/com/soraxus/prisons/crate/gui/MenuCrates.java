@@ -2,7 +2,10 @@ package com.soraxus.prisons.crate.gui;
 
 import com.soraxus.prisons.crate.Crate;
 import com.soraxus.prisons.crate.CrateManager;
-import com.soraxus.prisons.util.*;
+import com.soraxus.prisons.util.EventSubscription;
+import com.soraxus.prisons.util.EventSubscriptions;
+import com.soraxus.prisons.util.Synchronizer;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
 import com.soraxus.prisons.util.menus.MenuManager;
@@ -35,7 +38,7 @@ public class MenuCrates extends Menu {
 
     @EventSubscription
     private void onChat(AsyncPlayerChatEvent event) {
-        if(chatConsumer != null && event.getPlayer().getUniqueId().equals(chatConsumerPlayer)) {
+        if (chatConsumer != null && event.getPlayer().getUniqueId().equals(chatConsumerPlayer)) {
             event.setCancelled(true);
             chatConsumer.accept(event.getMessage());
             chatConsumer = null;
@@ -71,11 +74,11 @@ public class MenuCrates extends Menu {
             builder.addLore("&aLeft Click to Edit");
 
             return new MenuElement(builder.build()).setClickHandler((e, i) -> {
-                if(e.getClick().isLeftClick() && e.getClick().isShiftClick()) {
+                if (e.getClick().isLeftClick() && e.getClick().isShiftClick()) {
                     ItemStack stack = crate.getItem();
                     stack.setAmount(1);
                     e.getWhoClicked().getInventory().addItem(stack);
-                } else if(e.getClick().isRightClick() && e.getClick().isShiftClick()) {
+                } else if (e.getClick().isRightClick() && e.getClick().isShiftClick()) {
                     ItemStack stack = crate.getItem();
                     stack.setAmount(64);
                     e.getWhoClicked().getInventory().addItem(stack);
@@ -89,7 +92,7 @@ public class MenuCrates extends Menu {
         }, 0);
         MenuElement addCrate = new MenuElement(new ItemBuilder(Material.ANVIL, 1).setName("&a&lAdd").build()).setClickHandler((e, i) -> {
             chatConsumer = (s) -> {
-                Crate crate = new Crate(s, s, "&fNo Description :(", new ArrayList<>(), Material.CHEST, (byte) 0);
+                Crate crate = new Crate(s, s, "&fNo Description :(", new ArrayList<>(), Material.CHEST, (byte) 0, 0);
                 CrateManager.instance.add(crate);
                 setup();
                 Synchronizer.synchronize(() -> open(e.getWhoClicked()));

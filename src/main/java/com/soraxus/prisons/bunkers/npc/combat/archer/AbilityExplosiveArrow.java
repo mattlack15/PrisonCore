@@ -51,7 +51,7 @@ public class AbilityExplosiveArrow extends BunkerNPCAbility {
 
             @EventSubscription
             private void onHit(ProjectileHitEvent event) {
-                if(event.getEntity().getUniqueId().equals(arrow.getUniqueId())) {
+                if (event.getEntity().getUniqueId().equals(arrow.getUniqueId())) {
                     event.getEntity().remove();
                     explode(event.getEntity().getLocation());
                 }
@@ -80,7 +80,7 @@ public class AbilityExplosiveArrow extends BunkerNPCAbility {
         });
 
         //Damage elements
-        if(((CombatNPCController)getParent()).getCurrentMatch() != null) {
+        if (((CombatNPCController) getParent()).getCurrentMatch() != null) {
             List<BunkerElement> elements = ((CombatNPCController) getParent()).getCurrentMatch().getDefender().getTileMap().getElements();
             elements.removeIf((e) -> e.getBoundingRegion(5).smallestDistance(Vector3D.fromBukkitVector(location.toVector())) > 10);
             elements.forEach(e -> e.damage(getParent().getParent().getLevel() * 15 * DAMAGE_MULTIPLIER)); //Damage elements

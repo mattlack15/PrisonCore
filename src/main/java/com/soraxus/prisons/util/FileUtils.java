@@ -46,11 +46,9 @@ public class FileUtils {
      * The Method will backup the dest File, copy source to
      * dest, and then will delete the source and the backup.
      *
-     * @param source
-     *            File to be moved
-     * @param dest
-     *            File to be overwritten (does not matter if
-     *            non existent)
+     * @param source File to be moved
+     * @param dest   File to be overwritten (does not matter if
+     *               non existent)
      * @throws IOException
      */
     public static void moveAndOverwrite(File source, File dest) throws IOException {
@@ -71,8 +69,7 @@ public class FileUtils {
      * Folder as the {@code inputFile}, that is not existing
      * and ends with {@code _temp}.
      *
-     * @param inputFile
-     *            The FileBase to generate a Tempfile
+     * @param inputFile The FileBase to generate a Tempfile
      * @return A non existing File
      */
     public static File getNonExistingTempFile(File inputFile) {

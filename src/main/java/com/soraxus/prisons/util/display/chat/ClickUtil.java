@@ -1,13 +1,17 @@
 package com.soraxus.prisons.util.display.chat;
 
-import net.md_5.bungee.api.chat.*;
-import net.minecraft.server.v1_12_R1.NBTTagCompound;
-import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
-import org.bukkit.entity.Entity;
-import org.bukkit.inventory.ItemStack;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import net.md_5.bungee.api.chat.ClickEvent;
+import org.bukkit.entity.Player;
+
+import java.util.function.Consumer;
 
 public class ClickUtil {
+    /**
+     * Open a URL, this creates a client-side popup when clicked asking to open the link
+     *
+     * @param url URL
+     * @return Click event
+     */
     public static ClickEvent url(String url) {
         return new ClickEvent(ClickEvent.Action.OPEN_URL, url);
     }
@@ -51,5 +55,28 @@ public class ClickUtil {
      */
     public static ClickEvent commandSuggest(String command) {
         return new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command);
+    }
+
+    /**
+     * Run a runnable
+     * Expires after 60 seconds
+     *
+     * @param run Runnable
+     * @return Click event
+     */
+    public static ClickEvent runnable(Consumer<Player> run) {
+        return command(Handler.getHandler().registerHandler(run));
+    }
+
+    /**
+     * Run a runnable
+     * Expires after a set amount of time
+     *
+     * @param run    Runnable
+     * @param expiry Time until expiry (milliseconds)
+     * @return Click event
+     */
+    public static ClickEvent runnable(Consumer<Player> run, long expiry) {
+        return command(Handler.getHandler().registerHandler(run, expiry));
     }
 }

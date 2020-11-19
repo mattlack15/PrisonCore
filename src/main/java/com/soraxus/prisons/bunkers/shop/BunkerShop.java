@@ -12,6 +12,7 @@ public abstract class BunkerShop {
     private final String name;
     @Getter
     private final List<BunkerShopSection> sectionList = new ArrayList<>();
+
     public BunkerShop(String name) {
         this.name = name;
     }

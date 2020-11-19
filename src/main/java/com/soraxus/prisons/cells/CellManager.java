@@ -183,7 +183,7 @@ public class CellManager {
 
                 initCell(cell);
 
-                if(!registerCell(cell))
+                if (!registerCell(cell))
                     throw new RuntimeException("Could not register cell");
 
                 ioLock.loadUnlock(cellId, cell); //Completes future for us
@@ -219,12 +219,13 @@ public class CellManager {
 
     /**
      * Tries to register the cell as loaded in this manager, you should call cell.saveAndUnloadWorld() if this returns false
+     *
      * @return true if successfully registered, false if a cell with this id is already loaded
      */
     public boolean registerCell(Cell cell) {
         loadedCellsLock.lock();
         try {
-            if(getLoadedCell(cell.getId()) != null) {
+            if (getLoadedCell(cell.getId()) != null) {
                 return false;
             }
             loadedCells.add(cell);

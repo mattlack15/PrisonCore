@@ -17,6 +17,7 @@ public class MineVisitor implements GravSerializable {
     private final UUID visitor;
     private VisitationType visitationType = VisitationType.FREE;
     private final AtomicInteger currentSessionTicks = new AtomicInteger();
+
     public MineVisitor(@NotNull UUID visitor) {
         this.visitor = visitor;
     }

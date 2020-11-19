@@ -21,6 +21,7 @@ public class ElementStorageFood extends StorageElement {
     public double getCapacity(BunkerResource resource) {
         return this.getLevel() * 100 + (this.getLevel() * this.getLevel() * 25);
     }
+
     @Override
     public IntVector2D getShape() {
         return IntVector2D.ONE;
@@ -33,7 +34,7 @@ public class ElementStorageFood extends StorageElement {
 
     @Override
     public BunkerElementType getType() {
-        return null;
+        return BunkerElementType.STORAGE_FOOD;
     }
 
     @Override

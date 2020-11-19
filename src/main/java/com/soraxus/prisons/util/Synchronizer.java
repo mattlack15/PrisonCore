@@ -8,10 +8,10 @@ import com.soraxus.prisons.SpigotPrisonCore;
 import com.soraxus.prisons.util.list.LockingList;
 import org.bukkit.Bukkit;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Synchronizer {
-
     private static class QueuedRunnable {
         public final Runnable runnable;
         public final AtomicBoolean executing = new AtomicBoolean(false);
@@ -23,6 +23,15 @@ public class Synchronizer {
 
     private static final LockingList<QueuedRunnable> workQueue = new LockingList<>();
     private static boolean closed = false;
+
+    public static void synchronizeAndWait(Runnable run) {
+        CompletableFuture<Void> f = new CompletableFuture<>();
+        synchronize(() -> {
+            run.run();
+            f.complete(null);
+        });
+        f.join();
+    }
 
     public static int synchronize(Runnable run) {
         if (Bukkit.isPrimaryThread()) {

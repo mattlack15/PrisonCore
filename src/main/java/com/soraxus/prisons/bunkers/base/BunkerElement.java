@@ -8,7 +8,8 @@ import com.soraxus.prisons.bunkers.base.elements.type.BunkerElementType;
 import com.soraxus.prisons.bunkers.gui.tile.MenuTileOccupied;
 import com.soraxus.prisons.bunkers.npc.ElementDrop;
 import com.soraxus.prisons.bunkers.util.BunkerSchematics;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.event.bunkers.BunkerElementDamageEvent;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.math.MathUtils;
 import com.soraxus.prisons.util.menus.MenuElement;
 import lombok.AccessLevel;
@@ -21,6 +22,7 @@ import net.ultragrav.serializer.GravSerializable;
 import net.ultragrav.serializer.GravSerializer;
 import net.ultragrav.utils.CuboidRegion;
 import net.ultragrav.utils.IntVector2D;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.block.Action;
@@ -30,28 +32,43 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Getter
 public abstract class BunkerElement implements GravSerializable {
     public static final int DEFAULT_MAX_LEVEL = 10;
 
-    public static final Random random = ThreadLocalRandom.current();
+    /**
+     * The parent bunker
+     */
     private final Bunker bunker;
-    //Flags
+    /**
+     * Flag lock
+     */
     private final ReentrantLock flagListLock = new ReentrantLock(true);
     /**
      * Meta for this bunker element
      * internal.* is reserved for internal usage
      */
     private Meta meta = new Meta();
+
+    /**
+     * The ID of this element
+     */
     private UUID id = UUID.randomUUID();
+
+    /**
+     * The position of this element in the grid
+     */
     @Setter(AccessLevel.PROTECTED)
     private IntVector2D position;
+
+    /**
+     * The level of this element
+     */
     private int level = 1; //starts at 1
+
     @Setter
     private int rotation = 0;
     @Getter
@@ -76,28 +93,48 @@ public abstract class BunkerElement implements GravSerializable {
      * @param bunker     The Bunker this element is a part of
      */
     public BunkerElement(GravSerializer serializer, Bunker bunker) {
+        // Set the parent bunker field
         this.bunker = bunker;
-        if (serializer == null)
+
+        // Check if the serializer is null
+        if (serializer == null) {
+            //First creation, not being deserialized
+
+            // Add default flags
+            this.addFlag(BunkerElementFlag.PROTECTED);
+
+            // Return to avoid deserialization attempt
             return;
+        }
 
         //Deserialize
-        id = serializer.readUUID();
-        position = serializer.readObject();
-        level = serializer.readInt();
-        health = serializer.readDouble();
-        destroyed = serializer.readBoolean();
+        id = serializer.readUUID(); // Read element id
+        position = serializer.readObject(); // Read element position
+        level = serializer.readInt(); // Read element level
+        health = serializer.readDouble(); // Read element health
+        destroyed = serializer.readBoolean(); // Read whether or not this element is destroyed
+
+        // Set generation settings
         this.setGenerationSettings(new ElementGenerationSettings(serializer.readBoolean(), serializer.readBoolean()));
+
+        // Read element meta
         meta = serializer.readObject();
+
+        // Get async serializer
         GravSerializer serializer1 = serializer.readSerializer();
+
+        // Try to catch exceptions
         try {
+            // Call async onLoad method with the remaining serialized data
             this.onLoadAsync(serializer1);
         } catch (Exception e) {
+            // Print caught exception
             e.printStackTrace();
+
+            // Message exception to devs
             ModuleBunkers.messageDevs("Exception thrown during loading of element of type " + this.getType().getName());
         }
     }
-
-    ;
 
     /**
      * Load an element from a serializer
@@ -654,7 +691,15 @@ public abstract class BunkerElement implements GravSerializable {
      *
      * @param amount The amount of damage
      */
-    public void damage(double amount) {
+    public ElementDrop damage(double amount) {
+        ElementDrop drop = getDropForDamage(amount);
+
+        BunkerElementDamageEvent event = new BunkerElementDamageEvent(this, amount, drop);
+        Bukkit.getPluginManager().callEvent(event);
+
+        amount = event.getDamage();
+        drop = event.getDrop();
+
         double health = getHealth();
         health -= amount;
         if (health < 0D)
@@ -664,6 +709,7 @@ public abstract class BunkerElement implements GravSerializable {
         this.onDamage(amount);
         if (health <= 0D)
             this.destroy();
+        return drop;
     }
 
     /**
@@ -720,6 +766,9 @@ public abstract class BunkerElement implements GravSerializable {
         }
     }
 
+    /**
+     * I AM JAVADOC
+     */
     private void validateFlags() {
         flagListLock.lock();
         try {

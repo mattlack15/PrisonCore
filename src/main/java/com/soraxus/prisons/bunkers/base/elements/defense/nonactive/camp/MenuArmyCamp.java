@@ -3,7 +3,7 @@ package com.soraxus.prisons.bunkers.base.elements.defense.nonactive.camp;
 import com.soraxus.prisons.bunkers.base.army.BunkerArmy;
 import com.soraxus.prisons.bunkers.npc.BunkerNPC;
 import com.soraxus.prisons.bunkers.npc.info.BunkerNPCType;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
 import com.soraxus.prisons.util.menus.MenuManager;
@@ -36,7 +36,7 @@ public class MenuArmyCamp extends Menu {
         AtomicInteger i = new AtomicInteger();
         this.setupActionableList(10, 35, 36, 44, (index) -> {
             BunkerNPC npc = null;
-            while(npc == null || npc.getType() == type.get()) {
+            while (npc == null || npc.getType() == type.get()) {
                 int npcIndex = i.getAndIncrement();
                 if (npcIndex >= npcList.size())
                     return null;
@@ -48,7 +48,7 @@ public class MenuArmyCamp extends Menu {
             builder.addLore("", "&fCount: &a" + count);
             builder.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             return new MenuElement(builder.build());
-        },0);
+        }, 0);
 
         this.fillElement(new MenuElement(new ItemBuilder(Material.STAINED_GLASS_PANE, 1, (byte) 7).setName(" ").build())
                 .setClickHandler((e, i1) -> ((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.ENTITY_ITEM_BREAK, 0.8f, 1f)));

@@ -2,7 +2,7 @@ package com.soraxus.prisons.cells.minions;
 
 import com.soraxus.prisons.util.EventSubscription;
 import com.soraxus.prisons.util.EventSubscriptions;
-import com.soraxus.prisons.util.ItemBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -111,7 +111,7 @@ public class MinionArmorStand {
 
     @EventSubscription
     private void onBreak(EntityDamageEvent event) {
-        if(event.getEntity().getUniqueId().equals(this.armorStand))
+        if (event.getEntity().getUniqueId().equals(this.armorStand))
             event.setCancelled(true);
     }
 }

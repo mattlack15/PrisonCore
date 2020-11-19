@@ -52,11 +52,11 @@ public abstract class CombatNPCController extends AbstractBunkerNPCController {
         super.tick();
         this.getAbilities().forEach(a -> {
             a.tick();
-            if(a.getCooldown().get() > 0){
+            if (a.getCooldown().get() > 0) {
                 a.getCooldown().decrementAndGet();
             }
-            if(a.canUse()) {
-                if(a.getCooldown().get() <= 0) {
+            if (a.canUse()) {
+                if (a.getCooldown().get() <= 0) {
                     a.getCooldown().set(a.cooldownTicks());
                     a.use();
                 }

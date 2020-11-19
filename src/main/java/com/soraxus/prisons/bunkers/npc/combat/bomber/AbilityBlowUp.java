@@ -114,7 +114,7 @@ public class AbilityBlowUp extends BunkerNPCAbility {
                 public void invalidate() {
                     EventSubscriptions.instance.unSubscribe(this);
                 }
-                
+
                 @EventSubscription
                 public void onFall(EntityChangeBlockEvent event) {
                     if (event.getEntity() == block) {
@@ -147,7 +147,7 @@ public class AbilityBlowUp extends BunkerNPCAbility {
         });
 
         //Damage elements
-        if(((CombatNPCController)getParent()).getCurrentMatch() != null) {
+        if (((CombatNPCController) getParent()).getCurrentMatch() != null) {
             List<BunkerElement> elements = ((CombatNPCController) getParent()).getCurrentMatch().getDefender().getTileMap().getElements();
             elements.removeIf((e) -> e.getBoundingRegion(5).smallestDistance(loc) > 10);
             elements.forEach(e -> e.damage(getParent().getParent().getLevel() * 15));
