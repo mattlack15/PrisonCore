@@ -26,7 +26,7 @@ public class CellManager {
 
     private final ManagerLock<UUID, Cell> ioLock = new ManagerLock<>();
 
-    private final ExecutorService service = Executors.newFixedThreadPool(4);
+    protected final ExecutorService service = Executors.newFixedThreadPool(4);
 
     private final File baseDir;
 

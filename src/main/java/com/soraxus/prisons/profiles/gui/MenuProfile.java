@@ -1,6 +1,7 @@
 package com.soraxus.prisons.profiles.gui;
 
 import com.soraxus.prisons.economy.Economy;
+import com.soraxus.prisons.gangs.Gang;
 import com.soraxus.prisons.gangs.GangManager;
 import com.soraxus.prisons.gangs.GangMember;
 import com.soraxus.prisons.gangs.GangMemberManager;
@@ -75,7 +76,9 @@ public class MenuProfile extends Menu {
 
         GangMember member = GangMemberManager.instance.getOrLoadMember(profile.getPlayerId(), false);
         if (member != null && member.getGang() != null) {
-            infoBuilder.addLore("&8Gang &f" + GangManager.instance.getLoadedGang(member.getGang()).getName());
+            Gang gang = GangManager.instance.getLoadedGang(member.getGang());
+            if (gang != null)
+                infoBuilder.addLore("&8Gang &f" + gang.getName());
         }
 
         this.setElement(0, new MenuElement(infoBuilder.build()));

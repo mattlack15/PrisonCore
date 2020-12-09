@@ -28,7 +28,8 @@ public class CmdGang extends UltraCommand {
                 new CmdGangRename(),
                 new CmdGangDesc(),
                 new CmdGangBunker(),
-                new CmdGangMine()
+                new CmdGangMine(),
+                new CmdGangList()
         );
     }
 }

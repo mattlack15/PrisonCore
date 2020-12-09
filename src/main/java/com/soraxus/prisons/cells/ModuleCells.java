@@ -58,6 +58,7 @@ public class ModuleCells extends CoreModule {
                 e.printStackTrace();
             }
         });
+        CellManager.instance.service.shutdown();
     }
 
     @Override

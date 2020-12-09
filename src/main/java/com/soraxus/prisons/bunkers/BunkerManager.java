@@ -45,7 +45,7 @@ public class BunkerManager {
     private final Map<UUID, Bunker> loadedBunkers = new HashMap<>();
     private final ReentrantLock lock = new ReentrantLock(true);
     private final ManagerLock<UUID, Bunker> ioLock = new ManagerLock<>();
-    private final ExecutorService loadingService = Executors.newFixedThreadPool(20);
+    protected final ExecutorService loadingService = Executors.newFixedThreadPool(20);
 
     @Getter
     private final WeakList<Bunker> bunkerWeakList = new WeakList<>();

@@ -33,6 +33,7 @@ public class Diagnostics {
             }
 
             gangManager.saveGang(gang);
+            gang.disband();
         }));
     }
 

@@ -6,6 +6,7 @@ import com.soraxus.prisons.privatemines.PrivateMine;
 import com.soraxus.prisons.privatemines.PrivateMineManager;
 import com.soraxus.prisons.util.list.ElementableList;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -117,9 +118,15 @@ public class GangManager {
             return null;
         }
         File file = getFile(id);
-        if (!file.exists())
+        if (!file.exists()) {
+            ioLock.unlock();
             return null;
+        }
         FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+        if (config == null) { //Dont remove
+            ioLock.unlock();
+            return null;
+        }
         Gang gang = Gang.fromSection(config, this, GangMemberManager.instance);
         ioLock.unlock();
 
@@ -135,15 +142,7 @@ public class GangManager {
     }
 
     private File getFile(UUID id) {
-        File file = new File(folder, id.toString() + ".yml");
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return file;
+        return new File(folder, id.toString() + ".yml");
     }
 
     /**
@@ -194,7 +193,9 @@ public class GangManager {
         }
         ReentrantLock ioLock = getIoLock(gangId);
         ioLock.lock();
-        getFile(gangId).delete();
+        File file = getFile(gangId);
+        if(file.exists())
+            file.delete();
         ioLock.unlock();
     }
 
@@ -261,6 +262,13 @@ public class GangManager {
         savingLock.unlock();
         ReentrantLock ioLock = getIoLock(gang.getId());
         File file = getFile(gang.getId());
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         new Thread(() -> {
             try {
                 Thread.sleep(50);
@@ -277,7 +285,7 @@ public class GangManager {
                     ioLock.unlock();
                 }
 
-                setGangNameInIndex(gang.getName(), gang.getId());
+                cacheGang(gang);
                 saveIndex();
 
             } catch (InterruptedException | IOException e) {
@@ -286,9 +294,17 @@ public class GangManager {
         }).start();
     }
 
-    protected void setGangNameInIndex(String name, UUID gang) {
+    public void cacheGang(Gang gang) {
         indexLock.lock();
-        indexConfig.set(name, gang != null ? gang.toString() : null);
+        ConfigurationSection section = indexConfig.createSection(gang.getName());
+        section.set("id", gang.getId().toString());
+        section.set("xp", gang.getXp());
+        indexLock.unlock();
+    }
+
+    public void uncacheGang(String gangName) {
+        indexLock.lock();
+        indexConfig.set(gangName, null);
         indexLock.unlock();
     }
 
@@ -302,5 +318,21 @@ public class GangManager {
             g = loadGang(gangId, loadBunker);
         }
         return g;
+    }
+
+    public Map<UUID, Long> getCachedGangXpMap() {
+        indexLock.lock();
+        try {
+            Map<UUID, Long> map = new HashMap<>();
+            for (String key : indexConfig.getKeys(false)) {
+                ConfigurationSection section = indexConfig.getConfigurationSection(key);
+                UUID id = UUID.fromString(section.getString("id"));
+                long xp = section.getLong("xp");
+                map.put(id, xp);
+            }
+            return map;
+        } finally {
+            indexLock.unlock();
+        }
     }
 }

@@ -3,14 +3,19 @@ package com.soraxus.prisons.gangs;
 import com.soraxus.prisons.core.CoreModule;
 import com.soraxus.prisons.event.PrisonBlockBreakEvent;
 import com.soraxus.prisons.gangs.cmd.CmdGang;
+import com.soraxus.prisons.sorting.ModuleSorting;
+import com.soraxus.prisons.sorting.SortingTask;
 import com.soraxus.prisons.util.EventSubscription;
 import com.soraxus.prisons.util.menus.MenuElement;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -34,6 +39,10 @@ public class ModuleGangs extends CoreModule {
         new CmdGang().register();
 
         Bukkit.getOnlinePlayers().forEach(p -> GangMemberManager.instance.getOrMakeMember(p.getUniqueId(), p.getName()));
+
+        ModuleSorting.instance.submitTask("gangTop",
+                new SortingTask<>(() -> GangManager.instance.getCachedGangXpMap(), false)
+        );
     }
 
     @Override

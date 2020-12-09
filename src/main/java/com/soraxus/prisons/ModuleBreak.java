@@ -40,6 +40,7 @@ public class ModuleBreak extends CoreModule {
         }
         this.onBreak(event.getPlayer(), Vector3D.fromBukkitVector(event.getBlock().getLocation().toVector()), event.getBlock().getData() << 12 | event.getBlock().getTypeId());
         event.setDropItems(false);
+        event.setExpToDrop(0);
     }
 
     public synchronized void onBreak(Player player, Vector3D location, int combinedId) {

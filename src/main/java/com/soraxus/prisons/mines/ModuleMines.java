@@ -33,9 +33,9 @@ import java.util.concurrent.ExecutionException;
 
 public class ModuleMines extends CoreModule {
     public static ModuleMines instance;
+    private final Map<UUID, Boolean> allowedFlight = new HashMap<>();
     int taskId = -1;
     private String prefix;
-    private final Map<UUID, Boolean> allowedFlight = new HashMap<>();
 
     public String getName() {
         return "Mines";
@@ -86,7 +86,7 @@ public class ModuleMines extends CoreModule {
 
     public MenuElement getGUI(MenuElement back) {
         return (new MenuElement((new ItemBuilder(Material.DIAMOND_PICKAXE, 1)).setName("&f&lMines").addLore("&7Click to enter &f&lMines").build())).setClickHandler((e, i) -> {
-            Player player = (Player)e.getWhoClicked();
+            Player player = (Player) e.getWhoClicked();
             Mine mine = MineManager.instance.getMineOf(player.getLocation());
             if (mine == null) {
                 mine = MineManager.instance.getMineOf(player.getLocation().clone().add(0.0D, -5.0D, 0.0D));
@@ -165,20 +165,20 @@ public class ModuleMines extends CoreModule {
         Bukkit.getOnlinePlayers().forEach((p) -> {
             Mine mine = MineManager.instance.getMineOf(p.getLocation());
             if (mine != null) {
-                double percentage = (double)mine.getBlocksMined() / (double)mine.getMineArea();
-                percentage = (double)((float)Math.round(percentage * 1000.0D) / 1000.0F);
+                double percentage = (double) mine.getBlocksMined() / (double) mine.getMineArea();
+                percentage = (double) ((float) Math.round(percentage * 1000.0D) / 1000.0F);
                 StringBuilder builder = new StringBuilder();
                 builder.append(ChatColor.AQUA).append(this.firstLetterUpper(mine.getName())).append(" ");
                 builder.append(ChatColor.GREEN).append(ChatColor.BOLD);
 
-                for(int i = 0; i < 10; ++i) {
+                for (int i = 0; i < 10; ++i) {
                     builder.append("█");
-                    if ((long)i == Math.round(percentage * 10.0D)) {
+                    if ((long) i == Math.round(percentage * 10.0D)) {
                         builder.append(ChatColor.GRAY).append(ChatColor.BOLD);
                     }
                 }
 
-                builder.append(ChatColor.YELLOW).append(" ").append((float)Math.round(percentage * 1000.0D) / 10.0F).append("%");
+                builder.append(ChatColor.YELLOW).append(" ").append((float) Math.round(percentage * 1000.0D) / 10.0F).append("%");
                 ActionBar.send(p, builder.toString());
             }
 
@@ -192,8 +192,8 @@ public class ModuleMines extends CoreModule {
             boolean isClose = false;
             Iterator var4 = MineManager.instance.getLoaded().iterator();
 
-            while(var4.hasNext()) {
-                Mine mines = (Mine)var4.next();
+            while (var4.hasNext()) {
+                Mine mines = (Mine) var4.next();
                 CuboidRegion region = mines.getRegion();
                 if (region.smallestDistance(Vector3D.fromBukkitVector(p.toVector())) <= 8.0D && event.getPlayer().hasPermission("spc.mines.flight")) {
                     if (!this.allowedFlight.containsKey(event.getPlayer().getUniqueId())) {
@@ -210,7 +210,7 @@ public class ModuleMines extends CoreModule {
             }
 
             if (!isClose && this.allowedFlight.containsKey(event.getPlayer().getUniqueId())) {
-                event.getPlayer().setAllowFlight((Boolean)this.allowedFlight.remove(event.getPlayer().getUniqueId()));
+                event.getPlayer().setAllowFlight((Boolean) this.allowedFlight.remove(event.getPlayer().getUniqueId()));
             }
         }
 

@@ -45,19 +45,15 @@ public class CmdGangInfo extends GangCommand {
             try {
                 tell(PREFIX + ChatColor.BLUE + "Name > &f" + finalGang.getName());
                 tell(PREFIX + ChatColor.BLUE + "Description > &f" + finalGang.getDescription());
-                int level = finalGang.getLevel();
-                long xp = finalGang.getXp();
-                long reqXp = GangLevelUtil.getReqXp(level);
-                String bar = TextUtil.generateBar('d', 'f', '|', 10, xp, reqXp);
                 ChatBuilder builder = new ChatBuilder();
-                builder.addText(PREFIX + ChatColor.BLUE + "Level > &d" + finalGang.getLevel() + " &8[" + bar + "&8]",
+                builder.addText(PREFIX + ChatColor.BLUE + "Level > &d" + finalGang.getLevelInt(),
                         HoverUtil.text("&fYour &e&lGang level &fis something\n" +
                                 "that determines a number of things including\n" +
                                 "whether or not you can have a gang mine, as well\n" +
                                 "as how many people can be there.\n" +
                                 "\n" +
                                 "&aYou can level up your gang by mining."));
-                tell(PREFIX + ChatColor.BLUE + "Level > &d" + finalGang.getLevel() + " &8[" + bar + "&8]");
+                builder.send(getPlayer());
                 tell(PREFIX + ChatColor.BLUE + "Members > &f" + finalGang.getMembers().stream()
                         .map((gm) -> {
                             if (gm.getGangRole().equals(GangRole.LEADER)) {

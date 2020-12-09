@@ -93,6 +93,7 @@ public class ModuleBunkers extends CoreModule {
             }
         });
         BunkerManager.instance.saveCachedRatings();
+        BunkerManager.instance.loadingService.shutdown();
     }
 
     public Bunker fromWorld(World world) {

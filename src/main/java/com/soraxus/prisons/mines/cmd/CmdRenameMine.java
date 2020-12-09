@@ -22,6 +22,6 @@ public class CmdRenameMine extends UltraCommand {
             return;
         }
         Mine.renameMine(mine, MineManager.instance, next);
-        tell("&aIt should be renamed to " + next + " now.. maybe... then again maybe it didnt work :/ but hopefully it did :)");
+        tell("&aIt should be renamed to " + next + " now.. maybe... then again maybe it didn't work :/ but hopefully it did :)");
     }
 }

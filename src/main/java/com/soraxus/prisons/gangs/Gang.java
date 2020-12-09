@@ -8,6 +8,7 @@ import com.soraxus.prisons.privatemines.PrivateMine;
 import com.soraxus.prisons.privatemines.PrivateMineManager;
 import com.soraxus.prisons.util.maps.MapUtil;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -24,8 +25,7 @@ public class Gang {
     private String name;
     private String description = "No description :/";
     @Getter
-    private int level = 1;
-    @Getter
+    @Setter
     private long xp = 0;
     private List<GangMember> cachedMembers = new ArrayList<>();
     private Map<String, String> invited = new HashMap<>();
@@ -126,7 +126,6 @@ public class Gang {
         gang.description = description;
         gang.id = id;
         gang.invited = invited;
-        gang.level = level;
         gang.xp = xp;
 
         //Load members
@@ -159,8 +158,8 @@ public class Gang {
     public synchronized void setName(String name) {
         String oldName = this.getName();
         this.name = name;
-        parent.setGangNameInIndex(oldName, null);
-        parent.setGangNameInIndex(name, this.getId());
+        parent.uncacheGang(oldName);
+        parent.cacheGang(this);
         parent.saveGang(this);
     }
 
@@ -316,7 +315,7 @@ public class Gang {
      * Pretty much just a synchronization tool so that a member can't be added between checking isInvited and another thread adding a member
      *
      * @param member     The member to try to add
-     * @param conditions The conditions
+     * @param condition The condition
      * @return True if the member was added, false otherwise
      */
     public synchronized boolean addMemberWithCondition(GangMember member, Supplier<Boolean> condition) {
@@ -341,6 +340,8 @@ public class Gang {
             cachedMembers.add(member);
             member.setGang(this.getId());
             parent.saveGang(this);
+        } else {
+            cachedMembers.add(member);
         }
     }
 
@@ -376,7 +377,6 @@ public class Gang {
         section.set("id", getId().toString());
         section.set("name", getName());
         section.set("description", getDescription());
-        section.set("level", level);
         section.set("xp", xp);
         section.set("invited", MapUtil.mapToString(invited));
         List<String> ids = new ArrayList<>();
@@ -421,11 +421,18 @@ public class Gang {
      * @param amount the amount of xp to add
      */
     public void addXp(long amount) {
+        int old = getLevelInt();
         xp += amount;
-        while (xp > GangLevelUtil.getReqXp(level)) {
-            xp -= GangLevelUtil.getReqXp(level);
-            level++;
-            this.broadcastMessage("§fYour gang leveled up to §5Level " + level + "§f!");
+        if (getLevelInt() > old) {
+            this.broadcastMessage("§fYour gang leveled up to §5Level " + getLevelInt() + "§f!");
         }
+    }
+
+    public int getLevelInt() {
+        return (int) Math.floor(getLevel());
+    }
+
+    public double getLevel() {
+        return Math.cbrt(xp / 1000D);
     }
 }

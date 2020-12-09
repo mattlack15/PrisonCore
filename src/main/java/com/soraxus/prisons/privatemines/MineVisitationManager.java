@@ -174,7 +174,7 @@ public class MineVisitationManager implements GravSerializable {
     }
 
     public int getSlots() {
-        return this.parent.getGang().getLevel();
+        return this.parent.getGang().getLevelInt();
     }
 
     public int getNonRentedSlots() {

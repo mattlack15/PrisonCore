@@ -26,6 +26,7 @@ import com.soraxus.prisons.ranks.cmd.CmdRankup;
 import com.soraxus.prisons.ranks.cmd.CmdRankupMax;
 import com.soraxus.prisons.ranks.cmd.CmdSetRank;
 import com.soraxus.prisons.selling.ModuleSelling;
+import com.soraxus.prisons.sorting.ModuleSorting;
 import com.soraxus.prisons.util.EventSubscription;
 import com.soraxus.prisons.util.EventSubscriptions;
 import com.soraxus.prisons.util.Synchronizer;
@@ -68,6 +69,7 @@ public class SpigotPrisonCore extends CorePlugin {
         new EventSubscriptions();
         EventSubscriptions.instance.subscribe(this);
         this.addModule(new ModuleErrors());
+        this.addModule(new ModuleSorting());
         this.addModule(new ModuleEnchants());
         this.addModule(new ModuleMines());
         this.addModule(new ModuleSelling());

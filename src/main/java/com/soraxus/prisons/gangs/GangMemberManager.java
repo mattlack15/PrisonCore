@@ -70,7 +70,10 @@ public class GangMemberManager {
         this.members.put(member1.getMember().toString(), member1);
         accessorLock.unlock();
 
-        GangManager.instance.loadGang(member1.getGang(), loadBunker);
+        Gang gang = GangManager.instance.loadGang(member1.getGang(), loadBunker);
+        if(gang == null) {
+            member1.setGang(null);
+        }
 
         return member1;
     }
