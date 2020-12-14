@@ -50,6 +50,7 @@ public class MenuMinion extends Menu {
 
             int give = minion.getStored().getAndSet(0);
             Economy.tokens.addBalance(e.getWhoClicked().getUniqueId(), give);
+            ((Player)e.getWhoClicked()).playSound(((Player) e.getWhoClicked()).getLocation(), Sound.ENTITY_ITEM_PICKUP, 1f, 1f);
             setup();
         }).setDoUpdates(true).setUpdateEvery(1).setUpdateHandler((e) -> e.setItem(new ItemBuilder(Material.EXP_BOTTLE)
                 .setName("&6&lCollect")

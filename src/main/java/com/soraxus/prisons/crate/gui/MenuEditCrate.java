@@ -78,15 +78,15 @@ public class MenuEditCrate extends Menu {
 
 
     public void setup() {
-        MenuElement rename = new MenuElement(new ItemBuilder(Material.NAME_TAG, 1).setName("&a&lDisplay Name").addLore("&fCurrent: " + crate.getDisplayName()).addLore("").addLore("&fClick to change")
+        MenuElement rename = new MenuElement(new ItemBuilder(Material.NAME_TAG, 1).setName("&a&lDisplay Name").addLore("&8Current: &f" + crate.getDisplayName()).addLore("").addLore("&fClick to change")
                 .build()).setClickHandler((e, i) -> {
             e.getWhoClicked().closeInventory();
-            e.getWhoClicked().sendMessage(ChatColor.YELLOW + "Enter the new Display Name in chat");
+            e.getWhoClicked().sendMessage(ChatColor.YELLOW + "Enter the new display name in chat");
             chatConsumer = (s) -> {
                 crate.setDisplayName(s);
                 CrateManager.instance.saveCrate(crate);
                 this.setup();
-                this.open((Player) e.getWhoClicked());
+                this.open(e.getWhoClicked());
                 MenuCrates.noGC.remove(this);
             };
             MenuCrates.noGC.add(this);

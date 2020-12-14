@@ -3,6 +3,8 @@ package com.soraxus.prisons;
 import com.soraxus.prisons.bunkers.BunkerManager;
 import com.soraxus.prisons.bunkers.ModuleBunkers;
 import com.soraxus.prisons.cells.ModuleCells;
+import com.soraxus.prisons.shop.ModuleShop;
+import com.soraxus.prisons.shop.customshop.CmdGlobalShop;
 import com.soraxus.prisons.chatgames.ModuleChatGames;
 import com.soraxus.prisons.core.CmdPrisonCoreGUI;
 import com.soraxus.prisons.core.CmdThreadDump;
@@ -87,6 +89,7 @@ public class SpigotPrisonCore extends CorePlugin {
         this.addModule(new ModuleProfiles());
         this.addModule(new ModuleRanks());
         this.addModule(new ModuleChatGames());
+        this.addModule(new ModuleShop());
         this.addModule(new ModuleDebug());
 
         new CmdThreadDump().register();
@@ -101,6 +104,7 @@ public class SpigotPrisonCore extends CorePlugin {
         new CmdRankupMax().register();
         new CmdPrestige().register();
         new CmdSetRank().register();
+        new CmdGlobalShop().register();
         // /\ /\ These belong in their respective modules
 
         this.spawn = getConfig().getString("spawn");

@@ -38,6 +38,10 @@ public class MenuElement {
         return this;
     }
 
+    public ClickHandlerBuilder clickBuilder() {
+        return new ClickHandlerBuilder(this);
+    }
+
     //Util
     public MenuElement setDoUpdates(boolean doUpdates) {
         this.doUpdates = doUpdates;

@@ -1,7 +1,6 @@
 package com.soraxus.prisons.cells;
 
 import com.soraxus.prisons.SpigotPrisonCore;
-import com.soraxus.prisons.bunkers.base.Meta;
 import com.soraxus.prisons.cells.minions.Minion;
 import com.soraxus.prisons.cells.minions.MinionManager;
 import com.soraxus.prisons.util.EventSubscription;
@@ -14,6 +13,7 @@ import net.ultragrav.asyncworld.customworld.SpigotCustomWorld;
 import net.ultragrav.asyncworld.schematics.Schematic;
 import net.ultragrav.serializer.GravSerializable;
 import net.ultragrav.serializer.GravSerializer;
+import net.ultragrav.serializer.Meta;
 import net.ultragrav.utils.CuboidRegion;
 import net.ultragrav.utils.IntVector3D;
 import net.ultragrav.utils.Vector3D;

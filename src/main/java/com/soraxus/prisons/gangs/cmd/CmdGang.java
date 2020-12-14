@@ -29,7 +29,9 @@ public class CmdGang extends UltraCommand {
                 new CmdGangDesc(),
                 new CmdGangBunker(),
                 new CmdGangMine(),
-                new CmdGangList()
+                new CmdGangList(),
+                new CmdGangChat(),
+                new CmdGangAdmin()
         );
     }
 }

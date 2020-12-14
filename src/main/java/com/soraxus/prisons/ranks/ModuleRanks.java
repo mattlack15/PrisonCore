@@ -42,8 +42,6 @@ public class ModuleRanks extends CoreModule {
 
         new RankupManager(this);
         RankupManager.instance.loadRanks();
-        RankupManager.instance.transferPRX();
-        RankupManager.instance.saveRanks();
 
         Bukkit.getOnlinePlayers().forEach(p -> RankupManager.instance.loadPlayer(p.getUniqueId()));
     }

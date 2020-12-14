@@ -3,6 +3,7 @@ package com.soraxus.prisons.mines.object;
 import com.soraxus.prisons.bunkers.util.BHoloTextBox;
 import com.soraxus.prisons.mines.ModuleMines;
 import com.soraxus.prisons.mines.manager.MineManager;
+import com.soraxus.prisons.util.time.DateUtils;
 import net.ultragrav.asyncworld.AsyncWorld;
 import net.ultragrav.asyncworld.SpigotAsyncWorld;
 import net.ultragrav.utils.CuboidRegion;
@@ -11,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 import java.util.HashMap;
@@ -59,6 +61,29 @@ public class Mine {
     }
 
     public void updateArmorStand() {
+        if(this.textBox == null) {
+            Location location = this.getRegion()
+                    .getCenter()
+                    .setY(this.getRegion().getMaximumY() + 3.5)
+                    .add(0.5, 0, 0.5)
+                    .toBukkitVector()
+                    .toLocation(this.getRegion().getWorld());
+
+            location.getWorld().getNearbyEntities(location, 2, 2, 2).forEach((e) -> {
+                if(e instanceof ArmorStand) {
+                    if(!((ArmorStand) e).isVisible()) {
+                        e.remove();
+                    }
+                }
+            });
+
+            this.textBox = new BHoloTextBox(location, 0.3D, false, () -> this.getRegion().getWorld());
+        }
+
+        this.textBox.setOrMake(0, "&d&lResetting in &7" +
+                DateUtils.readableDate((long) Math.max(0, 20 * 60 - (System.currentTimeMillis() - getLastMinedBlock().get()) / 1000D), true));
+        this.textBox.setOrMake(1, "&dOr when this hits &c" + Math.round(ModuleMines.instance.getMinedThreshold() * 100) + "% &d: &f" +
+                Math.round(getBlocksMined() / (double) getMineArea() * 100) + "%");
     }
 
     public boolean shouldSave() {

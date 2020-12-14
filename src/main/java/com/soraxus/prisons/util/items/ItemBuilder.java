@@ -5,6 +5,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -41,6 +43,21 @@ public class ItemBuilder {
             return;
         }
         this.item = new ItemStack(m, amount, data);
+    }
+
+    public static String itemToString(ItemStack stack) {
+        YamlConfiguration configuration = new YamlConfiguration();
+        configuration.set("item", stack);
+        return configuration.saveToString();
+    }
+    public static ItemStack itemFromString(String string) {
+        YamlConfiguration configuration = new YamlConfiguration();
+        try {
+            configuration.loadFromString(string);
+        } catch (InvalidConfigurationException e) {
+            e.printStackTrace();
+        }
+        return configuration.getItemStack("item");
     }
 
     public ItemBuilder setDurability(short val) {

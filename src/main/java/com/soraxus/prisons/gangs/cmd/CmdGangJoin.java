@@ -3,6 +3,7 @@ package com.soraxus.prisons.gangs.cmd;
 import com.soraxus.prisons.gangs.Gang;
 import com.soraxus.prisons.util.display.chat.ChatBuilder;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandException;
 
 import static com.soraxus.prisons.gangs.cmd.CmdGang.PREFIX;
 
@@ -17,21 +18,27 @@ public class CmdGangJoin extends GangCommand {
 
     public void perform() {
         getAsyncExecutor().submit(() -> {
-            Gang gang = getArgument(0);
-            if(getGangMember().getGang() != null && getGangMember().getGang().equals(gang.getId())) {
-                new ChatBuilder(PREFIX + "You are already in this gang...?").send(getPlayer());
-                return;
+            try {
+                Gang gang = getArgument(0);
+                if (getGangMember().getGang() != null && getGangMember().getGang().equals(gang.getId())) {
+                    new ChatBuilder(PREFIX + "You are already in this gang...?").send(getPlayer());
+                    return;
+                }
+                if (!gang.addMemberWithCondition(getGangMember(), () -> {
+                    if (gang.isInvited(getGangMember().getMember())) {
+                        gang.unInvite(getGangMember().getMember());
+                        return true;
+                    } else return sender.hasPermission("gang.admin");
+                })) {
+                    tell(PREFIX + ChatColor.RED + "You are not invited to this gang!");
+                    return;
+                }
+                gang.broadcastMessage("&a" + sender.getName() + "&f joined the gang!");
+            } catch(CommandException e) {
+                new ChatBuilder(e.getMessage()).send(getPlayer());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            if (!gang.addMemberWithCondition(getGangMember(), () -> {
-                if (gang.isInvited(getGangMember().getMember())) {
-                    gang.unInvite(getGangMember().getMember());
-                    return true;
-                } else return sender.hCasPermission("gang.admin");
-            })) {
-                tell(PREFIX + ChatColor.RED + "You are not invited to this gang!");
-                return;
-            }
-            gang.broadcastMessage("&a" + sender.getName() + "&f joined the gang!");
         });
     }
 }

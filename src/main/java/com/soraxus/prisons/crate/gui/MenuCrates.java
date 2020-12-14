@@ -60,18 +60,18 @@ public class MenuCrates extends Menu {
             byte data = crate.getItemData();
 
             ItemBuilder builder = new ItemBuilder(material, 1, data);
-            builder.setName("&f&l" + crate.getName());
-            builder.addLore("&fDisplay Name: " + crate.getDisplayName());
-            builder.addLore("&fReward Count: " + crate.getRewards().size());
-            builder.addLore("&fDescription:");
+            builder.setName("&6&l" + crate.getName());
+            builder.addLore("&8Display Name: &f" + crate.getDisplayName());
+            builder.addLore("&8Reward Count: &f" + crate.getRewards().size());
+            builder.addLore("&8Description:");
             builder.addLore("");
             for (String descLine : TextUtil.splitIntoLines(crate.getDescription(), 30)) {
                 builder.addLore("&7" + descLine);
             }
             builder.addLore("");
-            builder.addLore("&eShift-Left Click -> Retrieve a Crate");
-            builder.addLore("&eShift-Right Click -> Retrieve a stack of Crates");
-            builder.addLore("&aLeft Click to Edit");
+            builder.addLore("&fShift-Left Click &7-> Retrieve a Crate");
+            builder.addLore("&fShift-Right Click &7-> Retrieve a stack of Crates");
+            builder.addLore("&fLeft Click &7to Edit");
 
             return new MenuElement(builder.build()).setClickHandler((e, i) -> {
                 if (e.getClick().isLeftClick() && e.getClick().isShiftClick()) {

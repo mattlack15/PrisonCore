@@ -1,7 +1,10 @@
 package com.soraxus.prisons.errors;
 
 import com.soraxus.prisons.core.CoreModule;
+import com.soraxus.prisons.util.display.chat.ChatBuilder;
+import com.soraxus.prisons.util.display.chat.HoverUtil;
 import com.soraxus.prisons.util.menus.MenuElement;
+import org.bukkit.Bukkit;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -9,6 +12,7 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class ModuleErrors extends CoreModule {
 
@@ -19,12 +23,23 @@ public class ModuleErrors extends CoreModule {
     @Override
     protected void onEnable() {
         instance = this;
+        new CmdErrorTest().register();
+    }
+
+    public ChatBuilder getErrorMessage(Throwable t, String failedAction, String response) {
+        String id = recordError(t, failedAction, response, true);
+        return new ChatBuilder("&c&lError &8&l▶ &fSorry! There was a problem &e" + failedAction + "&f, we've &a" + response + "&f.")
+                .addText("\nPlease send this error id to an admin: &4&l" + id, HoverUtil.text("&4&l" + id));
     }
 
     /**
      * Records error to a file and returns an identifier.
      */
     public String recordError(Throwable t) {
+        return recordError(t, "Unknown action", "No identified response", true);
+    }
+
+    public String recordError(Throwable t, String failedAction, String response, boolean verbose) {
         String identifier = getIdentifier(10);
         service.submit(() -> {
             File file = new File(this.getDataFolder(), identifier + ".txt");
@@ -42,6 +57,15 @@ public class ModuleErrors extends CoreModule {
                 e.printStackTrace();
             }
         });
+
+        if (verbose)
+            new ChatBuilder("&c&lERROR &8&l▶ &fAn error was recorded with ID: &4&l" + identifier)
+                    .addText("\n&fThe server has failed to &c" + failedAction + "&f and has in response, &a" + response + "&f.")
+                    .sendAll(Bukkit.getOnlinePlayers()
+                            .stream()
+                            .filter((p) -> p.hasPermission("spc.error.verbose"))
+                            .collect(Collectors.toList()));
+
         return identifier;
     }
 

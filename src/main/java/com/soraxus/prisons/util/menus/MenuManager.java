@@ -113,7 +113,7 @@ public class MenuManager implements Listener {
         });
     }
 
-    private void callClose(UUID player, Inventory inv) {
+    private void handleClose(UUID player, Inventory inv) {
         if (infos.containsKey(player)) {
             if (infos.get(player).getCurrentMenu() == null) {
                 return;
@@ -125,9 +125,16 @@ public class MenuManager implements Listener {
         }
     }
 
+    //private Map<UUID, Long> lastClosed = new HashMap<>();
+
     @EventHandler
     public void onClose(InventoryCloseEvent e) {
-        this.callClose(e.getPlayer().getUniqueId(), e.getInventory());
+        if(infos.containsKey(e.getPlayer().getUniqueId())) {
+//            if(infos.get(e.getPlayer().getUniqueId()).getCurrentMenu() == e.getInventory()) {
+//                //TODO
+//            }
+            this.handleClose(e.getPlayer().getUniqueId(), e.getInventory());
+        }
     }
 
     @EventHandler
@@ -153,6 +160,10 @@ public class MenuManager implements Listener {
                     com.soraxus.prisons.util.menus.MenuElement.ClickHandler handler = info.getCurrentMenu().getElement(e.getSlot()).getClickHandler();
                     if (handler != null) {
                         handler.handleClick(e, info);
+                    }
+                    com.soraxus.prisons.util.menus.MenuElement.ClickHandler clickHandler = info.getCurrentMenu().getDefaultClickHandler();
+                    if (clickHandler != null) {
+                        clickHandler.handleClick(e, info);
                     }
                 } else {
                     com.soraxus.prisons.util.menus.MenuElement.ClickHandler clickHandler = info.getCurrentMenu().getDefaultClickHandler();

@@ -71,7 +71,7 @@ public class Handler {
         List<UUID> marked = new ArrayList<>();
         long t = System.currentTimeMillis();
         data.forEach((i, h) -> {
-            if (h.expiry < t || h.used >= h.uses) {
+            if (h.expiry < t || (h.used >= h.uses && h.uses != -1)) {
                 marked.add(i);
             }
         });
@@ -107,7 +107,7 @@ public class Handler {
 
         public HandledElement(Consumer<Player> run, long length) {
             this.run = run;
-            this.uses = 1;
+            this.uses = -1;
             this.expiry = System.currentTimeMillis() + length;
         }
 

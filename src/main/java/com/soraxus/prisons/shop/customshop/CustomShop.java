@@ -1,38 +1,31 @@
-package com.soraxus.prisons.cells.shop;
+package com.soraxus.prisons.shop.customshop;
 
 import com.soraxus.prisons.util.list.LockingList;
 import lombok.Getter;
 import lombok.Setter;
 import net.ultragrav.serializer.GravSerializable;
 import net.ultragrav.serializer.GravSerializer;
-import net.ultragrav.serializer.Meta;
 
 public class CustomShop implements GravSerializable {
-
     @Getter
-    private final LockingList<ShopItem> items = new LockingList<>();
+    private final LockingList<CustomShopSection> sections = new LockingList<>();
 
     @Getter
     @Setter
-    private String name;
-
-    @Getter
-    private Meta meta = new Meta();
+    private volatile String name;
 
     public CustomShop(String name) {
         this.name = name;
     }
 
     public CustomShop(GravSerializer serializer) {
-        this.name = serializer.readString();
-        this.meta = new Meta(serializer);
-        this.items.addAll(serializer.readObject());
+        sections.addAll(serializer.readObject());
+        name = serializer.readString();
     }
 
     @Override
     public void serialize(GravSerializer serializer) {
-        serializer.writeString(this.name);
-        meta.serialize(serializer);
-        serializer.writeObject(this.items);
+        serializer.writeObject(sections);
+        serializer.writeString(name);
     }
 }

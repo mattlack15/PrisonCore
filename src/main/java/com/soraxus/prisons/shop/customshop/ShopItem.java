@@ -1,4 +1,4 @@
-package com.soraxus.prisons.cells.shop;
+package com.soraxus.prisons.shop.customshop;
 
 import lombok.Getter;
 import lombok.Setter;

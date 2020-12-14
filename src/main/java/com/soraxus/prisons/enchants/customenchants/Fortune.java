@@ -3,6 +3,7 @@ package com.soraxus.prisons.enchants.customenchants;
 import com.soraxus.prisons.enchants.api.enchant.AbstractCE;
 import com.soraxus.prisons.event.PrisonBlockBreakEvent;
 import com.soraxus.prisons.util.EventSubscription;
+import org.bukkit.Material;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.inventory.ItemStack;
 
@@ -45,6 +46,8 @@ public class Fortune extends AbstractCE {
     @EventSubscription
     private void onBreak(PrisonBlockBreakEvent event) {
         if (hasEnchant(event.getPlayer().getInventory().getItemInMainHand())) {
+            if((event.getBlock() & 0xFFF) == Material.SPONGE.getId()) //If it is a lucky block
+                return;
             event.setAmount(event.getAmount() * (getInfo(event.getPlayer().getInventory().getItemInMainHand()).getEnchants().get(this) + 1));
         }
     }

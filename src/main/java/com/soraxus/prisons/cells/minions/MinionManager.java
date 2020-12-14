@@ -1,11 +1,12 @@
 package com.soraxus.prisons.cells.minions;
 
-import com.soraxus.prisons.bunkers.base.Meta;
 import com.soraxus.prisons.cells.Cell;
 import com.soraxus.prisons.util.list.ElementableLockingList;
 import lombok.Getter;
 import net.ultragrav.serializer.GravSerializer;
+import net.ultragrav.serializer.Meta;
 import net.ultragrav.utils.IntVector3D;
+import org.bukkit.Material;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,6 +78,8 @@ public class MinionManager {
 
     public boolean canPlace(IntVector3D location) {
         if (byLocation(location) != null)
+            return false;
+        if (parent.getWorld().getBukkitWorld().getBlockAt(location.getX(), location.getY(), location.getZ()).getType() != Material.AIR) //If block is not air
             return false;
         return true;
     }

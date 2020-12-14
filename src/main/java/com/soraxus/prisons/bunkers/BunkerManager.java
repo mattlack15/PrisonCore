@@ -102,7 +102,6 @@ public class BunkerManager {
             }
         } catch (Exception e) {
             try {
-                ModuleBunkers.messageDevs("Creating new CachedRatings file");
                 new File(bunkerFolder, "cachedRatings.cache").createNewFile();
             } catch (IOException ioException) {
                 ioException.printStackTrace();

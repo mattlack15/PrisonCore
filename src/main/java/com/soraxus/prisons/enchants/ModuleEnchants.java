@@ -42,8 +42,8 @@ public class ModuleEnchants extends CoreModule {
 
     @Override
     public MenuElement getGUI(MenuElement backButton) {
-        return new MenuElement(new ItemBuilder(Material.ENCHANTED_BOOK).setName("&d&lEnchantments")
-                .addLore("&7Click to view custom enchantments").build())
+        return new MenuElement(new ItemBuilder(Material.ENCHANTED_BOOK).setName("&f&lEnchantments")
+                .addLore("&7Click to open &f&lEnchantments").build())
                 .setClickHandler((e, i) -> new MenuModuleEnchants(backButton).open(e.getWhoClicked()));
     }
 

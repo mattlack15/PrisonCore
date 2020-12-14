@@ -159,10 +159,13 @@ public class GangManager {
     }
 
     public UUID getId(String gangName) {
-        String id = this.indexConfig.getString(gangName);
-        if (id == null)
+        ConfigurationSection section = this.indexConfig.getConfigurationSection(gangName);
+        if (section == null)
             return null;
-        return UUID.fromString(id);
+        if(!section.isSet("id") || !section.isString("id")) {
+            return null;
+        }
+        return UUID.fromString(section.getString("id"));
     }
 
     public boolean gangExists(String name) {

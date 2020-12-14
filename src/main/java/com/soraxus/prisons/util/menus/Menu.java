@@ -11,10 +11,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-public abstract class Menu {
+public class Menu {
 
     public static final Material BACK_BUTTON_ITEM = Material.BED;
     public static final Material PAGE_CONTROL_ITEM = Material.ARROW;
@@ -23,9 +24,13 @@ public abstract class Menu {
     private final Map<Integer, MenuElement> elements = new HashMap<>();
     //Value vars
     private String title;
-    private com.soraxus.prisons.util.menus.MenuElement.ClickHandler defaultClickHandler = null;
+    private com.soraxus.prisons.util.menus.MenuElement.ClickHandler defaultClickHandler = (e, i) -> e.setCancelled(true);
 
     //Construction
+    public Menu() {
+        this("", 3);
+    }
+
     public Menu(String title, int rows) {
         this.title = title;
         this.setSize(rows);
@@ -49,11 +54,14 @@ public abstract class Menu {
         return title;
     }
 
-    public void setTitle(String title) {
+    public Menu setTitle(String title) {
         this.title = title;
+        return this;
     }
 
-    public Inventory buildInventory() {
+    public void build(UUID player) {};
+
+    public Inventory createInventory() {
         Inventory inv = Bukkit.createInventory(null, this.getSize(), title);
         for (int i = 0; i < this.getSize(); i++) {
             MenuElement e = this.getElement(i);
@@ -77,7 +85,8 @@ public abstract class Menu {
     public void open(HumanEntity p, Object... data) {
         if (p == null)
             return;
-        Inventory inv = this.buildInventory();
+        build(p.getUniqueId());
+        Inventory inv = this.createInventory();
         InvInfo info = new InvInfo(inv, this, data);
 
         InvInfo pastInfo = MenuManager.instance.getInfo(p.getUniqueId());
@@ -98,6 +107,29 @@ public abstract class Menu {
                 MenuManager.instance.setInfo(p.getUniqueId(), info);
             }
         });
+    }
+
+    public void invalidate() {
+        MenuManager.instance.invalidateInvsForMenu(this);
+    }
+
+    public void evenlyDistribute(int row, MenuElement... elements) {
+        int size = elements.length;
+        if (size == 0)
+            return;
+
+        if (size <= Math.ceil((9 * 2) / 2d)) {
+            int fromMiddle = size - 1;
+            int i1 = 0;
+            for (int i = 4 - fromMiddle; i < 9 && i1 < size; i += 2) {
+                this.setElement(row * 9 + i, elements[i1]);
+                i1++;
+            }
+        } else {
+            for (int i = 0; i < 9 && i < size; i++) {
+                this.setElement(row * 9 + i, elements[i]);
+            }
+        }
     }
 
     public int indexOfElement(@NotNull MenuElement e) {
@@ -128,7 +160,7 @@ public abstract class Menu {
         return this.elements.size();
     }
 
-    public void setSize(int rows) {
+    public Menu setSize(int rows) {
         int size = rows * 9;
         if (elements.size() > size) {
             for (int i = elements.size() - 1; i != size - 1; i--) { // for -1 change if doesn't work but you did this briefly in your head (approx. 3m of thinking)
@@ -142,6 +174,7 @@ public abstract class Menu {
         if (size != this.elements.size()) {
             System.out.println("Problem making size adjustment in Menus -> Menu -> setSize(int size)");
         }
+        return this;
     }
 
     //Element management
@@ -150,11 +183,12 @@ public abstract class Menu {
         return this.elements.size() / 9;
     }
 
-    public void setElement(int position, MenuElement e) {
+    public Menu setElement(int position, MenuElement e) {
         if (position >= this.elements.size()) {
-            return;
+            return this;
         }
         this.elements.put(position, e);
+        return this;
     }
 
     public MenuElement getElement(int slot) {

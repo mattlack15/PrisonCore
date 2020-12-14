@@ -16,10 +16,7 @@ import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.MenuElement;
 import net.ultragrav.utils.CuboidRegion;
 import net.ultragrav.utils.Vector3D;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -71,6 +68,7 @@ public class ModuleMines extends CoreModule {
     protected void onDisable() {
         MineManager.instance.getLoaded().forEach((m) -> {
             try {
+                m.getTextBox().clear();
                 MineManager.instance.unload(m.getName()).get();
             } catch (ExecutionException | InterruptedException var2) {
                 var2.printStackTrace();
@@ -107,7 +105,6 @@ public class ModuleMines extends CoreModule {
     public boolean isFlightAllowedNearMine() {
         return this.getConfig().getBoolean("enable-flight-near-mines");
     }
-
     private void update() {
         this.sendActionBars();
         MineManager.instance.getLoaded().forEach((m) -> {
@@ -126,7 +123,10 @@ public class ModuleMines extends CoreModule {
                     m.getLastMinedBlock().getAndAdd(10000L);
                 }
             }
-
+            Vector3D p1 = m.getRegion().getMaximumPoint();
+            if (m.getRegion().getWorld().isChunkLoaded(p1.getBlockX() >> 4, p1.getBlockZ() >> 4)) {
+                m.updateArmorStand();
+            }
         });
     }
 

@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 import java.io.File;
 import java.io.IOException;
@@ -123,7 +124,7 @@ public class ModuleCells extends CoreModule {
                 event.setCancelled(true);
                 return;
             }
-            if (!cell.getMinionManager().canPlace(IntVector3D.fromBukkitVector(event.getBlock().getLocation().toVector()))) {
+            if (!cell.getMinionManager().canPlace(IntVector3D.fromBukkitVector(event.getBlock().getLocation().toVector().add(new Vector(0, 1, 0))))) {
                 event.setCancelled(true);
                 return;
             }

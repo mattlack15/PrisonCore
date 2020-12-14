@@ -45,7 +45,7 @@ public class Unbreaking extends AbstractCE {
 
     @Override
     public void onUnenchant(ItemStack stack) {
-        stack.removeEnchantment(Enchantment.DIG_SPEED);
+        stack.removeEnchantment(Enchantment.DURABILITY);
     }
 
     @Override

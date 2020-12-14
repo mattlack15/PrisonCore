@@ -94,7 +94,6 @@ public class MenuEnchant extends Menu {
             builder.addLore("&fMax Level: &c" + ce.getMaxLevel());
             builder.addLore("");
 
-            builder.addLore("&fDescription:");
             for (String descLine : ce.getDescription())
                 builder.addLore("&7" + descLine);
             builder.addLore("");
@@ -102,7 +101,7 @@ public class MenuEnchant extends Menu {
 
             if (level != ce.getMaxLevel()) {
                 long cost = ce.getCost(level + 1);
-                builder.addLore("&fCost: &a" + NumberUtils.toReadableNumber(BigInteger.valueOf(cost)));
+                builder.addLore("&a" + NumberUtils.toReadableNumber(BigInteger.valueOf(cost)) + " tokens");
                 builder.addLore("");
                 builder.addLore("&8Click to Buy");
             } else {

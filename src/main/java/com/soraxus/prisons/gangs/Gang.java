@@ -336,12 +336,10 @@ public class Gang {
             return;
         if (this.getMembers().contains(member))
             return;
+        cachedMembers.add(member);
         if (!this.getId().equals(member.getGang())) {
-            cachedMembers.add(member);
             member.setGang(this.getId());
             parent.saveGang(this);
-        } else {
-            cachedMembers.add(member);
         }
     }
 

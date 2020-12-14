@@ -153,7 +153,7 @@ public class MenuMines extends Menu {
         builder.addLore("&fPercentage Mined: &7" + Math.round(mine.getBlocksMined() / (double) mine.getMineArea() * 100) + "%");
         builder.addLore("&fPermission: &7" + mine.getPermission());
         builder.addLore("&fUnique Blocks: &7" + mine.getBlocks().size());
-        builder.addLore("&fTime till reset: &7" + (20 * 60 - (System.currentTimeMillis() - mine.getLastMinedBlock().get()) / 1000D) + "s");
+        builder.addLore("&fTime till reset: &7" + Math.max((20 * 60 - (System.currentTimeMillis() - mine.getLastMinedBlock().get()) / 1000D), 0) + "s");
         return builder.build();
     }
 }

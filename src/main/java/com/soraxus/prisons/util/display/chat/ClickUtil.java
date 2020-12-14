@@ -79,4 +79,19 @@ public class ClickUtil {
     public static ClickEvent runnable(Consumer<Player> run, long expiry) {
         return command(Handler.getHandler().registerHandler(run, expiry));
     }
+
+    /**
+     * Run a runnable
+     * Expires after a set amount of time
+     *
+     * @param run    Runnable
+     * @param expiry Time until expiry (milliseconds)
+     * @param uses Max uses
+     * @return Click event
+     */
+    public static ClickEvent runnable(Consumer<Player> run, long expiry, int uses) {
+        return command(Handler.getHandler().registerHandler(run, expiry, uses));
+    }
+
+
 }
