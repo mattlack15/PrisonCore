@@ -1,5 +1,6 @@
 package com.soraxus.prisons;
 
+import com.soraxus.prisons.announcements.ModuleAnnouncements;
 import com.soraxus.prisons.bunkers.BunkerManager;
 import com.soraxus.prisons.bunkers.ModuleBunkers;
 import com.soraxus.prisons.cells.ModuleCells;
@@ -90,6 +91,7 @@ public class SpigotPrisonCore extends CorePlugin {
         this.addModule(new ModuleRanks());
         this.addModule(new ModuleChatGames());
         this.addModule(new ModuleShop());
+        this.addModule(new ModuleAnnouncements());
         this.addModule(new ModuleDebug());
 
         new CmdThreadDump().register();

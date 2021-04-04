@@ -1,5 +1,6 @@
 package com.soraxus.prisons.cells.cmd;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.soraxus.prisons.cells.Cell;
 import com.soraxus.prisons.cells.CellManager;
 import com.soraxus.prisons.cells.ModuleCells;
@@ -18,7 +19,7 @@ public abstract class CellCommand extends UltraCommand {
     private boolean requiresCell = false;
 
     @Getter
-    private final ExecutorService asyncExecutor = Executors.newFixedThreadPool(2);
+    private final ExecutorService asyncExecutor = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder().setUncaughtExceptionHandler((a, b) -> b.printStackTrace()).build());
 
     public Cell getOrLoadCell() {
         if (!isPlayer())
@@ -29,9 +30,7 @@ public abstract class CellCommand extends UltraCommand {
                 cell = CellManager.instance.loadCell(getPlayer().getUniqueId()).join();
             } catch (Throwable t) {
                 t.printStackTrace();
-                tell(ModuleCells.PREFIX + "&cWe had trouble loading your cell!");
-                String errorId = ModuleErrors.instance.recordError(t);
-                tell(ModuleCells.PREFIX + "&cPlease send this error code to a developer: &f" + errorId);
+                ModuleErrors.instance.getErrorMessage(t, "loading cell", "uhhhm... done nothing").send(getPlayer());
                 throw t;
             }
         }

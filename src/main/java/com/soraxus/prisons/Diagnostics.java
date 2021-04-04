@@ -1,5 +1,6 @@
 package com.soraxus.prisons;
 
+import com.soraxus.prisons.bunkers.BunkerManager;
 import com.soraxus.prisons.gangs.Gang;
 import com.soraxus.prisons.gangs.GangManager;
 import lombok.AllArgsConstructor;
@@ -33,6 +34,7 @@ public class Diagnostics {
             }
 
             gangManager.saveGang(gang);
+            BunkerManager.instance.syncDeleteBunker(gang.getId());
             gang.disband();
         }));
     }

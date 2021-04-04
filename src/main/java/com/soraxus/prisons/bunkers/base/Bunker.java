@@ -171,6 +171,7 @@ public class Bunker implements GravSerializable {
                 try {
                     e.enable();
                 } catch (Exception ex) {
+                    System.out.println("Could not enable element of type " + e.getType());
                     ex.printStackTrace();
                 }
             }

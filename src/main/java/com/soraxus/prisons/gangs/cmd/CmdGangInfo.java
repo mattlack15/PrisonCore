@@ -4,6 +4,7 @@ import com.soraxus.prisons.gangs.*;
 import com.soraxus.prisons.util.display.chat.ChatBuilder;
 import com.soraxus.prisons.util.display.chat.HoverUtil;
 import com.soraxus.prisons.util.string.TextUtil;
+import java.util.UUID;
 import net.ultragrav.command.provider.impl.StringProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,7 +22,16 @@ public class CmdGangInfo extends GangCommand {
 
     public void perform() {
         String gangName = getArgument(0);
-        Gang gang = GangManager.instance.getLoadedGang(gangName);
+        Gang gang = null;
+        if(gangName != null) {
+            gang = GangManager.instance.getLoadedGang(gangName);
+            if (gang == null) {
+                UUID id = GangManager.instance.getId(gangName);
+                if (id != null) {
+                    gang = GangManager.instance.getOrLoadGang(id);
+                }
+            }
+        }
         if (gang == null) {
             Player player = Bukkit.getPlayer(gangName != null ? gangName : "");
             if (player == null) {

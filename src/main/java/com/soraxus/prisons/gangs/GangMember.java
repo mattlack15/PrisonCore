@@ -20,7 +20,7 @@ public class GangMember {
 
     public static GangMember fromSection(ConfigurationSection section, GangMemberManager parent) {
         UUID gang = null;
-        if (section.getString("gang") != null)
+        if (section.isString("gang") && section.getString("gang") != null)
             gang = UUID.fromString(section.getString("gang"));
         UUID member = UUID.fromString(section.getString("member"));
         String name = section.getString("name");
@@ -73,10 +73,13 @@ public class GangMember {
     }
 
     public synchronized void toSection(ConfigurationSection section) {
-        if (gang != null)
-            section.set("gang", gang.toString());
+        section.set("gang", gang.toString());
         section.set("gangRole", gangRole.ordinal());
         section.set("member", member.toString());
         section.set("name", memberName);
+    }
+
+    public synchronized void setMemberName(String name) {
+        this.memberName = name;
     }
 }

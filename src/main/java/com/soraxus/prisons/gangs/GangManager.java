@@ -1,10 +1,12 @@
 package com.soraxus.prisons.gangs;
 
 import com.soraxus.prisons.bunkers.BunkerManager;
+import com.soraxus.prisons.errors.ModuleErrors;
 import com.soraxus.prisons.gangs.events.GangUnloadEvent;
 import com.soraxus.prisons.privatemines.PrivateMine;
 import com.soraxus.prisons.privatemines.PrivateMineManager;
 import com.soraxus.prisons.util.list.ElementableList;
+import com.soraxus.prisons.util.list.LockingList;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -22,7 +24,6 @@ public class GangManager {
     private File indexFile;
     private FileConfiguration indexConfig;
     private ReentrantLock indexLock = new ReentrantLock(true);
-    private Map<UUID, ReentrantLock> fileLocks = new HashMap<>();
 
     //    public void load(GangMemberManager memberManager) {
 //        List<Gang> gangs = new ArrayList<>();
@@ -54,10 +55,7 @@ public class GangManager {
 //            this.gangs = gangs;
 //        }
 //    }
-    private ReentrantLock mapLock = new ReentrantLock(true);
-    private List<UUID> saving = new ArrayList<>();
-    private ReentrantLock savingLock = new ReentrantLock(true);
-    private boolean indexBool = false;
+    private volatile boolean indexBool = false;
     private ReentrantLock indexLockBool = new ReentrantLock(true);
 
     public GangManager(File folder) {
@@ -89,17 +87,6 @@ public class GangManager {
         return null;
     }
 
-    private ReentrantLock getIoLock(UUID id) {
-        mapLock.lock();
-        ReentrantLock lock = fileLocks.get(id);
-        if (lock == null) {
-            lock = new ReentrantLock(true);
-            fileLocks.put(id, lock);
-        }
-        mapLock.unlock();
-        return lock;
-    }
-
     public Gang loadGang(UUID id) {
         return loadGang(id, true);
     }
@@ -113,22 +100,19 @@ public class GangManager {
                 BunkerManager.instance.loadBunkerAsync(id);
             return getLoadedGang(id);
         }
-        ReentrantLock ioLock = getIoLock(id);
-        if (!ioLock.tryLock()) {
-            return null;
-        }
+        saveLock.lock();
         File file = getFile(id);
         if (!file.exists()) {
-            ioLock.unlock();
+            saveLock.unlock();
             return null;
         }
-        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-        if (config == null) { //Dont remove
-            ioLock.unlock();
-            return null;
+        Gang gang;
+        try {
+            FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+            gang = Gang.fromSection(config, this, GangMemberManager.instance);
+        } finally {
+            saveLock.unlock();
         }
-        Gang gang = Gang.fromSection(config, this, GangMemberManager.instance);
-        ioLock.unlock();
 
         synchronized (this) {
             this.gangs.removeIf(g -> g.getId().equals(gang.getId()));
@@ -159,10 +143,12 @@ public class GangManager {
     }
 
     public UUID getId(String gangName) {
+        if (gangName == null)
+            return null;
         ConfigurationSection section = this.indexConfig.getConfigurationSection(gangName);
         if (section == null)
             return null;
-        if(!section.isSet("id") || !section.isString("id")) {
+        if (!section.isSet("id") || !section.isString("id")) {
             return null;
         }
         return UUID.fromString(section.getString("id"));
@@ -194,12 +180,14 @@ public class GangManager {
                 return false;
             });
         }
-        ReentrantLock ioLock = getIoLock(gangId);
-        ioLock.lock();
-        File file = getFile(gangId);
-        if(file.exists())
+        saveLock.lock();
+        try {
+            File file = getFile(gangId);
             file.delete();
-        ioLock.unlock();
+        } finally {
+            saveLock.unlock();
+        }
+        BunkerManager.instance.syncDeleteBunker(gangId);
     }
 
     public void unload(UUID gangId) {
@@ -255,46 +243,59 @@ public class GangManager {
         }).start();
     }
 
-    public void saveGang(Gang gang) {
-        savingLock.lock();
-        if (gang == null || saving.contains(gang.getId())) {
-            savingLock.unlock();
-            return;
-        }
-        saving.add(gang.getId());
-        savingLock.unlock();
-        ReentrantLock ioLock = getIoLock(gang.getId());
-        File file = getFile(gang.getId());
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        new Thread(() -> {
-            try {
-                Thread.sleep(50);
-                savingLock.lock();
-                saving.remove(gang.getId());
-                savingLock.unlock();
-                ioLock.lock();
+    private final LockingList<Gang> saveQueue = new LockingList<>();
+    private final ReentrantLock saveLock = new ReentrantLock(true);
+
+    public void flushSaveQueue() {
+
+        //Copy and clear saveQueue
+        List<Gang> save = new ArrayList<>();
+        saveQueue.getLock().perform(() -> {
+            save.addAll(saveQueue);
+            saveQueue.clear();
+        });
+
+        saveLock.lock();
+        try {
+            for (Gang gang : save) {
                 try {
-                    //Save
+
+                    //Get file
+                    File file = getFile(gang.getId());
+                    file.createNewFile();
+
+                    //Save to file
                     FileConfiguration configuration = YamlConfiguration.loadConfiguration(file);
                     gang.toSection(configuration);
                     configuration.save(file);
-                } finally {
-                    ioLock.unlock();
+
+                    cacheGang(gang);
+                } catch (Exception e) {
+                    ModuleErrors.instance.recordError(e, "Saving gang " + gang.getName(), "stopped saving the gang");
+                    e.printStackTrace();
                 }
-
-                cacheGang(gang);
-                saveIndex();
-
-            } catch (InterruptedException | IOException e) {
-                e.printStackTrace();
             }
-        }).start();
+
+            //Save index
+            saveIndex();
+        } finally {
+            saveLock.unlock();
+        }
+    }
+
+    /**
+     * Queues a save operation of a gang
+     */
+    public void saveGang(Gang gang) {
+        saveQueue.getLock().perform(() -> {
+            if (!saveQueue.contains(gang)) {
+                saveQueue.add(gang);
+            }
+        });
+    }
+
+    public LockingList<Gang> getSaveQueue() {
+        return this.saveQueue;
     }
 
     public void cacheGang(Gang gang) {

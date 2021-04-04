@@ -4,9 +4,11 @@ import com.soraxus.prisons.SpigotPrisonCore;
 import com.soraxus.prisons.util.locks.CustomLock;
 import lombok.Getter;
 import net.ultragrav.serializer.GravSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,7 +41,7 @@ public class RankupManager {
         FileConfiguration conf = YamlConfiguration.loadConfiguration(file);
 
         List<Rank> rankList = new ArrayList<>();
-        for(String name : conf.getConfigurationSection("Ranks").getKeys(false)) {
+        for (String name : conf.getConfigurationSection("Ranks").getKeys(false)) {
             ConfigurationSection section = conf.getConfigurationSection("Ranks." + name);
             Rank rank = new Rank(name, section.getString("display", name).replace("&fP&e%prisonranksx_prestige_name% ", ""), (long) section.getDouble("cost", 0D), section.getStringList("executecmds"));
             rankList.add(rank);
@@ -70,7 +72,7 @@ public class RankupManager {
             ranks.clear();
             playerRanks.clear(); //Unload all players, they will be reloaded on-use
 
-            if(config.isConfigurationSection("ranks")) {
+            if (config.isConfigurationSection("ranks")) {
                 for (String name : config.getConfigurationSection("ranks").getKeys(false)) {
                     Rank rank = new Rank(config.getConfigurationSection("ranks." + name));
                     ranks.add(rank);
@@ -154,6 +156,21 @@ public class RankupManager {
         });
     }
 
+    public void setRank(Player player, int rankIndex) {
+        PRankPlayer pRankPlayer = getPlayer(player.getUniqueId());
+        int current = pRankPlayer.getRankIndex();
+        if(current < rankIndex) {
+            pRankPlayer.setRankIndex(rankIndex);
+            return;
+        }
+
+        for(int i = current+1; i <= rankIndex; i++) {
+            Rank rank = getRank(i);
+            rank.getCmds().forEach((c) -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), c.replace("%player%", player.getName())));
+        }
+        pRankPlayer.setRankIndex(rankIndex);
+    }
+
     //Player related
     public PRankPlayer getPlayer(UUID player) {
         return lock.perform(() -> {
@@ -179,6 +196,10 @@ public class RankupManager {
                         pRankPlayer = serializer.readObject(player);
                     } catch (Exception ignored) {
                     }
+                } else {
+                    Rank def = getRank(0);
+                    if (Bukkit.getPlayer(player) != null)
+                        def.getCmds().forEach(c -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), c.replace("%player%", Bukkit.getPlayer(player).getName())));
                 }
 
                 Rank ra = getRank(pRankPlayer.getRankIndex());

@@ -24,7 +24,7 @@ public class ModuleLuckyBlocks extends CoreModule {
         ItemStack pick = player.getInventory().getItemInMainHand();
 
         AbstractCE favored = EnchantManager.instance.getCE(Favored.class);
-        int level = favored.getLevel(pick);
+        int level = favored.getLevel(pick) + 1;
 
         double rand = MathUtils.random(0, 100D);
         if (rand <= 30.0) { // Money

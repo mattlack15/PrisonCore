@@ -112,9 +112,10 @@ public class MenuCustomShopSection extends Menu {
                         }
                         setup();
                     }).onShiftLeftClick((e) -> {
-                        //Buy 64
-                        if (item.getStock() == -1 || item.getStock() >= 64) {
-                            long cost = item.getCost() * 64;
+                        //Buy a stack
+                        int stackSize = item.getItem().getMaxStackSize();
+                        if (item.getStock() == -1 || item.getStock() >= stackSize) {
+                            long cost = item.getCost() * stackSize;
                             Player p = (Player) e.getWhoClicked();
                             if(p.getInventory().firstEmpty() == -1) {
                                 new ChatBuilder("&cYou don't have enough inventory space!").send(p);
@@ -123,10 +124,10 @@ public class MenuCustomShopSection extends Menu {
                             }
                             if (Economy.money.tryRemoveBalance(p.getUniqueId(), cost)) {
                                 if (item.getStock() != -1) { //Finite stock
-                                    item.setStock(item.getStock() - 64);
+                                    item.setStock(item.getStock() - stackSize);
                                 }
                                 ItemStack i = item.getItem().clone();
-                                i.setAmount(64);
+                                i.setAmount(stackSize);
                                 p.getInventory().addItem(i);
                                 p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_BOTTLE_THROW, 0.6f, 1.65f);
                             } else {

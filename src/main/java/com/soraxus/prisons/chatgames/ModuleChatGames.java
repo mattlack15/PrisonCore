@@ -1,20 +1,20 @@
 package com.soraxus.prisons.chatgames;
 
 import com.soraxus.prisons.SpigotPrisonCore;
-import com.soraxus.prisons.chatgames.games.ChatGameMathChallenge;
-import com.soraxus.prisons.chatgames.games.ChatGameSpotImposterSquare;
-import com.soraxus.prisons.chatgames.games.ChatGameTypeChallenge;
-import com.soraxus.prisons.chatgames.games.ChatGameUnscrambleChallenge;
+import com.soraxus.prisons.chatgames.games.*;
+import com.soraxus.prisons.chatgames.menu.MenuModuleChatGames;
 import com.soraxus.prisons.core.CoreModule;
 import com.soraxus.prisons.event.chatgames.ChatGameEndEvent;
 import com.soraxus.prisons.event.chatgames.ChatGameStartEvent;
 import com.soraxus.prisons.util.EventSubscription;
 import com.soraxus.prisons.util.ListUtil;
 import com.soraxus.prisons.util.display.chat.ChatBuilder;
+import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.locks.CustomLock;
 import com.soraxus.prisons.util.menus.MenuElement;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -50,6 +50,7 @@ public class ModuleChatGames extends CoreModule {
         addGame(new ChatGameMathChallenge());
         addGame(new ChatGameSpotImposterSquare());
         addGame(new ChatGameUnscrambleChallenge());
+        addGame(new ChatGameTrivia());
 
         new CmdChatGame().register();
 
@@ -168,6 +169,10 @@ public class ModuleChatGames extends CoreModule {
         }
     }
 
+    public boolean isRunning() {
+        return currentGame != null && currentGame.isRunning();
+    }
+
     public ChatGame getCurrentGame() {
         return currentGame;
     }
@@ -219,6 +224,6 @@ public class ModuleChatGames extends CoreModule {
 
     @Override
     public MenuElement getGUI(MenuElement backButton) {
-        return null;
+        return new MenuElement(new ItemBuilder(Material.NAME_TAG).setName("&f&lChat Games").build()).clickBuilder().openMenu(new MenuModuleChatGames(backButton)).build();
     }
 }

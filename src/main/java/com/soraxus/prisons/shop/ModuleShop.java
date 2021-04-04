@@ -27,21 +27,24 @@ public class ModuleShop extends CoreModule {
         return globalShop;
     }
 
-    private File shopFile = new File(getDataFolder(), "global.shop");
+    private File shopFile;
 
     @Override
     protected void onEnable() {
         instance = this;
-        if (!shopFile.exists()) {
-            try {
-                shopFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
+
+        shopFile = new File(getDataFolder(), "global.shop");
+
+        try {
+            if (shopFile.createNewFile()) {
+                globalShop = new CustomShop("Global");
+            } else {
+                loadShop();
             }
-            globalShop = new CustomShop("Global");
-        } else {
-            loadShop();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
     }
 
     @Override

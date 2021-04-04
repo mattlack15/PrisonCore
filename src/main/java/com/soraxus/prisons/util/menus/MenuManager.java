@@ -5,9 +5,11 @@ import com.soraxus.prisons.util.Synchronizer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -149,6 +151,21 @@ public class MenuManager implements Listener {
     }
 
     @EventHandler
+    public void onClick(InventoryDragEvent e) {
+        if (this.infos.containsKey(e.getWhoClicked().getUniqueId())) {
+            com.soraxus.prisons.util.menus.InvInfo info = this.getInfo(e.getWhoClicked().getUniqueId());
+            if (info.getCurrentInv() != null && info.getCurrentInv().equals(e.getView().getTopInventory()) && info.getCurrentMenu() != null) {
+                for (int rawSlot : e.getRawSlots()) {
+                    if(rawSlot < e.getView().getTopInventory().getSize()) {
+                        e.setCancelled(true);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
     public void onClick(InventoryClickEvent e) {
         if (this.infos.containsKey(e.getWhoClicked().getUniqueId())) {
             com.soraxus.prisons.util.menus.InvInfo info = this.getInfo(e.getWhoClicked().getUniqueId());
@@ -160,10 +177,11 @@ public class MenuManager implements Listener {
                     com.soraxus.prisons.util.menus.MenuElement.ClickHandler handler = info.getCurrentMenu().getElement(e.getSlot()).getClickHandler();
                     if (handler != null) {
                         handler.handleClick(e, info);
-                    }
-                    com.soraxus.prisons.util.menus.MenuElement.ClickHandler clickHandler = info.getCurrentMenu().getDefaultClickHandler();
-                    if (clickHandler != null) {
-                        clickHandler.handleClick(e, info);
+                    } else {
+                        com.soraxus.prisons.util.menus.MenuElement.ClickHandler clickHandler = info.getCurrentMenu().getDefaultClickHandler();
+                        if (clickHandler != null) {
+                            clickHandler.handleClick(e, info);
+                        }
                     }
                 } else {
                     com.soraxus.prisons.util.menus.MenuElement.ClickHandler clickHandler = info.getCurrentMenu().getDefaultClickHandler();

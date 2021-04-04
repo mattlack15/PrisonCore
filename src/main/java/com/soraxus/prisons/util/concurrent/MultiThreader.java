@@ -1,8 +1,11 @@
 package com.soraxus.prisons.util.concurrent;
 
+import lombok.AllArgsConstructor;
+
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
+@AllArgsConstructor
 public class MultiThreader {
     private final ForkJoinPool service;
 
@@ -53,5 +56,9 @@ public class MultiThreader {
 
     public void shutdown() {
         this.service.shutdown();
+    }
+
+    public static MultiThreader common() {
+        return new MultiThreader(ForkJoinPool.commonPool());
     }
 }

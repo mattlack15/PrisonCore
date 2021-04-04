@@ -69,6 +69,7 @@ public class Mine {
                     .toBukkitVector()
                     .toLocation(this.getRegion().getWorld());
 
+            //In case of a crash and the text box wasn't destroyed
             location.getWorld().getNearbyEntities(location, 2, 2, 2).forEach((e) -> {
                 if(e instanceof ArmorStand) {
                     if(!((ArmorStand) e).isVisible()) {

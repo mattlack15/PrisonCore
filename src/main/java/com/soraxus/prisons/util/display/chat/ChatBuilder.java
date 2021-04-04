@@ -181,6 +181,10 @@ public class ChatBuilder {
         return addComponent(c);
     }
 
+    public ChatBuilder copy() {
+        return new ChatBuilder().addComponent(this.comp.duplicate());
+    }
+
     /**
      * Convert this ChatBuilder into a TextComponent for spigot
      *

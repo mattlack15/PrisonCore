@@ -24,7 +24,7 @@ public class CmdSetRank extends UltraCommand {
             tell("&cCould not find that rank!");
             return;
         }
-        pRankPlayer.setRankIndex(index);
+        RankupManager.instance.setRank(getPlayer(), index);
         tell("&aDone! &7They are now " + RankupManager.instance.getRank(rank).getDisplayName());
     }
 }

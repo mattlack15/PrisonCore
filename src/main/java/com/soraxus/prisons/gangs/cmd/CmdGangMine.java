@@ -10,7 +10,6 @@ public class CmdGangMine extends GangCommand {
 
     public CmdGangMine() {
         this.addAlias("mine");
-        this.setRequiresGang(true);
         this.addParameter(null, StringProvider.getInstance(), "browse");
     }
 
@@ -19,6 +18,10 @@ public class CmdGangMine extends GangCommand {
         if (this.getArgument(0) != null) {
             new MenuBrowseMines(null).open(getPlayer());
         } else {
+            if(getGangMember().getGang() == null) {
+                tell("&cYou are not in a gang!");
+                return;
+            }
             if(getGangMember().getGangRole().ordinal() < GangRole.MOD.ordinal()) {
                 tell("&cYou are not a high enough role in your gang to use this!");
                 return;

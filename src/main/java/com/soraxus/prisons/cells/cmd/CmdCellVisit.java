@@ -29,6 +29,10 @@ public class CmdCellVisit extends CellCommand {
             }
 
             Cell cell = CellManager.instance.deserializeCell(player.getUniqueId());
+            if(cell == null) {
+                tell(ModuleCells.PREFIX + "&cHmmm... I can't find that cell on the map, did you spell their name right?");
+                return;
+            }
             CellSettings.OpenSetting setting = cell.getSettings().getOpenSetting();
             if (!getPlayer().getUniqueId().equals(player.getUniqueId())) {
                 if (setting == CellSettings.OpenSetting.CLOSED) {

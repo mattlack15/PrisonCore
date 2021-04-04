@@ -16,7 +16,10 @@ import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.MenuElement;
 import net.ultragrav.utils.CuboidRegion;
 import net.ultragrav.utils.Vector3D;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -26,7 +29,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 public class ModuleMines extends CoreModule {
     public static ModuleMines instance;
@@ -42,6 +44,7 @@ public class ModuleMines extends CoreModule {
         instance = this;
         this.createFiles(MineFiles.class);
         new MineManager();
+        Bukkit.getScheduler().runTaskTimer(getParent(), MineManager.instance::flushSaveQueue, 0, 20);
         MineManager.instance.loadAll();
         MineManager.instance.getLoaded().forEach((m) -> {
 
@@ -67,14 +70,11 @@ public class ModuleMines extends CoreModule {
 
     protected void onDisable() {
         MineManager.instance.getLoaded().forEach((m) -> {
-            try {
+            if (m.getTextBox() != null)
                 m.getTextBox().clear();
-                MineManager.instance.unload(m.getName()).get();
-            } catch (ExecutionException | InterruptedException var2) {
-                var2.printStackTrace();
-            }
-
+            MineManager.instance.unload(m.getName());
         });
+        MineManager.instance.flushSaveQueue();
         if (this.taskId != -1) {
             Bukkit.getScheduler().cancelTask(this.taskId);
             this.taskId = -1;
@@ -105,6 +105,7 @@ public class ModuleMines extends CoreModule {
     public boolean isFlightAllowedNearMine() {
         return this.getConfig().getBoolean("enable-flight-near-mines");
     }
+
     private void update() {
         this.sendActionBars();
         MineManager.instance.getLoaded().forEach((m) -> {

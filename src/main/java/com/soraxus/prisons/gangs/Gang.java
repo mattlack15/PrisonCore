@@ -118,7 +118,6 @@ public class Gang {
         UUID id = UUID.fromString(section.getString("id"));
         String name = section.getString("name");
         String description = section.getString("description");
-        int level = section.getInt("level");
         long xp = section.getLong("xp");
         Map<String, String> invited = MapUtil.stringToMap(section.getString("invited"));
 
@@ -424,6 +423,7 @@ public class Gang {
         if (getLevelInt() > old) {
             this.broadcastMessage("§fYour gang leveled up to §5Level " + getLevelInt() + "§f!");
         }
+        parent.saveGang(this);
     }
 
     public int getLevelInt() {

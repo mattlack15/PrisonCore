@@ -1,5 +1,6 @@
 package com.soraxus.prisons.gangs;
 
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -29,12 +30,10 @@ public class GangMemberManager {
 
     public File getFile(UUID id) {
         File file = new File(folder, id.toString() + ".yml");
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return file;
     }
@@ -71,8 +70,12 @@ public class GangMemberManager {
         accessorLock.unlock();
 
         Gang gang = GangManager.instance.loadGang(member1.getGang(), loadBunker);
-        if(gang == null) {
+        if (gang == null) {
             member1.setGang(null);
+        }
+
+        if(Bukkit.getPlayer(member1.getMember()) != null) {
+            member1.setMemberName(Bukkit.getPlayer(member1.getMember()).getName());
         }
 
         return member1;

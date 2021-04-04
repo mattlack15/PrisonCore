@@ -5,6 +5,7 @@ import com.soraxus.prisons.mines.MineFiles;
 import com.soraxus.prisons.mines.object.Mine;
 import com.soraxus.prisons.privatemines.PrivateMine;
 import com.soraxus.prisons.privatemines.PrivateMineManager;
+import com.soraxus.prisons.util.concurrent.ConcurrentBulkOperationQueue;
 import net.ultragrav.utils.Vector3D;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
@@ -12,42 +13,29 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class MineManager extends Manager<Mine, String> {
     public static MineManager instance;
     private ExecutorService service = Executors.newCachedThreadPool();
     private List<Mine> loadedMines = new ArrayList();
     private FileConfiguration minesConfig;
-    private ConcurrentMap<String, Future<Void>> saveOperations;
+    private ConcurrentBulkOperationQueue<Runnable> saveQueue = new ConcurrentBulkOperationQueue<>(this::flushSaveQueue0);
 
     public MineManager() {
         this.minesConfig = YamlConfiguration.loadConfiguration(MineFiles.MINES_FILE);
-        this.saveOperations = new ConcurrentHashMap();
         instance = this;
     }
 
-    public synchronized void joinSaveOps() {
-        Iterator var1 = (new HashMap(this.saveOperations)).entrySet().iterator();
-
-        while(var1.hasNext()) {
-            Entry<String, Future<Void>> entry = (Entry)var1.next();
-            Future v = (Future)entry.getValue();
-
-            try {
-                v.get();
-            } catch (ExecutionException | InterruptedException var5) {
-                var5.printStackTrace();
-            }
-        }
-
-        this.saveOperations.clear();
-    }
-
     public synchronized List<Mine> getLoaded() {
-        List<Mine> list = new ArrayList(this.loadedMines);
+        List<Mine> list = new ArrayList<>(this.loadedMines);
         list.sort(Comparator.comparingInt(Mine::getOrder));
         return list;
     }
@@ -108,7 +96,7 @@ public class MineManager extends Manager<Mine, String> {
     }
 
     public synchronized Future<Void> loadAll() {
-        CompletableFuture<Void> future = new CompletableFuture();
+        CompletableFuture<Void> future = new CompletableFuture<>();
 
         for (String keys : this.minesConfig.getKeys(false)) {
             Mine mine = Mine.fromConfigSection(this.minesConfig.getConfigurationSection(keys));
@@ -120,23 +108,13 @@ public class MineManager extends Manager<Mine, String> {
     }
 
     public synchronized Future<Void> unload(String identifier) {
-        CompletableFuture<Void> future = new CompletableFuture<>();
         Mine mine = this.get(identifier);
-        if (mine == null) {
-            future.complete(null);
-            return future;
-        } else {
-            this.loadedMines.removeIf((m) -> {
-                return m.getName().endsWith(identifier);
-            });
-            if (this.saveOperations.containsKey(mine.getName())) {
-                return this.saveOperations.get(mine.getName());
-            } else {
-                mine.saveToConfigSection(this.minesConfig.createSection(mine.getName()));
-                future.complete(null);
-                return future;
-            }
+        if (mine != null) {
+            //Unload
+            this.loadedMines.removeIf((m) -> m.getName().endsWith(identifier));
+            queueSaveMineOperation(mine);
         }
+        return null;
     }
 
     public Future<Void> remove(String identifier) {
@@ -161,35 +139,21 @@ public class MineManager extends Manager<Mine, String> {
         }
     }
 
-    public synchronized void queueSaveMineOperation(Mine mine) {
-        if (mine.shouldSave()) {
-            mine.getIoLock().lock();
-            if (!this.saveOperations.containsKey(mine.getName())) {
-                Future<Void> future = this.service.submit(() -> {
-                    try {
-                        Thread.sleep(1000L);
-                        if (!this.getLoaded().contains(mine)) {
-                            return null;
-                        }
+    public void flushSaveQueue() {
+        saveQueue.flushQueue();
+    }
 
-                        mine.saveToConfigSection(this.minesConfig.createSection(mine.getName()));
-                        synchronized(this) {
-                            this.saveOperations.remove(mine.getName());
-                            if (this.saveOperations.size() == 0) {
-                                this.minesConfig.save(MineFiles.MINES_FILE);
-                            }
-                        }
-                    } catch (InterruptedException var5) {
-                        var5.printStackTrace();
-                    }
-
-                    return null;
-                });
-                this.saveOperations.put(mine.getName(), future);
-            }
-
-            mine.getIoLock().unlock();
+    private synchronized void flushSaveQueue0(List<Runnable> runnables) {
+        runnables.forEach(Runnable::run);
+        try {
+            this.minesConfig.save(MineFiles.MINES_FILE);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
+
+    public synchronized void queueSaveMineOperation(Mine mine) {
+        saveQueue.queue(() -> mine.saveToConfigSection(this.minesConfig.createSection(mine.getName())));
     }
 
     public FileConfiguration getMinesConfig() {
