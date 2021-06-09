@@ -73,6 +73,7 @@ public class ModuleSelling extends CoreModule {
             saveConfig();
         }
         for (String key : sellprices.getKeys(false)) {
+            System.out.println(key + " KEY");
             prices.add(SellItem.fromSection(sellprices.getConfigurationSection(key)));
         }
     }

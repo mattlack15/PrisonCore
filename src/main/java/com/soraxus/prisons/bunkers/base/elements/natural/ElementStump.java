@@ -54,7 +54,7 @@ public class ElementStump extends NaturalElement {
     @NotNull
     @Override
     public Schematic getSchematic(int level, boolean destroyed) {
-        return BunkerSchematics.get("stump-" + getStumpType() + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow("stump-" + getStumpType() + (destroyed ? "-destroyed" : ""));
     }
 
     @Override

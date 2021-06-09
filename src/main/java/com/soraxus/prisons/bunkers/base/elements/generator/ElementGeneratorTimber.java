@@ -37,7 +37,7 @@ public class ElementGeneratorTimber extends GeneratorElement {
     @NotNull
     @Override
     public Schematic getSchematic(int level, boolean destroyed) {
-        return BunkerSchematics.get("gen-timber-" + level + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow("gen-timber-" + level + (destroyed ? "-destroyed" : ""));
     }
 
     @Override

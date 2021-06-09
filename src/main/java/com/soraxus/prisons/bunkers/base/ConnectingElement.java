@@ -34,6 +34,6 @@ public abstract class ConnectingElement extends BunkerElement {
         BunkerElement[] neighbours = getNeighbours();
         WallParameter param = WallRotation.get(neighbours, getConnectables());
         this.setRotation(param.getRotation());
-        return BunkerSchematics.get(getName().replaceAll(" ", "-").toLowerCase() + "-" + getLevel() + "-" + param.getType().name().toLowerCase() + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow(getName().replaceAll(" ", "-").toLowerCase() + "-" + getLevel() + "-" + param.getType().name().toLowerCase() + (destroyed ? "-destroyed" : ""));
     }
 }

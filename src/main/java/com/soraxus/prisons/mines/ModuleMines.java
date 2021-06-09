@@ -7,7 +7,6 @@ import com.soraxus.prisons.mines.gui.MenuMines;
 import com.soraxus.prisons.mines.manager.MineManager;
 import com.soraxus.prisons.mines.object.Mine;
 import com.soraxus.prisons.ranks.PRankPlayer;
-import com.soraxus.prisons.ranks.Rank;
 import com.soraxus.prisons.ranks.RankupManager;
 import com.soraxus.prisons.util.EventSubscription;
 import com.soraxus.prisons.util.Scheduler;
@@ -110,11 +109,6 @@ public class ModuleMines extends CoreModule {
         this.sendActionBars();
         MineManager.instance.getLoaded().forEach((m) -> {
             if (System.currentTimeMillis() - m.getLastMinedBlock().get() > 1200000L) {
-                Rank rank = RankupManager.instance.getRank(m.getName());
-                if (rank == null) {
-                    MineManager.instance.remove(m.getName());
-                    return;
-                }
 
                 Vector3D p1 = m.getRegion().getMaximumPoint();
                 if (m.getRegion().getWorld().isChunkLoaded(p1.getBlockX() >> 4, p1.getBlockZ() >> 4)) {

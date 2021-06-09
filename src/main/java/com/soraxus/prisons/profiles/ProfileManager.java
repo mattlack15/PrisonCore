@@ -50,7 +50,7 @@ public class ProfileManager {
             System.out.println("Connected to profile database!");
             Bukkit.getScheduler().runTaskTimerAsynchronously(SpigotPrisonCore.instance, this::flushUpdateQueue, 0, 10);
         } catch (SQLException throwable) {
-            throwable.printStackTrace();
+            Bukkit.getLogger().severe("Could not connect to profile SQL server: " + throwable.getMessage());
         }
     }
 
@@ -144,6 +144,7 @@ public class ProfileManager {
 
                 future.complete(profile);
             } catch (Throwable t) {
+                future.complete(null);
                 t.printStackTrace();
             }
         });

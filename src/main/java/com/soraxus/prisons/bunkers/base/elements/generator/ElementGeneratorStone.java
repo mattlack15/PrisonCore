@@ -38,7 +38,7 @@ public class ElementGeneratorStone extends GeneratorElement {
     @NotNull
     @Override
     public Schematic getSchematic(int level, boolean destroyed) {
-        return BunkerSchematics.get("gen-stone-" + level + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow("gen-stone-" + level + (destroyed ? "-destroyed" : ""));
     }
 
     @Override

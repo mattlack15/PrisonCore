@@ -39,7 +39,7 @@ public class ElementEnvoy extends BunkerElement {
 
     @Override
     public @NotNull Schematic getSchematic(int level, boolean destroyed) {
-        return BunkerSchematics.get("envoy-1" + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow("envoy-1" + (destroyed ? "-destroyed" : ""));
     }
 
     @Override

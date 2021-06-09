@@ -30,7 +30,8 @@ public class ProfileSQL {
     }
 
     public void insertProfiles(List<? extends PlayerProfile> profiles) throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO " + TABLE + " (identifier, data, lastEdit) VALUES (?, ?, ?)")) {
+        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO " + TABLE + " (identifier, data, lastEdit) VALUES (?, ?, ?) ON DUPLICATE KEY " +
+                "UPDATE data=VALUES('data'), lastEdit=VALUES('lastEdit')")) {
             for (PlayerProfile p : profiles) {
                 GravSerializer serializer = new GravSerializer();
                 p.getMeta().serialize(serializer);

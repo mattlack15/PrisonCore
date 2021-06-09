@@ -1,6 +1,4 @@
 sellprices:
-  STONE: 1
-  COBBLESTONE: 1000
 multiplier:
   item:
     type: "PAPER"

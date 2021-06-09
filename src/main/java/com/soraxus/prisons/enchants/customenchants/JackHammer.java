@@ -71,6 +71,7 @@ public class JackHammer extends AbstractCE {
             hammerRegion.clampY(event.getBlock().getLocation().getBlockY(), event.getBlock().getLocation().getBlockY());
 
             AsyncWorld session = new SpigotAsyncWorld(event.getBlock().getWorld());
+            AsyncWorld session2 = new SpigotAsyncWorld(event.getBlock().getWorld());
 
             AtomicInteger broken = new AtomicInteger();
 
@@ -87,8 +88,8 @@ public class JackHammer extends AbstractCE {
             }, true);
 
             service.execute(() -> {
-                session.setBlocks(hammerRegion, () -> (short) 0);
-                session.flush();
+                session2.setBlocks(hammerRegion, () -> (short) 0);
+                session2.flush();
             });
             mine.incrementBlocksMined(broken.get());
             PickaxeLevelManager.addXp(event.getPlayer(), broken.get());

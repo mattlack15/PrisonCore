@@ -198,7 +198,7 @@ public class RankupManager {
                     }
                 } else {
                     Rank def = getRank(0);
-                    if (Bukkit.getPlayer(player) != null)
+                    if (Bukkit.getPlayer(player) != null && def != null)
                         def.getCmds().forEach(c -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), c.replace("%player%", Bukkit.getPlayer(player).getName())));
                 }
 

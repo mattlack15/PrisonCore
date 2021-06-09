@@ -63,7 +63,7 @@ public class ElementCore extends StorageElement {
     @NotNull
     @Override
     public Schematic getSchematic(int level, boolean destroyed) {
-        return BunkerSchematics.get("core-" + (level) + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow("core-" + (level) + (destroyed ? "-destroyed" : ""));
     }
 
     @Override

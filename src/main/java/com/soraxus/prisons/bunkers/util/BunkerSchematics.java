@@ -38,7 +38,7 @@ public class BunkerSchematics {
     }
 
     @NotNull
-    public static Schematic get(String name) {
+    public static Schematic getWithoutThrow(String name) {
         lock.lock(); //REQUIRED: I did a lot of testing and this is required due to heap overflows with concurrent decompression
         try {
             if (loadedSchems.containsKey(name)) {
@@ -47,6 +47,7 @@ public class BunkerSchematics {
             System.out.println("Loading schematic: " + name);
             try {
                 File f = new File(ModuleBunkers.instance.getDataFolder(), "schematics/" + name + ".bschem");
+                f.getParentFile().mkdirs();
                 if (!f.exists()) {
                     Bukkit.getLogger().log(Level.SEVERE, "Missing schematic: " + name);
                     return getDefaultSchematic();
@@ -57,6 +58,31 @@ public class BunkerSchematics {
             } catch (IOException e) {
                 Bukkit.getLogger().log(Level.SEVERE, "Missing schematic: " + name);
                 return getDefaultSchematic();
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @NotNull
+    public static Schematic get(String name) throws IllegalStateException {
+        lock.lock(); //REQUIRED: I did a lot of testing and this is required due to heap overflows with concurrent decompression
+        try {
+            if (loadedSchems.containsKey(name)) {
+                return loadedSchems.get(name);
+            }
+            System.out.println("Loading schematic: " + name);
+            try {
+                File f = new File(ModuleBunkers.instance.getDataFolder(), "schematics/" + name + ".bschem");
+                f.getParentFile().mkdirs();
+                if (!f.exists()) {
+                    throw new IllegalStateException("Missing schematic: " + name);
+                }
+                Schematic ret = new Schematic(f);
+                loadedSchems.put(name, ret);
+                return ret;
+            } catch (IOException e) {
+                throw new IllegalStateException("Missing schematic: " + name);
             }
         } finally {
             lock.unlock();

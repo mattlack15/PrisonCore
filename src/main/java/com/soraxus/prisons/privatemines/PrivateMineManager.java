@@ -48,14 +48,14 @@ public class PrivateMineManager {
         try {
             this.schematicList.add(new Schematic(new File(ModulePrivateMines.instance.getDataFolder(), "pm.bschem")));
         } catch (IOException e) {
-            e.printStackTrace();
+            Bukkit.getLogger().severe("Could not find, or could not load private mine schematic!");
         }
 
         //Cache
         try {
             this.cachedMineInfos.putAll(new GravSerializer(new FileInputStream(new File(baseDir, "mine_cache.cache"))).readObject());
         } catch (IOException e) {
-            e.printStackTrace();
+            Bukkit.getLogger().severe("Could not find, or could not load private mine cache!");
         }
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(SpigotPrisonCore.instance, this::tick, 0, 1);

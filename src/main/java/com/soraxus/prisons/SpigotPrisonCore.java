@@ -111,6 +111,8 @@ public class SpigotPrisonCore extends CorePlugin {
 
         this.spawn = getConfig().getString("spawn");
 
+        Synchronizer.class.getName();
+
         Diagnostics.runDiagnostics();
     }
 

@@ -85,6 +85,8 @@ public class Mine {
                 DateUtils.readableDate((long) Math.max(0, 20 * 60 - (System.currentTimeMillis() - getLastMinedBlock().get()) / 1000D), true));
         this.textBox.setOrMake(1, "&dOr when this hits &c" + Math.round(ModuleMines.instance.getMinedThreshold() * 100) + "% &d: &f" +
                 Math.round(getBlocksMined() / (double) getMineArea() * 100) + "%");
+
+        t
     }
 
     public boolean shouldSave() {

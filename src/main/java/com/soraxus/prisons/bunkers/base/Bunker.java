@@ -199,7 +199,7 @@ public class Bunker implements GravSerializable {
      * Gets the schematic for the map of this bunker
      */
     public Schematic getMapSchematic() {
-        return BunkerSchematics.get("maps/" + this.mapSchematicName);
+        return BunkerSchematics.getWithoutThrow("maps/" + this.mapSchematicName);
     }
 
     /**

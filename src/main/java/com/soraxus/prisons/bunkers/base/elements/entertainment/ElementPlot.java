@@ -49,7 +49,7 @@ public class ElementPlot extends BunkerElement {
 
     @Override
     public @NotNull Schematic getSchematic(int level, boolean destroyed) {
-        return BunkerSchematics.get("plot-" + level);
+        return BunkerSchematics.getWithoutThrow("plot-" + level);
     }
 
     public Map<Integer, Schematic> getHeldSchematics() {

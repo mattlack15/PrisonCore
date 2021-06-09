@@ -56,7 +56,7 @@ public class ElementRock extends NaturalElement {
     @NotNull
     @Override
     public Schematic getSchematic(int level, boolean destroyed) {
-        return BunkerSchematics.get("rock-" + getRockType() + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow("rock-" + getRockType() + (destroyed ? "-destroyed" : ""));
     }
 
 //    @Override

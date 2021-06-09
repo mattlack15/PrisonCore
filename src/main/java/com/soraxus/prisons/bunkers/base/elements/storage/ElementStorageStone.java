@@ -28,7 +28,7 @@ public class ElementStorageStone extends StorageElement {
 
     @Override
     public @NotNull Schematic getSchematic(int level, boolean destroyed) {
-        return BunkerSchematics.get("storage-stone-" + level + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow("storage-stone-" + level + (destroyed ? "-destroyed" : ""));
     }
 
     @Override

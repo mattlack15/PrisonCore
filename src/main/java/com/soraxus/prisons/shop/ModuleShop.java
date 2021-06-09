@@ -6,6 +6,7 @@ import com.soraxus.prisons.shop.customshop.menu.MenuCustomShop;
 import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.MenuElement;
 import net.ultragrav.serializer.GravSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 
 import java.io.File;
@@ -38,6 +39,9 @@ public class ModuleShop extends CoreModule {
         try {
             if (shopFile.createNewFile()) {
                 globalShop = new CustomShop("Global");
+                GravSerializer serializer = new GravSerializer();
+                globalShop.serialize(serializer);
+                serializer.writeToStream(new FileOutputStream(shopFile));
             } else {
                 loadShop();
             }
@@ -56,8 +60,16 @@ public class ModuleShop extends CoreModule {
         try {
             GravSerializer serializer = new GravSerializer(new FileInputStream(shopFile));
             globalShop = new CustomShop(serializer);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException | IllegalStateException e) {
+            Bukkit.getLogger().info("Not sure how we got here but no custom shop file, creating one...");
+            globalShop = new CustomShop("Global");
+            GravSerializer serializer = new GravSerializer();
+            globalShop.serialize(serializer);
+            try {
+                serializer.writeToStream(new FileOutputStream(shopFile));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
         }
     }
 

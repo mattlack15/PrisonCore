@@ -1,5 +1,6 @@
 package com.soraxus.prisons.mines.gui;
 
+import com.soraxus.prisons.mines.manager.MineManager;
 import com.soraxus.prisons.mines.object.Mine;
 import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
@@ -25,9 +26,8 @@ public class MenuMine extends Menu {
 
         MenuElement delete = new MenuElement(new ItemBuilder(Material.REDSTONE_BLOCK, 1).setName("&4&lDelete")
                 .build()).setClickHandler((e, i) -> {
-                    getElement(e.getSlot()).addTempLore(this, "&cRemoving is currently disabled!", 60);
-//            MineManager.instance.remove(mine.getName());
-//            backElement.getClickHandler().handleClick(e, i);
+            MineManager.instance.remove(mine.getName());
+            backElement.getClickHandler().handleClick(e, i);
         });
 
         MenuElement blocks = new MenuElement(new ItemBuilder(Material.COAL_BLOCK, 1).setName("&6&lBlocks").build())

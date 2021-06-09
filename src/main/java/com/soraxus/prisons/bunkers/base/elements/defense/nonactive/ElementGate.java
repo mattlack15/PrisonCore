@@ -4,7 +4,6 @@ import com.soraxus.prisons.bunkers.base.Bunker;
 import com.soraxus.prisons.bunkers.base.BunkerElement;
 import com.soraxus.prisons.bunkers.base.elements.defense.nonactive.wall.WallParameter;
 import com.soraxus.prisons.bunkers.base.elements.defense.nonactive.wall.WallRotation;
-import com.soraxus.prisons.bunkers.base.elements.defense.nonactive.wall.WallType;
 import com.soraxus.prisons.bunkers.base.elements.type.BunkerElementType;
 import com.soraxus.prisons.bunkers.tools.ToolUtils;
 import com.soraxus.prisons.bunkers.util.BunkerSchematics;
@@ -13,8 +12,6 @@ import net.ultragrav.serializer.GravSerializer;
 import org.bukkit.Sound;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
 
 public class ElementGate extends ElementWall {
     public ElementGate(GravSerializer serializer, Bunker bunker) {
@@ -45,7 +42,7 @@ public class ElementGate extends ElementWall {
         BunkerElement[] neighbours = getNeighbours();
         WallParameter param = WallRotation.get(neighbours, ElementWall.class);
         this.setRotation(param.getRotation());
-        return BunkerSchematics.get("gate-" + level + "-" + (isOpen() ? "open" : "closed") + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow("gate-" + level + "-" + (isOpen() ? "open" : "closed") + (destroyed ? "-destroyed" : ""));
     }
 
     @Override

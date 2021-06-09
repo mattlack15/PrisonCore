@@ -69,7 +69,7 @@ public class ElementTree extends NaturalElement {
     @NotNull
     @Override
     public Schematic getSchematic(int level, boolean destroyed) {
-        return BunkerSchematics.get("tree-" + (getTreeSize() == 1 ? "small" : (getTreeSize() == 2 ? "medium" : "large")) + "-" + getTreeType() + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow("tree-" + (getTreeSize() == 1 ? "small" : (getTreeSize() == 2 ? "medium" : "large")) + "-" + getTreeType() + (destroyed ? "-destroyed" : ""));
     }
 
 //    @Override

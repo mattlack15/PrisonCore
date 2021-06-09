@@ -56,7 +56,7 @@ public class ElementWorkerHut extends BunkerElement {
     @NotNull
     @Override
     public Schematic getSchematic(int level, boolean destroyed) {
-        return BunkerSchematics.get("worker-hut-" + Math.min(level, this.getMaxLevel()) + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow("worker-hut-" + Math.min(level, this.getMaxLevel()) + (destroyed ? "-destroyed" : ""));
     }
 
     @Override

@@ -30,7 +30,7 @@ public class ElementStorageTimber extends StorageElement {
     @NotNull
     @Override
     public Schematic getSchematic(int level, boolean destroyed) {
-        return BunkerSchematics.get("storage-timber-" + level + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow("storage-timber-" + level + (destroyed ? "-destroyed" : ""));
     }
 
     @Override

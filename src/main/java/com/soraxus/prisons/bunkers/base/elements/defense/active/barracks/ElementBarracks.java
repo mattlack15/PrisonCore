@@ -66,7 +66,7 @@ public class ElementBarracks extends ActiveDefenseElement {
 
     @Override
     public @NotNull Schematic getSchematic(int level, boolean destroyed) {
-        return BunkerSchematics.get("barracks-" + level + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow("barracks-" + level + (destroyed ? "-destroyed" : ""));
     }
 
     @Override

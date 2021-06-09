@@ -7,6 +7,7 @@ import com.soraxus.prisons.mines.object.Mine;
 import com.soraxus.prisons.util.items.ItemBuilder;
 import com.soraxus.prisons.util.menus.Menu;
 import com.soraxus.prisons.util.menus.MenuElement;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -111,7 +112,11 @@ public class MenuMines extends Menu {
 //        }));
 
         this.setElement(2, new MenuElement(new ItemBuilder(Material.ANVIL, 1).setName("&eCreate").build()).setClickHandler((e, i) -> {
-            new MineCreationSession((Player) e.getWhoClicked(), (mine) -> MineManager.instance.add(mine));
+            new MineCreationSession((Player) e.getWhoClicked(), (mine) -> {
+                if(!MineManager.instance.add(mine)) {
+                    e.getWhoClicked().sendMessage(ChatColor.RED + "Unable to create mine, one already exists with that name! (" + mine.getName() + ")");
+                }
+            });
             e.getWhoClicked().closeInventory();
         }));
 

@@ -166,9 +166,9 @@ public class ElementMineField extends BunkerElement {
     @Override
     public @NotNull Schematic getSchematic(int level, boolean destroyed) {
         if (this.hasExploded()) {
-            return BunkerSchematics.get("mine-exploded-" + level + (destroyed ? "-destroyed" : ""));
+            return BunkerSchematics.getWithoutThrow("mine-exploded-" + level + (destroyed ? "-destroyed" : ""));
         } else {
-            return BunkerSchematics.get("mine-" + level + (destroyed ? "-destroyed" : ""));
+            return BunkerSchematics.getWithoutThrow("mine-" + level + (destroyed ? "-destroyed" : ""));
         }
     }
 

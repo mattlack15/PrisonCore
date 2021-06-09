@@ -92,7 +92,7 @@ public class ElementWall extends ConnectingElement {
                 .toArray();
         WallParameter param = WallType.getWall(bls);
         this.setRotation(param.getRotation());
-        return BunkerSchematics.get(param.getType().getSchematicName(level) + (destroyed ? "-destroyed" : ""));
+        return BunkerSchematics.getWithoutThrow(param.getType().getSchematicName(level) + (destroyed ? "-destroyed" : ""));
     }
 
     @Override

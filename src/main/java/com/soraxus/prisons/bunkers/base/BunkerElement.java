@@ -208,7 +208,7 @@ public abstract class BunkerElement implements GravSerializable {
      */
     @NotNull
     public Schematic getSchematic(int level, boolean destroyed) {
-        return BunkerSchematics.get(
+        return BunkerSchematics.getWithoutThrow(
                 getName().replaceAll(" ", "-").toLowerCase() +
                         "-" + level + (destroyed ? "-destroyed" : ""));
     }

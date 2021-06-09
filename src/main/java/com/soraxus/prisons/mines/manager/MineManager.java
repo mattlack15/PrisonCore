@@ -5,6 +5,7 @@ import com.soraxus.prisons.mines.MineFiles;
 import com.soraxus.prisons.mines.object.Mine;
 import com.soraxus.prisons.privatemines.PrivateMine;
 import com.soraxus.prisons.privatemines.PrivateMineManager;
+import com.soraxus.prisons.util.Synchronizer;
 import com.soraxus.prisons.util.concurrent.ConcurrentBulkOperationQueue;
 import net.ultragrav.utils.Vector3D;
 import org.bukkit.Location;
@@ -59,8 +60,8 @@ public class MineManager extends Manager<Mine, String> {
                 return null;
             }
 
-            mines = (Mine)var2.next();
-        } while(!mines.getName().equalsIgnoreCase(identifier));
+            mines = (Mine) var2.next();
+        } while (!mines.getName().equalsIgnoreCase(identifier));
 
         return mines;
     }
@@ -108,11 +109,22 @@ public class MineManager extends Manager<Mine, String> {
     }
 
     public synchronized Future<Void> unload(String identifier) {
+        return unload(identifier, true);
+    }
+
+    public synchronized Future<Void> unload(String identifier, boolean save) {
         Mine mine = this.get(identifier);
         if (mine != null) {
             //Unload
             this.loadedMines.removeIf((m) -> m.getName().endsWith(identifier));
-            queueSaveMineOperation(mine);
+            if (save)
+                queueSaveMineOperation(mine);
+            if (mine.getTextBox() != null) {
+                Synchronizer.synchronize(() -> {
+                    if (mine.getTextBox().getLocationOfLine(0).getChunk().isLoaded())
+                        mine.getTextBox().clear();
+                });
+            }
         }
         return null;
     }
@@ -120,12 +132,13 @@ public class MineManager extends Manager<Mine, String> {
     public Future<Void> remove(String identifier) {
         CompletableFuture<Void> future = new CompletableFuture<>();
         future.complete(null);
+
         Mine mine = this.get(identifier);
         if (mine == null) {
             return future;
         } else {
-            synchronized(this) {
-                this.unload(identifier);
+            synchronized (this) {
+                this.unload(identifier, false);
                 this.minesConfig.set(mine.getName(), null);
 
                 try {

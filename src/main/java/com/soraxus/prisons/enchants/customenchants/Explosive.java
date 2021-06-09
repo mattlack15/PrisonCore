@@ -96,6 +96,8 @@ public class Explosive extends AbstractCE {
             Vector3D starting = Vector3D.fromBukkitVector(event.getBlock().getLocation().toVector());
             CuboidRegion region = new CuboidRegion(event.getPlayer().getWorld(), starting.add(radius, radius, radius), starting.add(-radius, -radius, -radius));
             AsyncWorld world = new SpigotAsyncWorld(event.getPlayer().getWorld());
+            AsyncWorld world2 = new SpigotAsyncWorld(event.getPlayer().getWorld());
+
             Map<IntVector3D, Integer> blocks = new ConcurrentHashMap<>();
             AtomicInteger total = new AtomicInteger();
             final double radSqrd = radius * radius;
@@ -110,13 +112,13 @@ public class Explosive extends AbstractCE {
                     broken.putIfAbsent(b, new AtomicInteger());
                     broken.get(b).incrementAndGet();
 
-                    world.setBlock(v.getX(), v.getY(), v.getZ(), 0, (byte) 0);
+                    world2.setBlock(v.getX(), v.getY(), v.getZ(), 0, (byte) 0);
                     total.getAndIncrement();
                     if (rand.nextInt(10) < 3)
                         blocks.put(v, b);
                 }
             }, true);
-            world.flush().thenAccept((n) -> new BukkitRunnable() {
+            world2.flush().thenAccept((n) -> new BukkitRunnable() {
                 @Override
                 public void run() {
                     blocks.forEach((v, b) -> {
