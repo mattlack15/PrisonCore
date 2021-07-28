@@ -60,7 +60,7 @@ public abstract class AbstractCE {
     public void disable() {
         if (!this.isEnabled())
             return;
-        EventSubscriptions.instance.unSubscribe(this);
+        EventSubscriptions.instance.unSubscribeAll(this);
         this.enabled = false;
         this.onDisable();
     }

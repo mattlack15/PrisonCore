@@ -1,7 +1,7 @@
 package com.soraxus.prisons.enchants.customenchants;
 
 import com.soraxus.prisons.ModuleBreak;
-import com.soraxus.prisons.enchants.ModuleEnchants;
+import com.soraxus.prisons.bunkers.AvgMeasure;
 import com.soraxus.prisons.enchants.api.enchant.AbstractCE;
 import com.soraxus.prisons.enchants.api.enchant.EnchantInfo;
 import com.soraxus.prisons.mines.manager.MineManager;
@@ -13,15 +13,10 @@ import net.ultragrav.asyncworld.SpigotAsyncWorld;
 import net.ultragrav.utils.CuboidRegion;
 import net.ultragrav.utils.IntVector3D;
 import net.ultragrav.utils.Vector3D;
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -77,6 +72,8 @@ public class Explosive extends AbstractCE {
         }
     }
 
+    private static AvgMeasure measure = new AvgMeasure();
+
     @EventSubscription
     private void onBreak(BlockBreakEvent event) {
 
@@ -87,15 +84,15 @@ public class Explosive extends AbstractCE {
             return;
 
         EnchantInfo info = getInfo(event.getPlayer().getInventory().getItemInMainHand());
-        if (rand.nextDouble() > info.getEnchants().get(this) * percentIncrease)
-            return;
+//        if (rand.nextDouble() > info.getEnchants().get(this) * percentIncrease)
+//            return;
 
         Mine mine = MineManager.instance.getMineOf(event.getBlock().getLocation());
         if (mine != null) {
             int radius = 4;
             Vector3D starting = Vector3D.fromBukkitVector(event.getBlock().getLocation().toVector());
             CuboidRegion region = new CuboidRegion(event.getPlayer().getWorld(), starting.add(radius, radius, radius), starting.add(-radius, -radius, -radius));
-            AsyncWorld world = new SpigotAsyncWorld(event.getPlayer().getWorld());
+            //AsyncWorld world = new SpigotAsyncWorld(event.getPlayer().getWorld());
             AsyncWorld world2 = new SpigotAsyncWorld(event.getPlayer().getWorld());
 
             Map<IntVector3D, Integer> blocks = new ConcurrentHashMap<>();
@@ -103,42 +100,49 @@ public class Explosive extends AbstractCE {
             final double radSqrd = radius * radius;
 
             Map<Integer, AtomicInteger> broken = new ConcurrentHashMap<>();
-
-            world.syncForAllInRegion(region, (v, b) -> {
-                if (!(v.distanceSq(starting.asIntVector()) > radSqrd) && mine.getRegion().contains(new Vector3D(v))) {
-                    if (b == 0)
-                        return;
-
-                    broken.putIfAbsent(b, new AtomicInteger());
-                    broken.get(b).incrementAndGet();
-
-                    world2.setBlock(v.getX(), v.getY(), v.getZ(), 0, (byte) 0);
-                    total.getAndIncrement();
-                    if (rand.nextInt(10) < 3)
-                        blocks.put(v, b);
-                }
-            }, true);
-            world2.flush().thenAccept((n) -> new BukkitRunnable() {
-                @Override
-                public void run() {
-                    blocks.forEach((v, b) -> {
-                        Vector3D vel = new Vector3D(v).subtract(starting.subtract(0, 1.2, 0)).normalize().multiply(0.9);
-                        Location location = new Location(event.getBlock().getWorld(), v.getX(), v.getY(), v.getZ());
-                        if (vel.lengthSq() == 0)
+            for (int i = 0; i < 10; i++) {
+                long ns = System.nanoTime();
+                AsyncWorld world = new SpigotAsyncWorld(event.getPlayer().getWorld());
+                world.syncForAllInRegion(region, (v, b) -> {
+                    if (!(v.distanceSq(starting.asIntVector()) > radSqrd) && mine.getRegion().contains(new Vector3D(v))) {
+                        if (b == 0)
                             return;
-                        FallingBlock block = event.getPlayer().getWorld().spawnFallingBlock(location, b & 4095, (byte) (b >> 12));
-                        block.setDropItem(false);
-                        block.setInvulnerable(true);
-                        block.setHurtEntities(false);
-                        fb.add(block.getUniqueId());
-                        block.setVelocity(vel.toBukkitVector());
-                    });
-                }
-            }.runTask(ModuleEnchants.instance.getParent()));
 
-            event.getBlock().getWorld().spawnParticle(Particle.EXPLOSION_HUGE, event.getBlock().getLocation(), 1);
-            event.getBlock().getWorld().playSound(event.getBlock().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 0.7f, 1f);
-            mine.incrementBlocksMined(total.get());
+                        broken.putIfAbsent(b, new AtomicInteger());
+                        broken.get(b).incrementAndGet();
+
+                        world2.setBlock(v.getX(), v.getY(), v.getZ(), 0, (byte) 0);
+                        total.getAndIncrement();
+                        if (rand.nextInt(10) < 3)
+                            blocks.put(v, b);
+                    }
+                }, false);
+                ns = System.nanoTime() - ns;
+                double ms = (ns / 1000000D);
+                measure.addEntry(ms);
+                System.out.println("Done in " + ns + "ns : " + ms + "ms avg: " + measure.getAvg());
+            }
+//            world2.flush().thenAccept((n) -> new BukkitRunnable() {
+//                @Override
+//                public void run() {
+//                    blocks.forEach((v, b) -> {
+//                        Vector3D vel = new Vector3D(v).subtract(starting.subtract(0, 1.2, 0)).normalize().multiply(0.9);
+//                        Location location = new Location(event.getBlock().getWorld(), v.getX(), v.getY(), v.getZ());
+//                        if (vel.lengthSq() == 0)
+//                            return;
+//                        FallingBlock block = event.getPlayer().getWorld().spawnFallingBlock(location, b & 4095, (byte) (b >> 12));
+//                        block.setDropItem(false);
+//                        block.setInvulnerable(true);
+//                        block.setHurtEntities(false);
+//                        fb.add(block.getUniqueId());
+//                        block.setVelocity(vel.toBukkitVector());
+//                    });
+//                }
+//            }.runTask(ModuleEnchants.instance.getParent()));
+//
+//            event.getBlock().getWorld().spawnParticle(Particle.EXPLOSION_HUGE, event.getBlock().getLocation(), 1);
+//            event.getBlock().getWorld().playSound(event.getBlock().getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 0.7f, 1f);
+//            mine.incrementBlocksMined(total.get());
             PickaxeLevelManager.addXp(event.getPlayer(), total.get());
 
             //Call events

@@ -79,7 +79,7 @@ public class ElementPlot extends BunkerElement {
 
     @Override
     protected void onDisable() {
-        EventSubscriptions.instance.unSubscribe(this);
+        EventSubscriptions.instance.unSubscribeAll(this);
     }
 
     @Override

@@ -50,7 +50,7 @@ public class ModuleChatGames extends CoreModule {
         addGame(new ChatGameMathChallenge());
         addGame(new ChatGameSpotImposterSquare());
         addGame(new ChatGameUnscrambleChallenge());
-        addGame(new ChatGameTrivia());
+//        addGame(new ChatGameTrivia());
 
         new CmdChatGame().register();
 

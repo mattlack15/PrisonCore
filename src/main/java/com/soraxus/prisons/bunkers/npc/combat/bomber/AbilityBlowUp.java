@@ -112,7 +112,7 @@ public class AbilityBlowUp extends BunkerNPCAbility {
 
                 @Override
                 public void invalidate() {
-                    EventSubscriptions.instance.unSubscribe(this);
+                    EventSubscriptions.instance.unSubscribeAll(this);
                 }
 
                 @EventSubscription

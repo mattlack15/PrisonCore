@@ -73,7 +73,7 @@ public class ElementLaboratory extends BunkerElement {
 
     @Override
     protected void onDisable() {
-        EventSubscriptions.instance.unSubscribe(this);
+        EventSubscriptions.instance.unSubscribeAll(this);
         Synchronizer.synchronize(() -> {
             madScientist.despawn();
             madScientist.destroy();

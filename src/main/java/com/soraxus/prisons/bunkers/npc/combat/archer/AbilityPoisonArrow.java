@@ -41,7 +41,7 @@ public class AbilityPoisonArrow extends BunkerNPCAbility {
             @Override
             public void invalidate() {
                 super.invalidate();
-                EventSubscriptions.instance.unSubscribe(this);
+                EventSubscriptions.instance.unSubscribeAll(this);
             }
 
             @EventSubscription

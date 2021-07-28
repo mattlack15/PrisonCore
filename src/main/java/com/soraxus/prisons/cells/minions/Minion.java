@@ -139,7 +139,7 @@ public class Minion implements GravSerializable {
         state.update(true);
 
         this.built = false;
-        EventSubscriptions.instance.unSubscribe(this);
+        EventSubscriptions.instance.unSubscribeAll(this);
     }
 
     public void remove() {

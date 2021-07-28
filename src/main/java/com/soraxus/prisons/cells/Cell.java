@@ -51,7 +51,7 @@ public class Cell implements GravSerializable {
     public Cell(GravSerializer serializer) {
         this.meta = new Meta(serializer);
         this.player = this.meta.get("playerId");
-        this.world = new SpigotCustomWorld(SpigotPrisonCore.instance, "cell_" + this.player.toString().replace("-", ""), 4, 4);
+        this.world = new SpigotCustomWorld(SpigotPrisonCore.instance, "cell_" + player.toString().replace("-", ""), 4, 4);
         this.minionManager = new MinionManager(this);
     }
 
@@ -68,20 +68,26 @@ public class Cell implements GravSerializable {
         SavedCustomWorld world = this.meta.get("world");
         if (world != null) {
             this.world.create(world, false);
-        } else if (cellSchematic != null) {
+        } else {
             this.world.create((w) -> {
-                int targetY = 60;
-                IntVector3D dimensions = cellSchematic.getDimensions();
-                int halfX = dimensions.getX() / 2;
-                int halfZ = dimensions.getZ() / 2;
-                int placeX = (4 << 3) - halfX;
-                int placeZ = (4 << 3) - halfZ;
-                w.pasteSchematic(cellSchematic, new IntVector3D(placeX, targetY, placeZ), true);
+                if(cellSchematic != null) {
+                    int targetY = 60;
+                    IntVector3D dimensions = cellSchematic.getDimensions();
+                    int halfX = dimensions.getX() / 2;
+                    int halfZ = dimensions.getZ() / 2;
+                    int placeX = (4 << 3) - halfX;
+                    int placeZ = (4 << 3) - halfZ;
+                    w.pasteSchematic(cellSchematic, new IntVector3D(placeX, targetY, placeZ), true);
+                } else {
+                    w.setBlocks(new CuboidRegion(null, new Vector3D(0, 0, 0),
+                                    new Vector3D(16*4-1, 60, 16*4-1)),
+                            () -> (short)1);
+                }
             });
         }
 
         this.world.getBukkitWorld().getWorldBorder().setCenter(32.0D, 32.0D);
-        this.world.getBukkitWorld().getWorldBorder().setSize(64.0D);
+        this.world.getBukkitWorld().getWorldBorder().setSize(getSettings().getShowBorder() ? 64.0D : 10000.0D);
         this.world.getBukkitWorld().getWorldBorder().setWarningDistance(0);
         this.world.getBukkitWorld().setPVP(false);
         this.world.getBukkitWorld().setGameRuleValue("doMobSpawning", "false");
@@ -89,20 +95,20 @@ public class Cell implements GravSerializable {
         this.world.getBukkitWorld().setGameRuleValue("doWeatherCycle", "false");
         this.world.getBukkitWorld().setThundering(false);
         this.world.getBukkitWorld().setStorm(false);
-        this.world.getBukkitWorld().setTime((Long)this.meta.getOrSet("worldTime", 0L));
+        this.world.getBukkitWorld().setTime((Long) this.meta.getOrSet("worldTime", 0L));
         Synchronizer.synchronize(() -> {
             if (this.isWorldCreated()) {
                 this.minionManager.spawnAll();
             }
 
         });
-        this.meta.set("world", (Object)null);
+        this.meta.set("world", (Object) null);
         EventSubscriptions.instance.subscribe(this);
         ms = System.currentTimeMillis() - ms;
     }
 
     public void setSettingWorldTime(int time) {
-        this.world.getBukkitWorld().setTime((long)time);
+        this.world.getBukkitWorld().setTime((long) time);
         this.getSettings().setWorldTime(time);
     }
 
@@ -172,7 +178,7 @@ public class Cell implements GravSerializable {
             f.join();
             this.meta.set("world", this.world.getSavedCustomWorld(worldAsyncWorld));
             this.minionManager.save(this.meta);
-            EventSubscriptions.instance.unSubscribe(this);
+            EventSubscriptions.instance.unSubscribeAll(this);
         }
     }
 
@@ -200,7 +206,6 @@ public class Cell implements GravSerializable {
                     if (event.getPlayer().getWorld().equals(this.world.getBukkitWorld()) && (!this.isTrusted(event.getPlayer().getUniqueId()) || this.getSettings().getProtectionSetting() != CellSettings.ProtectionSetting.TRUSTED) && !this.getPlayer().equals(event.getPlayer().getUniqueId())) {
                         event.setCancelled(true);
                     }
-
                 }
             }
         }
@@ -217,7 +222,7 @@ public class Cell implements GravSerializable {
             }
 
             minion = var2.next();
-        } while(!minion.getMiningBlockLocation().toBukkitVector().equals(event.getBlock().getLocation().toVector()));
+        } while (!minion.getMiningBlockLocation().toBukkitVector().equals(event.getBlock().getLocation().toVector()));
 
         event.setCancelled(true);
     }
@@ -232,7 +237,7 @@ public class Cell implements GravSerializable {
             }
 
             trustedPlayer = var2.next();
-        } while(!trustedPlayer.getId().equals(id));
+        } while (!trustedPlayer.getId().equals(id));
 
         return true;
     }

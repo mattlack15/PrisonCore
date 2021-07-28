@@ -50,7 +50,7 @@ public class OpenHotbarSelector {
      */
     public void close() {
         HotbarSelectorManager.getInstance().close(this);
-        EventSubscriptions.instance.unSubscribe(this);
+        EventSubscriptions.instance.unSubscribeAll(this);
         state.restore(player.getInventory());
     }
 

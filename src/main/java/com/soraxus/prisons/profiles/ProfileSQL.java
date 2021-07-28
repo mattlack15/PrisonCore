@@ -31,7 +31,7 @@ public class ProfileSQL {
 
     public void insertProfiles(List<? extends PlayerProfile> profiles) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("INSERT INTO " + TABLE + " (identifier, data, lastEdit) VALUES (?, ?, ?) ON DUPLICATE KEY " +
-                "UPDATE data=VALUES('data'), lastEdit=VALUES('lastEdit')")) {
+                "UPDATE data=VALUES(data), lastEdit=VALUES(lastEdit)")) {
             for (PlayerProfile p : profiles) {
                 GravSerializer serializer = new GravSerializer();
                 p.getMeta().serialize(serializer);
@@ -52,6 +52,18 @@ public class ProfileSQL {
                 statement.setBytes(1, serializer.toByteArray());
                 statement.setLong(2, System.currentTimeMillis());
                 statement.setString(3, p.getPlayerId().toString());
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        }
+    }
+
+    public void deleteProfiles(List<? extends PlayerProfile> profiles) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM " + TABLE + " WHERE identifier=?")) {
+            for (PlayerProfile p : profiles) {
+                GravSerializer serializer = new GravSerializer();
+                p.getMeta().serialize(serializer);
+                statement.setString(1, p.getPlayerId().toString());
                 statement.addBatch();
             }
             statement.executeBatch();

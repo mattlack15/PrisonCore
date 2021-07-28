@@ -4,7 +4,7 @@ import com.soraxus.prisons.util.Scheduler;
 import com.soraxus.prisons.util.locks.ManagerLock;
 import net.ultragrav.asyncworld.schematics.Schematic;
 import net.ultragrav.serializer.GravSerializer;
-import net.ultragrav.serializer.compressors.ZstdCompressor;
+import net.ultragrav.serializer.compressors.StandardCompressor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -134,7 +134,7 @@ public class CellManager {
             }
 
             try {
-                GravSerializer serializer = new GravSerializer(new FileInputStream(file), ZstdCompressor.instance);
+                GravSerializer serializer = new GravSerializer(new FileInputStream(file), StandardCompressor.instance);
                 return new Cell(serializer);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -178,7 +178,7 @@ public class CellManager {
                 long ms = System.currentTimeMillis();
 
                 //Deserialize
-                GravSerializer serializer = new GravSerializer(new FileInputStream(file), ZstdCompressor.instance);
+                GravSerializer serializer = new GravSerializer(new FileInputStream(file), StandardCompressor.instance);
                 Cell cell = new Cell(serializer);
 
                 initCell(cell);
@@ -257,10 +257,8 @@ public class CellManager {
 
                 File file = getFile(cell.getId());
                 try {
-                    if (!file.exists()) {
-                        file.createNewFile();
-                    }
-                    serializer.writeToStream(new FileOutputStream(file), ZstdCompressor.instance);
+                    file.createNewFile();
+                    serializer.writeToStream(new FileOutputStream(file), StandardCompressor.instance);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

@@ -127,13 +127,8 @@ public class MenuProfile extends Menu {
                         this.open(e.getWhoClicked());
                         Player player = Bukkit.getPlayer(profile.getPlayerId());
                         if (player != null) {
-                            Synchronizer.synchronize(() -> {
-                                player.sendMessage("");
-                                player.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                                        "&c&lProfile > &a" + e.getWhoClicked().getName() + "&f has posted a comment on your profile:"));
-                                player.sendMessage(s);
-                                player.sendMessage("");
-                            });
+                            Synchronizer.synchronize(() -> player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                                    "&c&lProfile > &a" + e.getWhoClicked().getName() + "&f has posted a comment on your profile.")));
                         }
                     });
                     e.getWhoClicked().sendMessage(ChatColor.YELLOW + "Enter your comment in chat:");

@@ -13,6 +13,6 @@ public abstract class EventMetadata extends FixedMetadataValue {
     @Override
     public void invalidate() {
         super.invalidate();
-        EventSubscriptions.instance.unSubscribe(this);
+        EventSubscriptions.instance.unSubscribeAll(this);
     }
 }

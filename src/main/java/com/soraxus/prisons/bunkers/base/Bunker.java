@@ -192,7 +192,7 @@ public class Bunker implements GravSerializable {
                 e.disable();
             }
         });
-        EventSubscriptions.instance.unSubscribe(this);
+        EventSubscriptions.instance.unSubscribeAll(this);
     }
 
     /**

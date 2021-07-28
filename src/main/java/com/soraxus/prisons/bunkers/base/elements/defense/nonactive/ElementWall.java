@@ -61,7 +61,7 @@ public class ElementWall extends ConnectingElement {
      */
     @Override
     protected void onDisable() {
-        EventSubscriptions.instance.unSubscribe(this);
+        EventSubscriptions.instance.unSubscribeAll(this);
     }
 
     @Override

@@ -162,7 +162,7 @@ public class ElementMortar extends ActiveDefenseElement {
 
     @Override
     protected void onDisable() {
-        EventSubscriptions.instance.unSubscribe(this);
+        EventSubscriptions.instance.unSubscribeAll(this);
     }
 
     @EventSubscription

@@ -65,4 +65,11 @@ public class PrisonProfile extends PlayerProfile {
     public void scheduleUpdate() {
         ProfileManager.instance.queueUpdate(this);
     }
+    public void unload() {
+        ProfileManager.instance.unloadProfile(this.getPlayerId());
+    }
+    public void delete() {
+        unload();
+        ProfileManager.instance.delete(this);
+    }
 }

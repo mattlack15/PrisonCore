@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ProfileManager {
@@ -221,4 +222,19 @@ public class ProfileManager {
         }
     }
 
+    public void delete(PrisonProfile profile) {
+        ForkJoinPool.commonPool().submit(() -> {
+            try {
+                ProfileSQL sql = new ProfileSQL();
+                try {
+                    sql.connect(host, database, port, username, password);
+                    sql.deleteProfiles(Collections.singletonList(profile));
+                } finally {
+                    sql.disconnect();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
 }

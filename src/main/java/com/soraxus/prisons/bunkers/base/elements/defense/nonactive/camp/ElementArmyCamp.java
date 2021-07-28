@@ -151,7 +151,7 @@ public class ElementArmyCamp extends BunkerElement {
 
     @Override
     protected void onDisable() {
-        EventSubscriptions.instance.unSubscribe(this);
+        EventSubscriptions.instance.unSubscribeAll(this);
         if (campLeader.isSpawned()) {
             campLeader.despawn();
             campLeader.destroy();

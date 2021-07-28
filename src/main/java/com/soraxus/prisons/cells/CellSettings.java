@@ -54,4 +54,14 @@ public class CellSettings {
     public void setProtectionSetting(ProtectionSetting setting) {
         setSetting("protection_setting", setting);
     }
+
+    public boolean getShowBorder() {
+        return getSetting("show_border", true);
+    }
+
+    public void setShowBorder(boolean value) {
+        setSetting("show_border", value);
+        if(parent.isWorldCreated())
+            parent.getWorld().getBukkitWorld().getWorldBorder().setSize(value ? 64.0D : 10000.0D);
+    }
 }

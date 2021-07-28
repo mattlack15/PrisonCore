@@ -55,6 +55,14 @@ public class MenuCellSettings extends Menu {
         }
         builder.addLore("", "&7Click to change");
 
+        MenuElement borderSetting = new MenuElement(new ItemBuilder(Material.STAINED_GLASS, 1, (byte) 3)
+        .setName("&6&lShow World Border")
+        .addLore(settings.getShowBorder() ? "&aYes" : "&cNo").build())
+                .setClickHandler((e, i) -> {
+                    settings.setShowBorder(!settings.getShowBorder());
+                    this.setup();
+                });
+
         MenuElement protectionSetting = new MenuElement(builder.build()).setClickHandler((e, i) -> {
             int o = settings.getProtectionSetting().ordinal() + 1;
             if (o >= CellSettings.ProtectionSetting.values().length)
@@ -75,9 +83,10 @@ public class MenuCellSettings extends Menu {
         });
 
         this.setElement(4, this.backElement);
-        this.setElement(11, openSetting);
-        this.setElement(13, protectionSetting);
-        this.setElement(15, worldTimeSetting);
+        this.setElement(10, openSetting);
+        this.setElement(12, protectionSetting);
+        this.setElement(14, worldTimeSetting);
+        this.setElement(16, borderSetting);
 
         this.fillElement(new MenuElement(new ItemBuilder(Material.STAINED_GLASS_PANE, 1, (byte) 7).setName(" ").build())
                 .setClickHandler((e, i) -> ((Player) e.getWhoClicked()).playSound(e.getWhoClicked().getLocation(), Sound.ENTITY_ITEM_BREAK, 0.8f, 1f)));

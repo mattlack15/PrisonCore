@@ -155,7 +155,7 @@ public class ElementBarracks extends ActiveDefenseElement {
 
     @Override
     protected void onDisable() {
-        EventSubscriptions.instance.unSubscribe(this);
+        EventSubscriptions.instance.unSubscribeAll(this);
         Synchronizer.synchronize(() -> {
             npc.despawn();
             npc.destroy();
