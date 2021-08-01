@@ -3,10 +3,11 @@ package com.soraxus.prisons.economy.command;
 import com.soraxus.prisons.economy.Economy;
 import com.soraxus.prisons.util.NumberUtils;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.LongProvider;
 import org.bukkit.inventory.ItemStack;
 
-public class CmdBankNote extends UltraCommand {
+public class CmdBankNote extends SpigotCommand {
     public CmdBankNote() {
         this.addAlias("banknote");
         this.addAlias("withdraw");
@@ -28,10 +29,10 @@ public class CmdBankNote extends UltraCommand {
         }
 
         ItemStack voucher = eco.createNote(getArgument(1));
-        for (ItemStack contents : getPlayer().getInventory().getStorageContents()) {
+        for (ItemStack contents : getSpigotPlayer().getInventory().getStorageContents()) {
             if (contents == null) {
-                getPlayer().getInventory().addItem(voucher);
-                eco.removeBalance(getPlayer().getUniqueId(), getArgument(1));
+                getSpigotPlayer().getInventory().addItem(voucher);
+                eco.removeBalance(getSpigotPlayer().getUniqueId(), getArgument(1));
                 tell(CmdEco.PREFIX + "&7Created a bank note for &e" + eco.getFormat().replace("%s", NumberUtils.toReadableNumber(this.<Long>getArgument(1))));
                 return;
             }

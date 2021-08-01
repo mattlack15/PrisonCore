@@ -10,24 +10,26 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: net.ultragrav:AsyncWorldShade:1.0.1" level="project" />
-    <orderEntry type="library" name="Maven: net.ultragrav:async-world-core:1.0.1" level="project" />
-    <orderEntry type="library" name="Maven: net.ultragrav:async-world1_8_R3:1.0.1" level="project" />
-    <orderEntry type="library" name="Maven: net.ultragrav:async-world1_12_R1:1.0.1" level="project" />
-    <orderEntry type="library" name="Maven: net.ultragrav:Serializer:1.1.0" level="project" />
+    <orderEntry type="library" name="Maven: net.ultragrav:AsyncWorldShade:1.0.2" level="project" />
+    <orderEntry type="library" name="Maven: net.ultragrav:async-world-core:1.0.2" level="project" />
+    <orderEntry type="library" name="Maven: net.ultragrav:async-world1_8_R3:1.0.2" level="project" />
+    <orderEntry type="library" name="Maven: net.ultragrav:async-world1_12_R1:1.0.2" level="project" />
+    <orderEntry type="library" name="Maven: net.ultragrav:async-world1_15_R1:1.0.2" level="project" />
+    <orderEntry type="library" name="Maven: net.ultragrav:Serializer:1.1.4" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava-primitives:r03" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava-base:r03" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava-annotations:r03" level="project" />
-    <orderEntry type="library" name="Maven: com.github.luben:zstd-jni:1.4.5-6" level="project" />
-    <orderEntry type="library" name="Maven: net.ultragrav:Commands:1.0.2" level="project" />
-    <orderEntry type="library" name="Maven: net.ultragrav:Utils:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: net.ultragrav:Commands:1.4.0" level="project" />
+    <orderEntry type="library" name="Maven: net.kyori:text:1.12-1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.google.code.findbugs:jsr305:3.0.2" level="project" />
+    <orderEntry type="library" name="Maven: net.ultragrav:Utils:1.0.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.spigotmc:spigot:1.12.2-R0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.googlecode.json-simple:json-simple:1.1.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: junit:junit:4.10" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.hamcrest:hamcrest-core:1.1" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.guava:guava:21.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.code.gson:gson:2.8.0" level="project" />
+    <orderEntry type="library" name="Maven: com.google.guava:guava:21.0" level="project" />
+    <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.8.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.yaml:snakeyaml:1.19" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.md-5:bungeecord-chat:1.12-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.MilkBowl:VaultAPI:1.7" level="project" />

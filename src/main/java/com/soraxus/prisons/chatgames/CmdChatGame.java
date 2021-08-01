@@ -1,11 +1,12 @@
 package com.soraxus.prisons.chatgames;
 
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.StringProvider;
 
 import java.util.List;
 
-public class CmdChatGame extends UltraCommand {
+public class CmdChatGame extends SpigotCommand {
     public CmdChatGame() {
         this.addAlias("chatgame");
         this.addParameter(StringProvider.getInstance(), "game");

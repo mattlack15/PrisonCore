@@ -3,9 +3,10 @@ package com.soraxus.prisons.gangs.cmd.admin;
 import com.soraxus.prisons.gangs.Gang;
 import com.soraxus.prisons.gangs.cmd.GangProvider;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.LongProvider;
 
-public class CmdGangAdminXp extends UltraCommand {
+public class CmdGangAdminXp extends SpigotCommand {
     public CmdGangAdminXp() {
         this.addAlias("xp");
         this.addAlias("exp");

@@ -6,13 +6,14 @@ import com.soraxus.prisons.worldedit.WorldEditPlayerManager;
 import com.soraxus.prisons.worldedit.WorldEditPlayerState;
 import net.ultragrav.asyncworld.schematics.Schematic;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.StringProvider;
 import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
 
-public class CmdLoadSchematic extends UltraCommand {
+public class CmdLoadSchematic extends SpigotCommand {
     public CmdLoadSchematic() {
         addAlias("loadschem");
 
@@ -26,7 +27,7 @@ public class CmdLoadSchematic extends UltraCommand {
         if (!sender.hasPermission("asyncworld.loadschem")) {
             returnTell(SpigotPrisonCore.PREFIX + "&cYou don't have permission to do this!");
         }
-        Player player = getPlayer();
+        Player player = getSpigotPlayer();
 
         String name = getArgument(0);
         File f = new File(ModuleBunkers.instance.getDataFolder(), "schematics/" + name + ".bschem");

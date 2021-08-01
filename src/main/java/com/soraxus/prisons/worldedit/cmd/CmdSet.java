@@ -6,13 +6,14 @@ import com.soraxus.prisons.worldedit.WorldEditPlayerManager;
 import com.soraxus.prisons.worldedit.WorldEditPlayerState;
 import net.ultragrav.asyncworld.SpigotAsyncWorld;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.utils.CuboidRegion;
 import org.bukkit.entity.Player;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class CmdSet extends UltraCommand {
+public class CmdSet extends SpigotCommand {
     public CmdSet() {
         addAlias("set");
         setAllowConsole(false);

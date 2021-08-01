@@ -6,9 +6,10 @@ import com.soraxus.prisons.ranks.Rank;
 import com.soraxus.prisons.ranks.RankupManager;
 import com.soraxus.prisons.util.NumberUtils;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import org.bukkit.Bukkit;
 
-public class CmdRankup extends UltraCommand {
+public class CmdRankup extends SpigotCommand {
     public CmdRankup() {
         this.addAlias("rankup");
         this.addAlias("ru");
@@ -30,7 +31,7 @@ public class CmdRankup extends UltraCommand {
             return;
         }
         rankPlayer.setRankIndex(rankPlayer.getRankIndex() + 1);
-        rank.getCmds().forEach(c -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), c.replace("%player%", getPlayer().getName())));
+        rank.getCmds().forEach(c -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), c.replace("%player%", getSpigotPlayer().getName())));
         tell("&aYou have ranked up to " + rank.getDisplayName() + "!");
     }
 }

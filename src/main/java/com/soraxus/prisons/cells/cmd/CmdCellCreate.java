@@ -45,7 +45,7 @@ public class CmdCellCreate extends CellCommand {
                                     HoverUtil.text("&7Click to confirm"),
                                     ClickUtil.command("/cell create confirm")
                             )
-                            .send(getPlayer());
+                            .send(getSpigotPlayer());
                     return;
                 }
 
@@ -59,7 +59,7 @@ public class CmdCellCreate extends CellCommand {
                                 HoverUtil.text("&cTeleport"),
                                 ClickUtil.command("/cell tp")
                         )
-                        .send(getPlayer());
+                        .send(getSpigotPlayer());
             } catch (Throwable t) {
                 t.printStackTrace();
             }

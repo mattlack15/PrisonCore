@@ -5,9 +5,10 @@ import com.soraxus.prisons.ranks.PRankPlayer;
 import com.soraxus.prisons.ranks.Rank;
 import com.soraxus.prisons.ranks.RankupManager;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import org.bukkit.Bukkit;
 
-public class CmdRankupMax extends UltraCommand {
+public class CmdRankupMax extends SpigotCommand {
     public CmdRankupMax() {
         this.addAlias("rankupmax");
         this.addAlias("rumax");
@@ -29,7 +30,7 @@ public class CmdRankupMax extends UltraCommand {
                 return;
             }
             rankPlayer.setRankIndex(rankPlayer.getRankIndex() + 1);
-            rank.getCmds().forEach(c -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), c.replace("%player%", getPlayer().getName())));
+            rank.getCmds().forEach(c -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), c.replace("%player%", getSpigotPlayer().getName())));
             tell("&aYou have ranked up to " + rank.getDisplayName() + "!");
         }
     }

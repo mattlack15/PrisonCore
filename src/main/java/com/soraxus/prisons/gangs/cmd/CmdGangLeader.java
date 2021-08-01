@@ -46,7 +46,7 @@ public class CmdGangLeader extends GangCommand {
             if (forced) {
                 gang.broadcastMessage("&a" + toLeader.getMemberName() + "&f was forcibly given leadership of the gang!");
             } else {
-                gang.broadcastMessage("&e" + sender.getName() + "&f transferred leadership of the gang to &a" + toLeader.getMemberName() + "&f!");
+                gang.broadcastMessage("&e" + getSpigotPlayer().getName() + "&f transferred leadership of the gang to &a" + toLeader.getMemberName() + "&f!");
             }
         });
     }

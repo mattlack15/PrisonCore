@@ -3,10 +3,11 @@ package com.soraxus.prisons.economy.command;
 import com.soraxus.prisons.economy.Economy;
 import com.soraxus.prisons.util.NumberUtils;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.LongProvider;
 import org.bukkit.inventory.ItemStack;
 
-public class CmdVoucher extends UltraCommand {
+public class CmdVoucher extends SpigotCommand {
     public CmdVoucher() {
         this.addAlias("voucher");
         this.addAlias("vouchers");
@@ -28,9 +29,9 @@ public class CmdVoucher extends UltraCommand {
         }
 
         ItemStack voucher = eco.createNote(getArgument(1));
-        for (ItemStack contents : getPlayer().getInventory().getStorageContents()) {
+        for (ItemStack contents : getSpigotPlayer().getInventory().getStorageContents()) {
             if (contents == null) {
-                getPlayer().getInventory().addItem(voucher);
+                getSpigotPlayer().getInventory().addItem(voucher);
                 eco.removeBalance(getPlayer().getUniqueId(), getArgument(1));
                 tell(CmdEco.PREFIX + "&7Created a voucher for &a$" + NumberUtils.toReadableNumber(getArgument(1)));
                 return;

@@ -6,6 +6,7 @@ import com.soraxus.prisons.worldedit.WorldEditPlayerState;
 import net.ultragrav.asyncworld.SpigotAsyncWorld;
 import net.ultragrav.asyncworld.schematics.Schematic;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.utils.CuboidRegion;
 import net.ultragrav.utils.IntVector3D;
 import org.bukkit.entity.Player;
@@ -13,7 +14,7 @@ import org.bukkit.entity.Player;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class CmdCopy extends UltraCommand {
+public class CmdCopy extends SpigotCommand {
     public CmdCopy() {
         addAlias("copy");
         setAllowConsole(false);

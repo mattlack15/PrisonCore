@@ -9,11 +9,12 @@ import lombok.Getter;
 import lombok.Setter;
 import net.ultragrav.command.UltraCommand;
 import net.ultragrav.command.exception.CommandException;
+import net.ultragrav.command.platform.SpigotCommand;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public abstract class CellCommand extends UltraCommand {
+public abstract class CellCommand extends SpigotCommand {
     @Getter
     @Setter
     private boolean requiresCell = false;
@@ -27,10 +28,10 @@ public abstract class CellCommand extends UltraCommand {
         Cell cell = CellManager.instance.getLoadedCell(getPlayer().getUniqueId());
         if (cell == null) {
             try {
-                cell = CellManager.instance.loadCell(getPlayer().getUniqueId()).join();
+                cell = CellManager.instance.loadCell(getSpigotPlayer().getUniqueId()).join();
             } catch (Throwable t) {
                 t.printStackTrace();
-                ModuleErrors.instance.getErrorMessage(t, "loading cell", "uhhhm... done nothing").send(getPlayer());
+                ModuleErrors.instance.getErrorMessage(t, "loading cell", "uhhhm... done nothing").send(getSpigotPlayer());
                 throw t;
             }
         }

@@ -5,9 +5,10 @@ import com.soraxus.prisons.ranks.PRankPlayer;
 import com.soraxus.prisons.ranks.Rank;
 import com.soraxus.prisons.ranks.RankupManager;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import org.bukkit.Bukkit;
 
-public class CmdPrestige extends UltraCommand {
+public class CmdPrestige extends SpigotCommand {
     public CmdPrestige() {
         this.addAlias("prestige");
         this.setAllowConsole(false);
@@ -26,7 +27,7 @@ public class CmdPrestige extends UltraCommand {
         rankPlayer.setPrestige(rankPlayer.getPrestige() + 1);
         Economy.money.setBalance(getPlayer().getUniqueId(), 0L);
 
-        RankupManager.instance.getPrestigeCmds().forEach(p -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), p.replace("%player%", getPlayer().getName())));
+        RankupManager.instance.getPrestigeCmds().forEach(p -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), p.replace("%player%", getSpigotPlayer().getName())));
 
         tell("");
         tell("&aYou prestriged :DDD");

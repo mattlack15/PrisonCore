@@ -69,7 +69,7 @@ public class SpigotPrisonCore extends CorePlugin {
 
         GravSerializable.relocationMappings.put("com.soraxus.prisons.util.world.IntVector3D", "net.ultragrav.utils.IntVector3D");
 
-        new EventSubscriptions();
+        new EventSubscriptions(this);
         EventSubscriptions.instance.subscribe(this);
         this.addModule(new ModuleErrors());
         this.addModule(new ModuleSorting());

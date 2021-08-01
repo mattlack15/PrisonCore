@@ -35,10 +35,10 @@ public class CmdGangChat extends GangCommand {
         boolean val = inGangChat.contains(getPlayer().getUniqueId());
         if (val) {
             inGangChat.remove(getPlayer().getUniqueId());
-            new ChatBuilder(CmdGang.PREFIX + "You have&c exited &e&lGang Chat" + (ChatColor.getLastColors(CmdGang.PREFIX)) + ".").send(getPlayer());
+            new ChatBuilder(CmdGang.PREFIX + "You have&c exited &e&lGang Chat" + (ChatColor.getLastColors(CmdGang.PREFIX)) + ".").send(getSpigotPlayer());
         } else {
             inGangChat.add(getPlayer().getUniqueId());
-            new ChatBuilder(CmdGang.PREFIX + "You have&a entered &e&lGang Chat" + (ChatColor.getLastColors(CmdGang.PREFIX)) + ".").send(getPlayer());
+            new ChatBuilder(CmdGang.PREFIX + "You have&a entered &e&lGang Chat" + (ChatColor.getLastColors(CmdGang.PREFIX)) + ".").send(getSpigotPlayer());
         }
     }
 
@@ -55,7 +55,7 @@ public class CmdGangChat extends GangCommand {
 
             new ChatBuilder("&c&lHey! &7There was a problem with sending your message in your gang's chat,")
                     .addText("please send this error id to an admin: &4&l" + id, HoverUtil.text("&4&l" + id))
-                    .addText("\n&7For now, we have&c blocked&7 the message you sent, and&a switched you back to normal chat!").send(getPlayer());
+                    .addText("\n&7For now, we have&c blocked&7 the message you sent, and&a switched you back to normal chat!").send(getSpigotPlayer());
             return;
         }
 

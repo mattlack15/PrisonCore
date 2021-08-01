@@ -21,7 +21,7 @@ public class CmdGangCreate extends GangCommand {
         if (getGang() != null) {
             returnTell(PREFIX + ChatColor.RED + "You are already in a gang!");
         }
-        Player player = getPlayer();
+        Player player = getSpigotPlayer();
 
         String name = getArgument(0);
 

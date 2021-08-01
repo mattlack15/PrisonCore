@@ -17,7 +17,7 @@ public class CmdCellTp extends CellCommand {
         getAsyncExecutor().submit(() -> {
             Cell cell = getOrLoadCell();
             Location loc = new Vector(33.5, 61.1D, 28.5).toLocation(cell.getWorld().getBukkitWorld());
-            Synchronizer.synchronize(() -> getPlayer().teleport(loc));
+            Synchronizer.synchronize(() -> getSpigotPlayer().teleport(loc));
         });
     }
 }

@@ -15,7 +15,7 @@ public class CmdGangDesc extends GangCommand {
     public void perform() {
         if (getGangMember().getGangRole().ordinal() >= GangRole.ADMIN.ordinal()) {
             getGang().setDescription(getArgument(0));
-            getGang().broadcastMessage("The gang description was set to &e" + getGang().getDescription() + " &fby &a" + getPlayer().getName());
+            getGang().broadcastMessage("The gang description was set to &e" + getGang().getDescription() + " &fby &a" + getSpigotPlayer().getName());
         } else
             tell(CmdGang.PREFIX + "&cYou are not a high enough role to do this!");
     }

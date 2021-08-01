@@ -21,7 +21,7 @@ public class CmdGangJoin extends GangCommand {
             try {
                 Gang gang = getArgument(0);
                 if (getGangMember().getGang() != null && getGangMember().getGang().equals(gang.getId())) {
-                    new ChatBuilder(PREFIX + "You are already in this gang...?").send(getPlayer());
+                    new ChatBuilder(PREFIX + "You are already in this gang...?").send(getSpigotPlayer());
                     return;
                 }
                 if (!gang.addMemberWithCondition(getGangMember(), () -> {
@@ -33,9 +33,9 @@ public class CmdGangJoin extends GangCommand {
                     tell(PREFIX + ChatColor.RED + "You are not invited to this gang!");
                     return;
                 }
-                gang.broadcastMessage("&a" + sender.getName() + "&f joined the gang!");
+                gang.broadcastMessage("&a" + getSpigotPlayer() + "&f joined the gang!");
             } catch(CommandException e) {
-                new ChatBuilder(e.getMessage()).send(getPlayer());
+                new ChatBuilder(e.getMessage()).send(getSpigotPlayer());
             } catch (Exception e) {
                 e.printStackTrace();
             }

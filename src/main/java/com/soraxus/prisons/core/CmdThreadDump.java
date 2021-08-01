@@ -2,6 +2,7 @@ package com.soraxus.prisons.core;
 
 import com.soraxus.prisons.SpigotPrisonCore;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.StringProvider;
 import org.bukkit.ChatColor;
 
@@ -9,7 +10,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
 
-public class CmdThreadDump extends UltraCommand {
+public class CmdThreadDump extends SpigotCommand {
     public CmdThreadDump() {
         this.addAlias("threaddump");
         this.addParameter("", StringProvider.getInstance());
@@ -19,7 +20,7 @@ public class CmdThreadDump extends UltraCommand {
     protected void perform() {
         try {
             String relevant = getArgument(0);
-            getPlayer().sendMessage(ChatColor.GREEN + "Dumping threads into console" + (!relevant.equals("") ? " and printing threads relevant to " + relevant : ""));
+            getSpigotPlayer().sendMessage(ChatColor.GREEN + "Dumping threads into console" + (!relevant.equals("") ? " and printing threads relevant to " + relevant : ""));
             File file = new File(SpigotPrisonCore.instance.getDataFolder(), "ThreadDump-" + UUID.randomUUID().toString() + new Date().toString() + ".txt");
             try (FileWriter writer = new FileWriter(file)) {
                 Map<?, ?> liveThreads = Thread.getAllStackTraces();
@@ -43,10 +44,10 @@ public class CmdThreadDump extends UltraCommand {
                         }
                     }
                     if (send) {
-                        getPlayer().sendMessage("");
-                        getPlayer().sendMessage("Thread Name: " + key.getName());
-                        getPlayer().sendMessage("Status: " + key.getState().toString());
-                        toSend.forEach(s -> getPlayer().sendMessage(s));
+                        getSpigotPlayer().sendMessage("");
+                        getSpigotPlayer().sendMessage("Thread Name: " + key.getName());
+                        getSpigotPlayer().sendMessage("Status: " + key.getState().toString());
+                        toSend.forEach(s -> getSpigotPlayer().sendMessage(s));
                     }
                 }
                 writer.flush();

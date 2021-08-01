@@ -16,7 +16,7 @@ public class CmdGangMine extends GangCommand {
     @Override
     protected void perform() {
         if (this.getArgument(0) != null) {
-            new MenuBrowseMines(null).open(getPlayer());
+            new MenuBrowseMines(null).open(getSpigotPlayer());
         } else {
             if(getGangMember().getGang() == null) {
                 tell("&cYou are not in a gang!");
@@ -32,13 +32,13 @@ public class CmdGangMine extends GangCommand {
                     getAsyncExecutor().submit(() -> {
                         try {
                             PrivateMine mine = getGang().createOrLoadMine().join();
-                            new MenuPrivateMine(mine).open(getPlayer());
+                            new MenuPrivateMine(mine).open(getSpigotPlayer());
                         } catch (Throwable t) {
                             t.printStackTrace();
                         }
                     });
                 } else {
-                    new MenuPrivateMine(m).open(getPlayer());
+                    new MenuPrivateMine(m).open(getSpigotPlayer());
                 }
             } else {
                 tell(CmdGang.PREFIX + "&cYou're gang is not a high enough level to have a mine yet!");

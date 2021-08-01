@@ -16,7 +16,7 @@ public class CmdCellMinion extends CellCommand {
     protected void perform() {
         int type = getArgument(0);
 
-        getPlayer().getInventory()
+        getSpigotPlayer().getInventory()
                 .addItem(MinionItems.getMinionItem("§cMinion", new ItemType(Material.getMaterial(type & 0xFFF)), 1));
     }
 }

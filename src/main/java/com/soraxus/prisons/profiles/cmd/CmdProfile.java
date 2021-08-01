@@ -4,6 +4,7 @@ import com.soraxus.prisons.profiles.PrisonProfile;
 import com.soraxus.prisons.profiles.ProfileManager;
 import com.soraxus.prisons.profiles.gui.MenuProfile;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.StringProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -12,7 +13,7 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 
-public class CmdProfile extends UltraCommand {
+public class CmdProfile extends SpigotCommand {
     public CmdProfile() {
         this.addAlias("profile");
         this.addParameter(null, StringProvider.getInstance(), "player");
@@ -23,7 +24,7 @@ public class CmdProfile extends UltraCommand {
     protected void perform() {
         String name = getArgument(0);
         if (name == null)
-            name = getPlayer().getName();
+            name = getSpigotPlayer().getName();
 
         Player player = Bukkit.getPlayer(name);
 
@@ -51,7 +52,7 @@ public class CmdProfile extends UltraCommand {
                     return;
                 }
 
-                new MenuProfile(getPlayer().getUniqueId(), name1, profile).open(getPlayer());
+                new MenuProfile(getPlayer().getUniqueId(), name1, profile).open(getSpigotPlayer());
 
             } catch (Throwable t) {
                 t.printStackTrace();

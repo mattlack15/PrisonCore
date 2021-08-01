@@ -15,10 +15,10 @@ public class CmdGangLeave extends GangCommand {
 
     public void perform() {
         getAsyncExecutor().submit(() -> {
-            GangMember member = GangMemberManager.instance.getMember(getPlayer());
+            GangMember member = GangMemberManager.instance.getMember(getSpigotPlayer());
             Gang gang = getGang();
             member.setGang(null);
-            gang.broadcastMessage("&e" + sender.getName() + "&f left the gang!");
+            gang.broadcastMessage("&e" + getSpigotPlayer().getName() + "&f left the gang!");
             tell(PREFIX + "You left your gang!");
         });
     }

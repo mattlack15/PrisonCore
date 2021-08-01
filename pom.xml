@@ -85,7 +85,7 @@
         <dependency>
             <groupId>net.ultragrav</groupId>
             <artifactId>AsyncWorldShade</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.spigotmc</groupId>
@@ -96,12 +96,12 @@
         <dependency>
             <groupId>net.ultragrav</groupId>
             <artifactId>Serializer</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.4</version>
         </dependency>
         <dependency>
             <groupId>net.ultragrav</groupId>
             <artifactId>Commands</artifactId>
-            <version>1.0.2</version>
+            <version>1.4.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.spigotmc</groupId>
@@ -112,7 +112,7 @@
         <dependency>
             <groupId>net.ultragrav</groupId>
             <artifactId>Utils</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.spigotmc</groupId>

@@ -63,7 +63,7 @@ public class CmdGangInfo extends GangCommand {
                                 "as how many people can be there.\n" +
                                 "\n" +
                                 "&aYou can level up your gang by mining."));
-                builder.send(getPlayer());
+                builder.send(getSpigotPlayer());
                 tell(PREFIX + ChatColor.BLUE + "Members > &f" + finalGang.getMembers().stream()
                         .map((gm) -> {
                             if (gm.getGangRole().equals(GangRole.LEADER)) {

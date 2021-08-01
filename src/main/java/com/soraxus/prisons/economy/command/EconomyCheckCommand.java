@@ -5,8 +5,9 @@ import com.soraxus.prisons.util.NumberUtils;
 import net.ultragrav.command.UltraCommand;
 import net.ultragrav.command.provider.impl.spigot.PlayerProvider;
 import org.bukkit.entity.Player;
+import net.ultragrav.command.platform.SpigotCommand;
 
-public abstract class EconomyCheckCommand extends UltraCommand {
+public abstract class EconomyCheckCommand extends SpigotCommand {
     private Economy eco;
 
     public EconomyCheckCommand(Economy eco) {
@@ -18,7 +19,7 @@ public abstract class EconomyCheckCommand extends UltraCommand {
         Player player = getArgument(0);
         if (player == null) {
             if (isPlayer()) {
-                player = getPlayer();
+                player = getSpigotPlayer();
             } else {
                 returnTell("§cYou must specify the player.");
                 return;

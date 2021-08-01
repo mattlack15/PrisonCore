@@ -4,11 +4,12 @@ import com.soraxus.prisons.pickaxe.crystals.Crystal;
 import com.soraxus.prisons.pickaxe.crystals.CrystalType;
 import com.soraxus.prisons.pickaxe.crystals.command.providers.CrystalTypeProvider;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.IntegerProvider;
 import net.ultragrav.command.provider.impl.spigot.PlayerProvider;
 import org.bukkit.entity.Player;
 
-public class CrystalsGiveCmd extends UltraCommand {
+public class CrystalsGiveCmd extends SpigotCommand {
     public CrystalsGiveCmd() {
         this.addAlias("give");
 

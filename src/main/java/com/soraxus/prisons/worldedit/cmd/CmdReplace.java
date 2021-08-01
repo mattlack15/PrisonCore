@@ -6,6 +6,7 @@ import com.soraxus.prisons.worldedit.WorldEditPlayerManager;
 import com.soraxus.prisons.worldedit.WorldEditPlayerState;
 import net.ultragrav.asyncworld.SpigotAsyncWorld;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.utils.CuboidRegion;
 import org.bukkit.entity.Player;
 
@@ -13,7 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CmdReplace extends UltraCommand {
+public class CmdReplace extends SpigotCommand {
     public CmdReplace() {
         addAlias("replace");
         setAllowConsole(false);

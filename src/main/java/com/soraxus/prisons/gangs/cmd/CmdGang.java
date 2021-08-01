@@ -1,9 +1,10 @@
 package com.soraxus.prisons.gangs.cmd;
 
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import org.bukkit.ChatColor;
 
-public class CmdGang extends UltraCommand {
+public class CmdGang extends SpigotCommand {
     public static final String PREFIX = ChatColor.translateAlternateColorCodes('&', "&d&lGangs &8&l▶ &f");
 
     public CmdGang() {

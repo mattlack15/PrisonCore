@@ -3,13 +3,14 @@ package com.soraxus.prisons.selling.mutlipliers.command;
 import com.soraxus.prisons.selling.mutlipliers.Multiplier;
 import com.soraxus.prisons.selling.mutlipliers.MultiplierManager;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.DoubleProvider;
 import net.ultragrav.command.provider.impl.IntegerProvider;
 import net.ultragrav.command.provider.impl.spigot.PlayerProvider;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class CommandMultiplierGive extends UltraCommand {
+public class CommandMultiplierGive extends SpigotCommand {
     public CommandMultiplierGive() {
         addAlias("give");
 

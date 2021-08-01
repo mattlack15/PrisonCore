@@ -7,6 +7,7 @@ import com.soraxus.prisons.worldedit.WorldEditPlayerState;
 import net.ultragrav.asyncworld.SpigotAsyncWorld;
 import net.ultragrav.asyncworld.schematics.Schematic;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.StringProvider;
 import net.ultragrav.utils.CuboidRegion;
 import net.ultragrav.utils.IntVector3D;
@@ -15,7 +16,7 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.IOException;
 
-public class CmdSaveSchematic extends UltraCommand {
+public class CmdSaveSchematic extends SpigotCommand {
     public CmdSaveSchematic() {
         this.addAlias("saveschem");
         this.addAlias("saveschematic");
@@ -50,10 +51,10 @@ public class CmdSaveSchematic extends UltraCommand {
         Schematic schem = new Schematic(origin, new SpigotAsyncWorld(region.getWorld()), region, ignoredBlock);
         try {
             schem.save(f);
-            sender.sendMessage(SpigotPrisonCore.PREFIX + "§aSuccess! Custom Origin: " + origin.getX() + " " + origin.getY() + " " + origin.getZ() + (ignoredBlock != -1 ? " ignoredBlock: " + args.get(2) + " (" + ignoredBlock + ")" : ""));
+            getSpigotPlayer().sendMessage(SpigotPrisonCore.PREFIX + "§aSuccess! Custom Origin: " + origin.getX() + " " + origin.getY() + " " + origin.getZ() + (ignoredBlock != -1 ? " ignoredBlock: " + args.get(2) + " (" + ignoredBlock + ")" : ""));
         } catch (IOException e) {
             e.printStackTrace();
-            sender.sendMessage(SpigotPrisonCore.PREFIX + "§cShit happened during the process of attempting to try to saving your schematic");
+            getSpigotPlayer().sendMessage(SpigotPrisonCore.PREFIX + "§cShit happened during the process of attempting to try to saving your schematic");
         }
     }
 }

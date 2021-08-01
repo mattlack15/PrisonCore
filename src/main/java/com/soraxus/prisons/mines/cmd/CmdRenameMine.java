@@ -3,9 +3,10 @@ package com.soraxus.prisons.mines.cmd;
 import com.soraxus.prisons.mines.manager.MineManager;
 import com.soraxus.prisons.mines.object.Mine;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.StringProvider;
 
-public class CmdRenameMine extends UltraCommand {
+public class CmdRenameMine extends SpigotCommand {
     public CmdRenameMine() {
         this.addAlias("renamemine");
         this.addParameter(StringProvider.getInstance(), "current name");

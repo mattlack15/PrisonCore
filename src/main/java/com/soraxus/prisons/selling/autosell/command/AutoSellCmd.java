@@ -2,9 +2,10 @@ package com.soraxus.prisons.selling.autosell.command;
 
 import com.soraxus.prisons.selling.ModuleSelling;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.StringProvider;
 
-public class AutoSellCmd extends UltraCommand {
+public class AutoSellCmd extends SpigotCommand {
     public AutoSellCmd() {
         this.addAlias("autosell");
         this.addAlias("as");

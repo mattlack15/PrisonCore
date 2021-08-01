@@ -33,7 +33,7 @@ public class CmdGangUnInvite extends GangCommand {
                 return;
             }
             gang.unInvite(pl);
-            gang.broadcastMessage("&e" + sender.getName() + " &7un-invited &9" + pl + " &7to the gang!");
+            gang.broadcastMessage("&e" + getSpigotPlayer().getName() + " &7un-invited &9" + pl + " &7to the gang!");
 
             Player player = Bukkit.getPlayer(pl);
             //Set to BukkitRunnable if causes concurrency issues

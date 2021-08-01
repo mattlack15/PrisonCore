@@ -6,12 +6,13 @@ import lombok.Getter;
 import lombok.Setter;
 import net.ultragrav.command.UltraCommand;
 import net.ultragrav.command.exception.CommandException;
+import net.ultragrav.command.platform.SpigotCommand;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public abstract class GangCommand extends UltraCommand {
+public abstract class GangCommand extends SpigotCommand {
     @Getter
     private final ExecutorService asyncExecutor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setUncaughtExceptionHandler((e, e1) -> e1.printStackTrace()).build());
 

@@ -14,7 +14,7 @@ public class CmdCellPanel extends CellCommand {
     protected void perform() {
         getAsyncExecutor().submit(() -> {
             Cell cell = getOrLoadCell();
-            Synchronizer.synchronize(() -> new MenuCellPanel(cell).open(getPlayer()));
+            Synchronizer.synchronize(() -> new MenuCellPanel(cell).open(getSpigotPlayer()));
         });
     }
 }

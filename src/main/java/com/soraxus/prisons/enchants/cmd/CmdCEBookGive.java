@@ -3,13 +3,14 @@ package com.soraxus.prisons.enchants.cmd;
 import com.soraxus.prisons.enchants.api.enchant.AbstractCE;
 import com.soraxus.prisons.enchants.manager.EnchantManager;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.IntegerProvider;
 import net.ultragrav.command.provider.impl.StringProvider;
 import net.ultragrav.command.provider.impl.spigot.PlayerProvider;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class CmdCEBookGive extends UltraCommand {
+public class CmdCEBookGive extends SpigotCommand {
     public CmdCEBookGive() {
         addAlias("give");
         addParameter(PlayerProvider.getInstance(), "player");

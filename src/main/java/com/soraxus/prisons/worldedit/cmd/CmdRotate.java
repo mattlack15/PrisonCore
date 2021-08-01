@@ -3,10 +3,11 @@ package com.soraxus.prisons.worldedit.cmd;
 import com.soraxus.prisons.worldedit.WorldEditPlayerManager;
 import com.soraxus.prisons.worldedit.WorldEditPlayerState;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.IntegerProvider;
 import org.bukkit.entity.Player;
 
-public class CmdRotate extends UltraCommand {
+public class CmdRotate extends SpigotCommand {
     public CmdRotate() {
         this.addAlias("rotate");
 
@@ -22,6 +23,6 @@ public class CmdRotate extends UltraCommand {
 
         state.setClipboard(state.getClipboard().rotate(rot));
 
-        sender.sendMessage("§aRotated!");
+        getSpigotPlayer().sendMessage("§aRotated!");
     }
 }

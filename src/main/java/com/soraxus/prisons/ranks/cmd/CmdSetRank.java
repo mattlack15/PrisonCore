@@ -3,11 +3,12 @@ package com.soraxus.prisons.ranks.cmd;
 import com.soraxus.prisons.ranks.PRankPlayer;
 import com.soraxus.prisons.ranks.RankupManager;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 import net.ultragrav.command.provider.impl.StringProvider;
 import net.ultragrav.command.provider.impl.spigot.PlayerProvider;
 import org.bukkit.entity.Player;
 
-public class CmdSetRank extends UltraCommand {
+public class CmdSetRank extends SpigotCommand {
     public CmdSetRank() {
         this.addAlias("setprisonrank");
         this.addParameter(PlayerProvider.getInstance(), "player");
@@ -24,7 +25,7 @@ public class CmdSetRank extends UltraCommand {
             tell("&cCould not find that rank!");
             return;
         }
-        RankupManager.instance.setRank(getPlayer(), index);
+        RankupManager.instance.setRank(getSpigotPlayer(), index);
         tell("&aDone! &7They are now " + RankupManager.instance.getRank(rank).getDisplayName());
     }
 }

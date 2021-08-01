@@ -26,7 +26,7 @@ public class CmdTest extends GangCommand {
             Location loc = new Location(world.getBukkitWorld(), 5, 81, 5);
             ms = System.currentTimeMillis() - ms;
             Bukkit.broadcastMessage("Created in " + ms + "ms");
-            Synchronizer.synchronize(() -> getPlayer().teleport(loc));
+            Synchronizer.synchronize(() -> getSpigotPlayer().teleport(loc));
         });
     }
 }

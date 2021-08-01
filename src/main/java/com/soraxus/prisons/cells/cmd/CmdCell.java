@@ -2,8 +2,9 @@ package com.soraxus.prisons.cells.cmd;
 
 import com.soraxus.prisons.cells.ModuleCells;
 import net.ultragrav.command.UltraCommand;
+import net.ultragrav.command.platform.SpigotCommand;
 
-public class CmdCell extends UltraCommand {
+public class CmdCell extends SpigotCommand {
     public static final String PREFIX = ModuleCells.PREFIX;
 
     public CmdCell() {

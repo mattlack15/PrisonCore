@@ -34,7 +34,7 @@ public class CmdGangInvite extends GangCommand {
                 return;
             }
             gang.invite(player.getUniqueId(), player.getName());
-            gang.broadcastMessage("&e" + sender.getName() + " &7invited &9" + player.getName() + " &7to the gang!");
+            gang.broadcastMessage("&e" + getSpigotPlayer().getName() + " &7invited &9" + player.getName() + " &7to the gang!");
             new ChatBuilder()
                     .addText(
                             PREFIX + "You were invited to " + gang.getName() + "&a&l Click to join!",
